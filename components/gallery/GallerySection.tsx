@@ -49,7 +49,7 @@ export function GallerySection() {
   return (
     <section
       id="gallery"
-      className="relative z-10 scroll-mt-[calc(var(--nav-h)+16px)] bg-charcoal/45 py-24 backdrop-blur-sm"
+      className="relative z-10 scroll-mt-[calc(var(--nav-h)+16px)] bg-charcoal py-24"
     >
       <div className="mx-auto max-w-[1400px] px-5 sm:px-8">
         <SectionHeading
@@ -63,20 +63,16 @@ export function GallerySection() {
             {Array.from({ length: 9 }).map((_, i) => (
               <div
                 key={i}
-                className={`relative mb-4 break-inside-avoid aspect-square animate-pulse rounded-3xl bg-white/10 ${
-                  i % 3 === 0 ? "sm:aspect-[3/4]" : ""
-                }`}
+                className="relative mb-4 break-inside-avoid aspect-square animate-pulse rounded-3xl bg-white/10"
               />
             ))}
           </div>
         ) : (
           <div className="mt-14 columns-1 gap-4 sm:columns-2 lg:columns-3">
-            {images.map((img, i) => (
+            {images.map((img) => (
               <div
                 key={img.key}
-                className={`relative mb-4 break-inside-avoid overflow-hidden rounded-3xl border border-white/10 ${
-                  i % 3 === 0 ? "aspect-[3/4]" : "aspect-square"
-                }`}
+                className="relative mb-4 break-inside-avoid aspect-square overflow-hidden rounded-3xl border border-white/10"
               >
                 <Image
                   src={img.src}
