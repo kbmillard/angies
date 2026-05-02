@@ -6,9 +6,14 @@ export const HOURS_LINES = [
   `Same-day truck updates: ${SOCIAL_LINKS.facebook.handle} on Facebook and ${SOCIAL_LINKS.instagram.handle} on Instagram`,
 ] as const;
 
+/** Public catering / contact lines (both numbers). */
+export const CONTACT_PHONES = [
+  { display: "(913) 433-1732", tel: "+19134331732" },
+  { display: "(913) 954-8745", tel: "+19139548745" },
+] as const;
+
 export const CONTACT = {
-  phoneDisplay: "(913) 954-8745",
-  phoneTel: "+19139548745",
+  phones: CONTACT_PHONES,
   email: "angiesfoodtruck83@gmail.com",
   socialHandle: SOCIAL_LINKS.instagram.handle,
   socialUrl: SOCIAL_LINKS.instagram.href,

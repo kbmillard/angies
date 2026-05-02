@@ -15,9 +15,10 @@ export function SiteFooter() {
 
   const visitTruck = footerTruckVisit(data);
 
-  const phoneDisplay =
-    truckLoc?.phone?.trim() || restaurantLoc?.phone?.trim() || CONTACT.phoneDisplay;
-  const phoneTel = telHrefFromDisplay(phoneDisplay, CONTACT.phoneTel);
+  const sheetPhone = truckLoc?.phone?.trim() || restaurantLoc?.phone?.trim();
+  const sheetPhoneHref = sheetPhone
+    ? telHrefFromDisplay(sheetPhone, CONTACT.phones[0]!.tel)
+    : null;
 
   const emailAddr =
     truckLoc?.email?.trim() || restaurantLoc?.email?.trim() || CONTACT.email;
@@ -34,15 +35,38 @@ export function SiteFooter() {
           <BrandLogo width={72} height={72} />
           <p className="text-sm leading-relaxed text-cream/70">
             Angie&apos;s Food Truck — Mexican food in Kansas City. Call or text{" "}
-            <a className="text-cream underline-offset-4 hover:underline" href={phoneTel}>
-              {phoneDisplay}
-            </a>
+            {sheetPhone && sheetPhoneHref ? (
+              <a className="text-cream underline-offset-4 hover:underline" href={sheetPhoneHref}>
+                {sheetPhone}
+              </a>
+            ) : (
+              CONTACT.phones.map((p, i) => (
+                <span key={p.tel}>
+                  {i > 0 ? " · " : null}
+                  <a className="text-cream underline-offset-4 hover:underline" href={`tel:${p.tel}`}>
+                    {p.display}
+                  </a>
+                </span>
+              ))
+            )}
             . Follow Facebook and Instagram for the live pin.
           </p>
           <div className="flex flex-wrap gap-3 text-sm">
-            <a className="text-cream underline-offset-4 hover:underline" href={phoneTel}>
-              {phoneDisplay}
-            </a>
+            {sheetPhone && sheetPhoneHref ? (
+              <a className="text-cream underline-offset-4 hover:underline" href={sheetPhoneHref}>
+                {sheetPhone}
+              </a>
+            ) : (
+              CONTACT.phones.map((p) => (
+                <a
+                  key={p.tel}
+                  className="text-cream underline-offset-4 hover:underline"
+                  href={`tel:${p.tel}`}
+                >
+                  {p.display}
+                </a>
+              ))
+            )}
             {emailAddr ? (
               <a
                 className="text-cream underline-offset-4 hover:underline"

@@ -120,8 +120,10 @@ export function LocationsSection() {
 
   const trucks = data?.foodTruckLocations ?? [];
   const primaryTruck = trucks[0];
-  const phoneDisplay = primaryTruck?.phone?.trim() || CONTACT.phoneDisplay;
-  const phoneTel = telHrefFromDisplay(phoneDisplay, CONTACT.phoneTel);
+  const phoneDisplay = primaryTruck?.phone?.trim() ?? "";
+  const phoneTel = phoneDisplay
+    ? telHrefFromDisplay(phoneDisplay, CONTACT.phones[0]!.tel)
+    : `tel:${CONTACT.phones[0]!.tel}`;
 
   const noteFromSheet = primaryTruck?.messageBoard?.trim() ?? "";
 
@@ -141,9 +143,14 @@ export function LocationsSection() {
         {error ? (
           <p className="mt-6 rounded-xl border border-angie-orange/35 bg-angie-orange/10 p-4 text-sm text-cream">
             {error}. Call{" "}
-            <a className="underline" href={`tel:${CONTACT.phoneTel}`}>
-              {CONTACT.phoneDisplay}
-            </a>
+            {CONTACT.phones.map((p, i) => (
+              <span key={p.tel}>
+                {i > 0 ? " or " : null}
+                <a className="underline" href={`tel:${p.tel}`}>
+                  {p.display}
+                </a>
+              </span>
+            ))}
             .
           </p>
         ) : null}

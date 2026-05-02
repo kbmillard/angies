@@ -70,9 +70,18 @@ export function CateringSection() {
               window, and add-ons so guests get hot food and cold drinks.
             </p>
             <p className="pt-2 text-sm text-cream/85">
-              <a className="text-cream underline-offset-4 hover:underline" href={`tel:${CONTACT.phoneTel}`}>
-                Call or text {CONTACT.phoneDisplay}
-              </a>
+              Call or text{" "}
+              {CONTACT.phones.map((p, i) => (
+                <span key={p.tel}>
+                  {i > 0 ? " · " : null}
+                  <a
+                    className="text-cream underline-offset-4 hover:underline"
+                    href={`tel:${p.tel}`}
+                  >
+                    {p.display}
+                  </a>
+                </span>
+              ))}
               {CONTACT.email ? (
                 <>
                   {" "}
@@ -107,14 +116,15 @@ export function CateringSection() {
                 <p>
                   Your email app should open with <strong>To:</strong>{" "}
                   {CATERING_REQUEST_EMAILS.join(" · ")} — tap <strong>Send</strong> to deliver the
-                  request. Use the text button if email is not available on this device.
+                  request. Text <strong>(913) 433-1732</strong> or <strong>(913) 954-8745</strong>{" "}
+                  with the same message if email is not available on this device.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <a
                     href={postSubmit.smsCombinedHref}
                     className="inline-flex rounded-full border border-white/25 bg-white/10 px-4 py-2 text-[10px] font-semibold uppercase tracking-editorial text-cream hover:bg-white/15"
                   >
-                    Text the truck line
+                    Text both numbers
                   </a>
                   {postSubmit.smsIndividualHrefs.map(({ label, href }) => (
                     <a

@@ -12,7 +12,7 @@ export const LOCAL_BUSINESS_SCHEMA = {
   "@type": "FoodEstablishment",
   name: "Angie's food truck",
   alternateName: "Angie's Food Truck",
-  telephone: "+1-913-954-8745",
+  telephone: "+1-913-433-1732, +1-913-954-8745",
   email: "angiesfoodtruck83@gmail.com",
   servesCuisine: "Mexican",
   priceRange: "$$",
