@@ -117,7 +117,7 @@ export function PopularOrders() {
               </p>
               <button
                 type="button"
-                className="mt-6 w-full rounded-full bg-salsa py-3 text-sm font-semibold uppercase tracking-editorial text-cream"
+                className="mt-6 w-full rounded-full bg-angie-orange py-3 text-sm font-semibold uppercase tracking-editorial text-cream shadow-sm transition hover:bg-angie-orange/90"
                 onClick={() => {
                   if (openItem.meatChoiceRequired || itemRequiresOptionSelections(openItem)) {
                     setOpenItem(null);

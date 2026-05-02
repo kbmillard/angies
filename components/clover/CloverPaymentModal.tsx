@@ -179,7 +179,7 @@ export function CloverPaymentModal({ open, onOpenChange }: Props) {
           <button
             type="button"
             disabled={busy || !canOpenPayment}
-            className="rounded-full bg-salsa px-6 py-3 text-sm font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-salsa/90 disabled:cursor-not-allowed disabled:opacity-40"
+            className="rounded-full bg-angie-orange px-6 py-3 text-sm font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-angie-orange/90 disabled:cursor-not-allowed disabled:opacity-40"
             onClick={handleTokenize}
           >
             {configured ? (busy ? "Processing…" : "Pay & place order") : "Place order without card"}

@@ -318,7 +318,7 @@ export function WeekendBreakfastSection() {
                                   <button
                                     type="button"
                                     className={cn(
-                                      "min-h-10 rounded-full bg-salsa px-4 py-2 text-[10px] font-semibold uppercase tracking-editorial text-cream hover:bg-salsa/90 md:px-5",
+                                      "min-h-10 rounded-full bg-angie-orange px-4 py-2 text-[10px] font-semibold uppercase tracking-editorial text-cream shadow-sm transition hover:bg-angie-orange/90 md:px-5",
                                     )}
                                     onClick={() => handleAdd(item)}
                                   >

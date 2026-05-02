@@ -56,7 +56,7 @@ export function ScheduleSection() {
         </div>
 
         {error ? (
-          <p className="mt-6 rounded-xl border border-salsa/40 bg-salsa/10 p-4 text-sm text-cream">
+          <p className="mt-6 rounded-xl border border-angie-orange/35 bg-angie-orange/10 p-4 text-sm text-cream">
             {error}
           </p>
         ) : null}

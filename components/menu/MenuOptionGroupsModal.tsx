@@ -106,7 +106,7 @@ export function MenuOptionGroupsModal({ item, open, onOpenChange, onConfirm }: P
         <button
           type="button"
           disabled={!complete}
-          className="mt-6 w-full rounded-full bg-salsa py-3 text-sm font-semibold uppercase tracking-editorial text-cream disabled:cursor-not-allowed disabled:opacity-40"
+          className="mt-6 w-full rounded-full bg-angie-orange py-3 text-sm font-semibold uppercase tracking-editorial text-cream shadow-sm transition hover:bg-angie-orange/90 disabled:cursor-not-allowed disabled:opacity-40"
           onClick={() => {
             if (!complete) return;
             onConfirm(sel);

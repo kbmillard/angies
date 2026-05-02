@@ -139,7 +139,7 @@ export function LocationsSection() {
         </div>
 
         {error ? (
-          <p className="mt-6 rounded-xl border border-salsa/40 bg-salsa/10 p-4 text-sm text-cream">
+          <p className="mt-6 rounded-xl border border-angie-orange/35 bg-angie-orange/10 p-4 text-sm text-cream">
             {error}. Call{" "}
             <a className="underline" href={`tel:${CONTACT.phoneTel}`}>
               {CONTACT.phoneDisplay}
@@ -205,7 +205,7 @@ export function LocationsSection() {
                   <MapButton label="Apple Maps" href={resolvedAppleMapsUrl(primaryTruck)} />
                   <a
                     href={phoneTel}
-                    className="inline-flex items-center gap-2 rounded-full bg-salsa px-4 py-2 text-[10px] font-semibold uppercase tracking-editorial text-cream hover:bg-salsa/90"
+                    className="inline-flex items-center gap-2 rounded-full bg-angie-orange px-4 py-2 text-[10px] font-semibold uppercase tracking-editorial text-cream shadow-sm transition hover:bg-angie-orange/90"
                   >
                     <Phone className="h-4 w-4" aria-hidden />
                     Call / text

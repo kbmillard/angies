@@ -179,7 +179,7 @@ export function EditorialNav() {
                 <button
                   type="button"
                   data-mobile-nav-link
-                  className="mt-4 w-full rounded-full bg-salsa py-4 text-center text-xs font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-salsa/90"
+                  className="mt-4 w-full rounded-full bg-angie-orange py-4 text-center text-xs font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-angie-orange/90"
                   onClick={openOrderFromMenu}
                 >
                   Order now
@@ -257,7 +257,7 @@ export function EditorialNav() {
             type="button"
             onClick={openOrderPanel}
             className={cn(
-              "rounded-full bg-salsa px-4 py-2 text-[10px] font-semibold uppercase tracking-editorial text-cream shadow-md transition hover:bg-salsa/90 sm:text-[11px]",
+              "rounded-full bg-angie-orange px-4 py-2 text-[10px] font-semibold uppercase tracking-editorial text-cream shadow-md transition hover:bg-angie-orange/90 sm:text-[11px]",
               open && "max-lg:hidden",
             )}
           >

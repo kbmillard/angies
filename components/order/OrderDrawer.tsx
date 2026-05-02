@@ -135,7 +135,7 @@ export function OrderDrawer() {
               ) : null}
 
               {orderStatus === "error" && orderError ? (
-                <p className="rounded-xl border border-salsa/40 bg-salsa/10 p-3 text-sm text-cream">
+                <p className="rounded-xl border border-angie-orange/35 bg-angie-orange/10 p-3 text-sm text-cream">
                   {orderError}
                 </p>
               ) : null}
@@ -442,7 +442,7 @@ export function OrderDrawer() {
                 <button
                   type="button"
                   disabled={!canSendOrderRequest}
-                  className="flex w-full items-center justify-center gap-2 rounded-full bg-salsa py-3 text-sm font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-salsa/90 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="flex w-full items-center justify-center gap-2 rounded-full bg-angie-orange py-3 text-sm font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-angie-orange/90 disabled:cursor-not-allowed disabled:opacity-40"
                   onClick={() => submitOrderRequest()}
                 >
                   Send Order Request
@@ -451,7 +451,7 @@ export function OrderDrawer() {
                 <button
                   type="button"
                   disabled={!canOpenPayment}
-                  className="flex w-full items-center justify-center gap-2 rounded-full bg-salsa py-3 text-sm font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-salsa/90 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="flex w-full items-center justify-center gap-2 rounded-full bg-angie-orange py-3 text-sm font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-angie-orange/90 disabled:cursor-not-allowed disabled:opacity-40"
                   onClick={() => setPaymentModalOpen(true)}
                 >
                   Pay with card (Clover)

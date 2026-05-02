@@ -61,7 +61,7 @@ export function Hero() {
         ))}
       </div>
       <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-charcoal via-charcoal/80 to-navy/40" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[42%] bg-gradient-to-t from-salsa/25 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[42%] bg-gradient-to-t from-angie-orange/30 to-transparent" />
 
       <div className="relative z-[2] mx-auto flex w-full max-w-[1400px] flex-col gap-10 px-5 pb-14 pt-20 sm:px-8 sm:pb-16 sm:pt-24 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl [text-shadow:0_2px_28px_rgba(0,0,0,0.55)]">
@@ -121,7 +121,7 @@ function Cta({
       onClick={onClick}
       className={
         primary
-          ? `rounded-full bg-salsa px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-salsa/90 sm:text-[11px] ${className ?? ""}`
+          ? `rounded-full bg-angie-orange px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-angie-orange/90 sm:text-[11px] ${className ?? ""}`
           : `rounded-full border border-white/20 bg-black/35 px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-editorial text-cream backdrop-blur-sm transition hover:bg-black/45 sm:text-[11px] ${className ?? ""}`
       }
     >

@@ -89,7 +89,7 @@ export function CateringSection() {
             <div className="pt-4">
               <button
                 type="button"
-                className="rounded-full bg-salsa px-5 py-2 text-[10px] font-semibold uppercase tracking-editorial text-cream"
+                className="rounded-full bg-angie-orange px-5 py-2 text-[10px] font-semibold uppercase tracking-editorial text-cream shadow-sm transition hover:bg-angie-orange/90"
                 onClick={scrollToFormAndFocus}
               >
                 Open request form
@@ -220,7 +220,7 @@ export function CateringSection() {
               <button
                 type="submit"
                 disabled={!!postSubmit}
-                className="rounded-full bg-salsa px-6 py-3 text-xs font-semibold uppercase tracking-editorial text-cream disabled:pointer-events-none disabled:opacity-45"
+                className="rounded-full bg-angie-orange px-6 py-3 text-xs font-semibold uppercase tracking-editorial text-cream shadow-sm transition hover:bg-angie-orange/90 disabled:pointer-events-none disabled:opacity-45"
               >
                 Send request
               </button>

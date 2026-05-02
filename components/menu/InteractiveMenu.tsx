@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -135,7 +134,7 @@ export function InteractiveMenu() {
         </div>
 
         {error ? (
-          <p className="mt-6 rounded-xl border border-salsa/40 bg-salsa/10 p-4 text-sm text-cream">
+          <p className="mt-6 rounded-xl border border-angie-orange/35 bg-angie-orange/10 p-4 text-sm text-cream">
             {error} — refresh the page. If this persists, the menu API may be unreachable.
           </p>
         ) : null}
@@ -242,22 +241,7 @@ export function InteractiveMenu() {
                             key={item.id}
                             className="w-full min-w-0 max-w-full rounded-2xl border border-white/10 bg-charcoal/50 p-4 sm:p-5"
                           >
-                            <div className="flex w-full min-w-0 gap-4">
-                              <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-xl border border-white/10 bg-black/40">
-                                {item.imageUrl ? (
-                                  <Image
-                                    src={item.imageUrl}
-                                    alt={item.imageAlt ?? `${item.name} — ${active.label}`}
-                                    fill
-                                    className="object-cover"
-                                    sizes="96px"
-                                  />
-                                ) : (
-                                  <div className="flex h-full w-full items-center justify-center text-[10px] uppercase tracking-editorial text-cream/40">
-                                    AF
-                                  </div>
-                                )}
-                              </div>
+                            <div className="flex w-full min-w-0 flex-col gap-3">
                               <div className="min-w-0 flex-1">
                                 <PriceRow name={item.name} price={item.price} />
                                 {item.includesFries ? (
@@ -283,7 +267,7 @@ export function InteractiveMenu() {
                                 <div className="mt-3 flex min-w-0 flex-wrap gap-2">
                                   <button
                                     type="button"
-                                    className="min-h-10 rounded-full bg-salsa px-3 py-1.5 text-[10px] font-semibold uppercase tracking-editorial text-cream hover:bg-salsa/90"
+                                    className="min-h-10 rounded-full bg-angie-orange px-3 py-1.5 text-[10px] font-semibold uppercase tracking-editorial text-cream shadow-sm transition hover:bg-angie-orange/90"
                                     onClick={() => handleAdd(item)}
                                   >
                                     Add
