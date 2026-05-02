@@ -1,0 +1,731 @@
+Build Angie’s Food Truck as the exact same one-page interactive food truck website system as Gringos Cubanos.
+
+This is not a new experiment.
+This is a full copy/refactor of the Gringos Cubanos system with Angie’s Food Truck content, menu, color scheme, logo assets, gallery assets, schedule board, current truck location board, message board, embedded Google map system, Google Sheets pipelines, and mobile polish.
+
+Source/reference repo to inspect first:
+ /Users/kyle/Desktop/foodtruck/gringoscubanos
+
+New local repo:
+ /Users/kyle/Desktop/foodtruck/angies
+
+New GitHub repo to create/connect:
+ kbmillard/angies
+
+IMPORTANT GITHUB OWNER:
+Create/connect the repo under:
+ https://github.com/kbmillard/angies.git
+
+Do NOT create or push to:
+- kylebelshaw
+- any other GitHub owner
+- any old repo
+- any La Hamburguesa repo
+- any Gringos repo
+
+If GitHub repo creation fails, stop and tell me the exact command to run.
+Do not push to the wrong account or organization.
+
+Logo assets:
+ /Users/kyle/Desktop/foodtruck/angies/angies_fresh_food_logo_web_assets
+
+Gallery/photos:
+ /Users/kyle/Desktop/foodtruck/angies/gallery
+
+CRITICAL:
+You have permission to leave the new repo and inspect:
+ /Users/kyle/Desktop/foodtruck/gringoscubanos
+
+Do this before implementation.
+Look through the Gringos Cubanos repo and make sure Angie’s gets EVERY feature, function, tweak, pipeline, component behavior, mobile fix, schedule/message-board feature, map behavior, embedded Google map behavior, owner-editable Google Sheets setup, styling pattern, and deployment-ready structure that Gringos Cubanos has.
+
+Do not miss any functionality or tweak added to Gringos Cubanos.
+
+Use Gringos Cubanos as the complete product baseline:
+- one-page interactive architecture
+- current truck location board
+- upcoming schedule board
+- owner-editable message board
+- Google Sheets menu pipeline
+- Google Sheets locations pipeline
+- Google Sheets schedule pipeline
+- embedded Google Maps/current-location map behavior
+- Google Maps fallback logic
+- mobile nav overlay
+- corrected scroll targets
+- no horizontal mobile overflow
+- interactive menu board
+- order drawer/request flow
+- social/contact sections
+- gallery/slideshows
+- owner docs/templates
+- README/env docs
+- SEO/metadata
+- favicon/manifest/icon setup
+
+CRITICAL IMAGE RULE:
+Do NOT use any images except:
+1. Logo assets from:
+   /Users/kyle/Desktop/foodtruck/angies/angies_fresh_food_logo_web_assets
+
+2. Gallery/photos from:
+   /Users/kyle/Desktop/foodtruck/angies/gallery
+
+Do not use:
+- Gringos Cubanos images
+- La Hamburguesa images
+- Taqueria Ibarra images
+- stock photos
+- AI-generated images
+- random web/Facebook/Google photos
+
+Gallery image rules:
+- files containing "truck" are for top/bottom slideshows, hero slideshow, story slideshow, truck/location visuals
+- files containing "food" are for food gallery, popular items, and menu/category media
+- if any files are marked with stars/priority naming, use priority-marked files first
+- document exactly which assets were used
+
+Business:
+Angie’s food truck
+
+Public business info:
+Name:
+Angie’s food truck
+
+Category:
+Mexican food truck
+
+Address:
+400 E Linwood Blvd
+Kansas City, MO 64109
+
+Phone:
+(913) 954-8745
+
+Email:
+angiesfoodtruck83@gmail.com
+
+Facebook:
+https://www.facebook.com/p/Angies-food-truck-100066851974098/
+
+Instagram:
+https://www.instagram.com/angiesfoodtruck/
+
+Messenger:
+Angie’s food truck
+
+Public review snippets:
+- “You will experience close to Mexico flavor will not living Kansas city”
+- “We had the opportunity to have Angie’s Food Truck present for one of our events. Over 100 guests raved about the food an...”
+
+Use these only as short social proof if tasteful.
+Do not invent reviewer names beyond what is visible.
+
+Known/public menu signals to seed if a full menu cannot be extracted:
+- Fish tacos
+- Birria / beef birria
+- Burrito
+- 12” flour tortilla, cheese, rice, beans, meat, salsa
+- Horchata
+- Mango fresh water
+- fresh waters / aguas frescas
+- Mexican food truck
+- possible daily hot specials from Facebook posts
+
+Important:
+Menu and hours need customer confirmation.
+Use Google Sheets/editable data and TODO notes where uncertain.
+
+Current public hours appear inconsistent across social snippets:
+- one public source says Wednesday to Saturday 10:00 AM to 5:00 PM
+- another snippet mentions open 10:00 AM to 8:00 PM
+- Facebook screenshot only shows “Closing Soon”
+
+Therefore:
+- do not hard-lock final hours without owner confirmation
+- make hours owner-editable through the Locations/Schedule Sheets
+- use a reasonable fallback only for demo and document it as customer-confirmation-needed
+
+Recommended fallback hours for demo:
+Wed-Sat 10:00 AM – 5:00 PM
+Sun-Tue closed
+America/Chicago
+
+But mark in docs:
+TODO: confirm final public hours with owner.
+
+Design/color direction:
+Use the Angie’s logo assets to drive the actual color scheme.
+
+The site should feel:
+- Mexican food truck
+- clean
+- bright
+- friendly
+- energetic
+- trustworthy for catering/events
+- mobile-first
+- more Angie’s brand, not Gringos, not La Hamburguesa
+
+Use a new Angie’s-specific palette based on the logo:
+- warm red/salsa
+- bright green/cilantro
+- cream/tortilla
+- charcoal/black
+- yellow/orange accents if present in logo
+- white highlights
+
+Do not leave:
+- Gringos Cuban color scheme
+- Gringos copy
+- Gringos menu
+- Gringos logos
+- Gringos social links
+- Gringos schedule text
+- Gringos metadata
+
+Project setup:
+1. Copy/refactor from:
+   /Users/kyle/Desktop/foodtruck/gringoscubanos
+
+2. New project path:
+   /Users/kyle/Desktop/foodtruck/angies
+
+3. Exclude:
+   node_modules
+   .next
+   .git
+   old deployment caches
+
+4. Initialize fresh git repo in:
+   /Users/kyle/Desktop/foodtruck/angies
+
+5. Create/connect GitHub remote:
+   https://github.com/kbmillard/angies.git
+
+If repo does not exist and gh CLI is available:
+   gh repo create kbmillard/angies --public --source=. --remote=origin --push
+
+If gh CLI is unavailable or auth fails:
+   stop and summarize the exact command I need to run.
+
+Do not push to the wrong repo.
+Do not push to kylebelshaw.
+Do not push to Gringos Cubanos.
+Do not push to the old foodtruck repo.
+
+Logo/assets:
+Inspect:
+ /Users/kyle/Desktop/foodtruck/angies/angies_fresh_food_logo_web_assets
+
+Use these for:
+- nav/header logo
+- favicon
+- apple-touch-icon
+- manifest icons
+- Open Graph/social preview image if suitable
+- footer logo
+- brand/prologue badge
+
+Use the real Angie’s logo assets.
+Do not make placeholder logos if a real asset exists.
+Do not distort logos.
+Keep retina crisp.
+Keep nav logo same footprint as the Gringos/La Hamburguesa header badge system.
+
+Photos:
+Inspect:
+ /Users/kyle/Desktop/foodtruck/angies/gallery
+
+Use:
+- "truck" photos for hero slideshow, story slideshow, truck/location visuals, top/bottom slideshows
+- "food" photos for food gallery, popular items, menu/category media
+
+Do not use any other photos.
+
+Architecture:
+Keep the same Gringos Cubanos architecture:
+- Next.js App Router
+- TypeScript
+- Tailwind
+- Framer Motion
+- Lucide icons
+- one-page layout
+- cinematic hero
+- sticky editorial nav
+- mobile nav overlay
+- interactive menu board
+- order drawer/request flow
+- Google Sheets menu pipeline
+- Google Sheets locations pipeline
+- Google Sheets schedule pipeline
+- embedded Google Maps support
+- current truck location board
+- message board
+- upcoming schedule board
+- gallery/slideshows
+- corrected mobile scroll targets
+- mobile no-overflow fixes
+
+Sections:
+1. Hero with truck slideshow
+2. Prologue / story
+3. Current truck location + live message board
+4. Interactive menu board
+5. Upcoming schedule board
+6. Food gallery
+7. Social proof / catering/events
+8. Catering / booking request
+9. Contact / footer
+
+Hero:
+Use truck images from gallery filenames containing "truck".
+
+Headline ideas:
+“Close-to-Mexico flavor, rolling through Kansas City.”
+
+or:
+“Angie’s Food Truck — Mexican flavor made fresh in KC.”
+
+Subcopy:
+“Find Angie’s Food Truck near Linwood, follow today’s location, and order Mexican favorites from the truck.”
+
+Hero CTAs:
+- Find the Truck
+- View Menu
+- Upcoming Schedule
+- Book Catering / Event
+
+Navigation:
+Desktop:
+MENU / LOCATION / SCHEDULE / STORY / centered logo / GALLERY / CATERING / CONTACT / ORDER NOW
+
+Mobile:
+hamburger / centered logo / order now
+
+Carry over Gringos mobile nav exactly:
+- createPortal overlay
+- dim/blur background
+- glass panel
+- body scroll lock
+- escape closes
+- backdrop closes
+- links close then scroll
+- order now opens drawer
+
+Scroll behavior:
+Carry over corrected scroll helper:
+- sticky nav offset
+- dedicated menu-start anchor
+- Find Truck lands at current location board
+- Upcoming Schedule lands at schedule board
+- View Menu lands at menu intro/category selector
+- Catering lands at catering section
+- no CTA lands halfway into cards
+
+Menu:
+Use the same interactive menu board as Gringos:
+- category selector/carousel
+- active category panel
+- item cards
+- add-to-cart/order drawer
+- optionGroups
+- selected options shown in cart
+- mobile swipe cue
+- no horizontal overflow
+- Price TBD when missing
+
+Menu categories for fallback/demo:
+- Tacos
+- Birria
+- Burritos
+- Aguas Frescas
+- Specials
+- Sides
+- Catering
+
+Seed fallback items from public signals only:
+
+Tacos:
+Fish Tacos
+price: null
+description: Fish tacos mentioned publicly. Confirm price/details with owner.
+
+Street Tacos
+price: null
+description: Mexican street tacos. Confirm meats, toppings, and price with owner.
+
+Birria:
+Birria
+price: null
+description: Beef birria mentioned publicly. Confirm whether served as tacos, plate, or consommé.
+
+Burritos:
+Burrito
+price: null
+description: 12” flour tortilla with cheese, rice, beans, meat, and salsa.
+Required option group:
+Meat:
+- Asada
+- Pastor
+- Chicken
+- Birria
+- Other / Confirm
+
+Aguas Frescas:
+Horchata
+price: null
+
+Mango Fresh Water
+price: null
+
+Aguas Frescas
+price: null
+description: Fresh waters. Confirm flavors.
+
+Specials:
+Daily Hot Special
+price: null
+description: Rotating daily special. Update through Google Sheet.
+
+Sides:
+Rice
+price: null
+
+Beans
+price: null
+
+Catering:
+Event Catering
+price: null
+description: Catering/event request item. Confirm menu and pricing.
+
+Do not invent prices.
+Use null/Price TBD when uncertain.
+
+If Cursor can find a more complete official/menu source:
+- use rendered/Facebook/public inspection
+- document source in prompt/angies-menu-research-notes.md
+- update fallback menu and Google Sheet template
+- do not scrape/use unauthorized images
+
+Order flow:
+Use Gringos request/order system.
+Support:
+- pickup at current truck location
+- name
+- phone
+- order notes
+- special instructions
+- selected options
+
+If delivery exists in Gringos system, do not emphasize unless owner confirms.
+Default Angie’s should be truck pickup/request/catering.
+
+Current truck location:
+This is important.
+
+Keep Gringos Current Truck Location board functionality:
+- status
+- current location name
+- address
+- last updated
+- message board
+- Open in Google Maps
+- Apple Maps
+- Call button
+- embedded map/pin
+
+Owner can update current location via Google Sheet.
+
+Location fallback:
+id: angies-food-truck-linwood
+type: food_truck
+name: Angie’s food truck
+label: Food Truck Location
+address: 400 E Linwood Blvd
+city: Kansas City
+state: MO
+zip: 64109
+phone: (913) 954-8745
+email: angiesfoodtruck83@gmail.com
+status: Open
+statusNote: Linwood location
+timezone: America/Chicago
+messageBoard: Follow Facebook or Instagram for same-day truck updates.
+
+Do not show Open outside computed hours.
+
+Locations Sheet headers:
+id,active,type,sortOrder,name,label,address,city,state,zip,hours,phone,email,status,statusNote,mapsUrl,embedUrl,lat,lng,lastUpdated,timezone,weeklyHoursJson,messageBoard
+
+Open/Closed:
+Use America/Chicago.
+Do not trust raw Sheet status = Open.
+Compute from weeklyHoursJson/default hours.
+Special overrides:
+- Closed
+- Sold Out
+- Private Event
+- Catering Event
+- Moving Soon
+- Weather Delay
+
+If status is blank/Open, compute from hours.
+If special status, override public status.
+
+Embedded Google Map:
+This is required.
+Do not skip the embedded Google map.
+
+The current truck location board must include a working embedded Google map area with a pin or location fallback:
+- If lat/lng exists, use lat/lng.
+- Else if address exists and Google Maps key is available, geocode or use browser/map fallback.
+- Else use a Google Maps address embed fallback.
+- Never show a broken map.
+- Never leave a blank “map preview” placeholder if an address exists.
+- Include Open in Google Maps and Apple Maps buttons.
+- Keep it responsive and mobile-safe.
+
+Carry over the Gringos embedded Google map behavior exactly.
+If Gringos uses NEXT_PUBLIC_GOOGLE_MAPS_API_KEY, preserve that support.
+If Gringos supports GOOGLE_MAPS_SERVER_KEY, preserve that optional support too.
+
+Map/env vars:
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
+GOOGLE_MAPS_SERVER_KEY=
+
+README must explain:
+- NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is enough for browser embedded map demo behavior.
+- GOOGLE_MAPS_SERVER_KEY is optional/recommended later for server-side geocoding.
+- The key should be restricted properly in Google Cloud.
+
+Upcoming schedule board:
+Copy Gringos schedule board exactly.
+
+Create/keep:
+- lib/schedule/schema.ts
+- lib/schedule/local-schedule.ts
+- lib/schedule/google-sheet-schedule.ts
+- lib/schedule/get-schedule.ts
+- app/api/schedule/route.ts
+- context/ScheduleCatalogContext.tsx if Gringos uses it
+
+Env vars:
+SCHEDULE_CSV_URL
+NEXT_PUBLIC_SCHEDULE_CSV_URL
+
+Schedule CSV columns:
+id,active,date,startTime,endTime,title,locationName,address,city,state,zip,status,statusNote,mapsUrl,lat,lng,description,featured,sortOrder,timezone,updatedAt
+
+Fallback schedule:
+Do not invent real events.
+Use polished fallback:
+“Schedule coming soon — follow Angie’s Food Truck on Facebook or Instagram for daily updates.”
+
+Message board:
+Copy Gringos message board behavior.
+
+Prefer messageBoard column in Locations Sheet.
+Display near Current Truck Location:
+- headline: Today’s Truck Note
+- fallback: Follow Angie’s Food Truck on Facebook or Instagram for today’s updates.
+
+Google Sheets templates:
+Create/update:
+- prompt/google-sheet-menu-template.csv
+- prompt/google-sheet-locations-template.csv
+- prompt/google-sheet-schedule-template.csv
+
+Menu headers:
+id,active,category,section,sortOrder,name,englishName,description,price,includesFries,meatChoiceRequired,featured,imageUrl,imageAlt,availabilityLabel,optionGroupsJson
+
+Locations headers:
+id,active,type,sortOrder,name,label,address,city,state,zip,hours,phone,email,status,statusNote,mapsUrl,embedUrl,lat,lng,lastUpdated,timezone,weeklyHoursJson,messageBoard
+
+Schedule headers:
+id,active,date,startTime,endTime,title,locationName,address,city,state,zip,status,statusNote,mapsUrl,lat,lng,description,featured,sortOrder,timezone,updatedAt
+
+Social/contact:
+Use:
+Phone:
+(913) 954-8745
+
+Email:
+angiesfoodtruck83@gmail.com
+
+Facebook:
+https://www.facebook.com/p/Angies-food-truck-100066851974098/
+
+Instagram:
+https://www.instagram.com/angiesfoodtruck/
+
+Displayed:
+Facebook: Angie’s food truck
+Instagram: @angiesfoodtruck
+
+Make social links clickable:
+target="_blank"
+rel="noopener noreferrer"
+
+Do not invent TikTok or other social links unless discovered/confirmed.
+
+Catering/event section:
+Use review/event angle:
+- “Over 100 guests raved about the food...”
+Do not overquote if not exact.
+Make catering form collect:
+- name
+- phone
+- email
+- event date
+- event time
+- event address
+- guest count
+- message
+
+Keep request-only until email/CRM is wired.
+
+Gallery:
+Use gallery images only.
+
+Food gallery:
+- images containing "food"
+
+Truck slideshow:
+- images containing "truck"
+
+If no matching images exist, create clean branded fallback panels, not external images.
+
+SEO:
+Update metadata:
+Title:
+Angie’s Food Truck | Kansas City Mexican Food Truck
+
+Description:
+Find Angie’s Food Truck in Kansas City for Mexican food, tacos, birria, burritos, aguas frescas, catering, and daily truck updates.
+
+JSON-LD:
+FoodEstablishment / LocalBusiness:
+- name: Angie’s food truck
+- address: 400 E Linwood Blvd, Kansas City, MO 64109
+- phone: (913) 954-8745
+- email
+- cuisine: Mexican
+- social links
+- areaServed: Kansas City
+
+Docs:
+Update README with:
+- how to update menu
+- how to update current truck location
+- how to update message board
+- how to update schedule
+- how maps work
+- where images are allowed to come from
+- where logo assets live
+- env vars needed
+- embedded Google map setup
+
+Create:
+prompt/owner-info-needed.md
+
+Include checklist:
+- confirm exact menu
+- confirm prices
+- confirm hours
+- confirm current regular location
+- confirm schedule update process
+- confirm social links
+- confirm catering/event details
+- confirm whether online orders are request-only
+- confirm food photos to use
+- confirm logo approval
+- confirm Google Maps key setup
+
+Color/theme implementation:
+Update:
+- CSS variables
+- Tailwind/theme tokens if used
+- app/globals.css
+- category colors
+- buttons
+- chips
+- gradients
+- cards
+- status colors
+
+Make the design align with Angie’s logo.
+
+Validation:
+Run:
+npm install
+npm run build
+npm run lint
+
+Fix errors.
+
+Mobile test:
+- 375px
+- 390px
+- 414px
+
+Check:
+- no horizontal overflow
+- nav overlay works
+- menu cards fit
+- schedule board fits
+- current truck map fits
+- embedded map fits
+- order drawer fits
+- slideshow fits
+
+Functionality parity check:
+Before final summary, compare Angie’s repo against Gringos Cubanos and confirm Angie’s includes every major Gringos feature:
+- current location board
+- message board
+- schedule board
+- menu board
+- order drawer
+- Google Sheets menu/location/schedule templates
+- embedded Google Maps functionality
+- Google Maps fallback logic
+- mobile nav overlay
+- corrected scroll helper
+- no-overflow mobile layout
+- social links
+- gallery/slideshows
+- owner docs
+
+Git:
+After build/lint pass:
+- git status
+- git add .
+- git commit -m "Build Angie’s Food Truck one-page site"
+- set remote to https://github.com/kbmillard/angies.git
+- verify remote with git remote -v
+- push only if remote is exactly kbmillard/angies
+
+Do NOT push to kylebelshaw.
+Do NOT push to any wrong owner.
+
+Final summary:
+Report:
+- whether copied/refactored from Gringos Cubanos
+- parity checklist vs Gringos Cubanos
+- files changed
+- logo assets selected
+- gallery assets selected
+- color scheme chosen
+- menu categories/items implemented
+- current truck location system
+- embedded Google map system
+- schedule board system
+- message board system
+- Google Sheets templates created
+- env vars needed
+- maps behavior
+- order behavior
+- build/lint status
+- git status
+- GitHub remote status

@@ -1,0 +1,772 @@
+You are working inside the existing Next.js project at /Users/kyle/Desktop/foodtruck.
+
+Important context:
+This project has already been built from prompt/la_hamburguesa_loca_one_page_cursor_prompt.txt. Do not rebuild the whole app from scratch. Patch the existing app.
+
+Current app summary:
+- Next.js 15 App Router
+- TypeScript
+- Tailwind
+- Framer Motion
+- Lucide
+- Single-page homepage experience
+- Sticky editorial nav
+- Cinematic hero
+- Prologue
+- Numbered menu carousel
+- Add-to-cart drawer / mobile bottom sheet
+- Essence cards
+- Service rows
+- Restaurant + truck section
+- Popular grid
+- Catering form
+- Gallery
+- Footer
+- Clover integration already exists in lib/clover/* and components/clover/CloverPaymentModal.tsx
+- Existing menu/location data is in lib/data/menu.ts and lib/data/locations.ts
+- Existing order state is in context/OrderContext.tsx
+- Existing order API is app/api/orders/route.ts
+
+Core instruction:
+Add the real La Hamburguesa Loca menu from the provided menu image and add a simple Google Sheets powered menu-management system so the restaurant can update items, prices, active status, and featured items without touching code.
+
+Do not remove the current visual design or interaction system.
+Do not add Stripe.
+Do not replace Clover.
+Do not create separate menu pages.
+Do not create a full admin dashboard yet.
+Keep the app one-page and interactive.
+Every CTA should still do something on the homepage.
+
+============================================================
+PART 1 — REAL MENU DATA
+============================================================
+
+Replace the placeholder menu data with the real menu data below.
+
+Important:
+- The menu image does not show visible prices.
+- Use price: null for every menu item for now.
+- Display “Market price”, “Price TBD”, or “Final price confirmed at pickup” instead of fake prices.
+- Add a TODO comment near the fallback menu data:
+  TODO: Replace null prices with confirmed restaurant pricing before enabling real payment checkout.
+
+Business info visible on the menu:
+- Name: La Hamburguesa Loca Food Truck
+- Tagline: Auténtico Sazón Mexicano
+- Hours shown on menu: Open 5:00 PM - 11:00 PM
+- Phone: (816) 589-8925
+- Email: lahamburguesaloca@yahoo.com
+- Social handle: @la_hamburguesaloca
+
+Make sure the phone is wired as a real tel: link:
+tel:+18165898925
+
+Make sure the email is wired as:
+mailto:lahamburguesaloca@yahoo.com
+
+Meat choices:
+- Asada (Steak)
+- Pastor (Marinated Pork)
+- Carnitas (Pulled Pork)
+- Chorizo (Mexican Sausage)
+- Tripa (Tripe)
+- Lengua (Tongue)
+- Barbacoa (Cheek Meat)
+- Suadero
+- Pollo (Chicken)
+- Picadillo (Ground Beef)
+
+Menu categories:
+1. Hamburguesas
+2. Tacos
+3. Tortas
+4. Antojitos
+5. Kids Menu
+6. Drinks
+
+Suggested menu item type:
+
+export type MenuItem = {
+  id: string;
+  active: boolean;
+  category: string;
+  sortOrder: number;
+  name: string;
+  description?: string;
+  price: number | null;
+  includesFries: boolean;
+  meatChoiceRequired: boolean;
+  featured: boolean;
+  imageUrl?: string;
+};
+
+Real menu items:
+
+export const meatChoices = [
+  "Asada (Steak)",
+  "Pastor (Marinated Pork)",
+  "Carnitas (Pulled Pork)",
+  "Chorizo (Mexican Sausage)",
+  "Tripa (Tripe)",
+  "Lengua (Tongue)",
+  "Barbacoa (Cheek Meat)",
+  "Suadero",
+  "Pollo (Chicken)",
+  "Picadillo (Ground Beef)"
+];
+
+export const localMenuItems: MenuItem[] = [
+  {
+    id: "burger-loca",
+    active: true,
+    category: "Hamburguesas",
+    sortOrder: 1,
+    name: "Loca",
+    description: "Ham patty, ham, white cheese, bacon, mayo, ketchup, mustard, lettuce, tomato, avocado.",
+    price: null,
+    includesFries: true,
+    meatChoiceRequired: false,
+    featured: true
+  },
+  {
+    id: "burger-regia",
+    active: true,
+    category: "Hamburguesas",
+    sortOrder: 2,
+    name: "Regia",
+    description: "Ham patty, ham, white cheese, bacon, salami, mayo, ketchup, mustard, lettuce, tomato, avocado.",
+    price: null,
+    includesFries: true,
+    meatChoiceRequired: false,
+    featured: false
+  },
+  {
+    id: "burger-hawaiana",
+    active: true,
+    category: "Hamburguesas",
+    sortOrder: 3,
+    name: "Hawaiana",
+    description: "Ham patty, ham, white cheese, tomato, Canadian bacon, pineapple, grilled onion, lettuce.",
+    price: null,
+    includesFries: true,
+    meatChoiceRequired: false,
+    featured: false
+  },
+  {
+    id: "burger-nortena",
+    active: true,
+    category: "Hamburguesas",
+    sortOrder: 4,
+    name: "Norteña",
+    description: "Ham patty, ham, white cheese, bacon, smoked grilled sausage, lettuce, tomato, avocado.",
+    price: null,
+    includesFries: true,
+    meatChoiceRequired: false,
+    featured: false
+  },
+  {
+    id: "burger-cheeseburger",
+    active: true,
+    category: "Hamburguesas",
+    sortOrder: 5,
+    name: "Cheeseburger",
+    description: "Ham patty, ham, cheddar cheese, mayo, ketchup, mustard, lettuce, tomato.",
+    price: null,
+    includesFries: true,
+    meatChoiceRequired: false,
+    featured: false
+  },
+  {
+    id: "burger-mushroom",
+    active: true,
+    category: "Hamburguesas",
+    sortOrder: 6,
+    name: "Mushroom",
+    description: "Ham patty, mushrooms, grilled onion, mayo, ketchup, mustard, lettuce, tomato.",
+    price: null,
+    includesFries: true,
+    meatChoiceRequired: false,
+    featured: false
+  },
+  {
+    id: "burger-bacon-cheeseburger",
+    active: true,
+    category: "Hamburguesas",
+    sortOrder: 7,
+    name: "Bacon Cheeseburger",
+    description: "Cheeseburger with bacon.",
+    price: null,
+    includesFries: true,
+    meatChoiceRequired: false,
+    featured: false
+  },
+  {
+    id: "burger-bbq",
+    active: true,
+    category: "Hamburguesas",
+    sortOrder: 8,
+    name: "BBQ Burger",
+    description: "Shredded pork in BBQ sauce, white cheese, onion rings, mayo.",
+    price: null,
+    includesFries: true,
+    meatChoiceRequired: false,
+    featured: false
+  },
+  {
+    id: "burger-chicken-sandwich",
+    active: true,
+    category: "Hamburguesas",
+    sortOrder: 9,
+    name: "Chicken Sandwich",
+    description: "Chicken patty, provolone cheese, mayo, lettuce, tomato.",
+    price: null,
+    includesFries: true,
+    meatChoiceRequired: false,
+    featured: false
+  },
+
+  {
+    id: "taco-fish",
+    active: true,
+    category: "Tacos",
+    sortOrder: 1,
+    name: "Fish",
+    description: "Tilapia fish, chipotle mayo, lettuce, pico de gallo.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: false,
+    featured: false
+  },
+  {
+    id: "taco-crispy",
+    active: true,
+    category: "Tacos",
+    sortOrder: 2,
+    name: "Crispy",
+    description: "Ground beef or chicken, cheese, lettuce, pico de gallo, sour cream.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: false,
+    featured: false
+  },
+  {
+    id: "taco-burrito",
+    active: true,
+    category: "Tacos",
+    sortOrder: 3,
+    name: "Burrito",
+    description: "Choice of meat, lettuce, pico de gallo, rice, beans.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: true,
+    featured: false
+  },
+  {
+    id: "taco-quesadilla",
+    active: true,
+    category: "Tacos",
+    sortOrder: 4,
+    name: "Quesadilla",
+    description: "Served with pico de gallo, lettuce, sour cream, avocado.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: true,
+    featured: false
+  },
+  {
+    id: "taco-salad",
+    active: true,
+    category: "Tacos",
+    sortOrder: 5,
+    name: "Taco Salad",
+    description: "Choice of meat, beans, lettuce, avocado, pico de gallo, cheese, sour cream.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: true,
+    featured: false
+  },
+  {
+    id: "taco-quesabirria",
+    active: true,
+    category: "Tacos",
+    sortOrder: 6,
+    name: "Quesabirria",
+    description: "Order of 3 with consommé, onion, cilantro, cheese, and limes.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: false,
+    featured: true
+  },
+  {
+    id: "taco-enchilada",
+    active: true,
+    category: "Tacos",
+    sortOrder: 7,
+    name: "Enchilada",
+    description: "Chicken or beef, melted cheese, or Mexican style.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: false,
+    featured: false
+  },
+  {
+    id: "taco-street-tacos",
+    active: true,
+    category: "Tacos",
+    sortOrder: 8,
+    name: "Street Tacos",
+    description: "Classic street tacos with choice of meat.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: true,
+    featured: true
+  },
+
+  {
+    id: "torta-sencilla",
+    active: true,
+    category: "Tortas",
+    sortOrder: 1,
+    name: "Sencilla",
+    description: "Choice of meat, lettuce, mayo, tomato, avocado, beans.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: true,
+    featured: false
+  },
+  {
+    id: "torta-jamon",
+    active: true,
+    category: "Tortas",
+    sortOrder: 2,
+    name: "Jamón",
+    description: "Ham, beans, lettuce, tomato, avocado, cheese, queso fresco.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: false,
+    featured: false
+  },
+  {
+    id: "torta-philly-steak",
+    active: true,
+    category: "Tortas",
+    sortOrder: 3,
+    name: "Philly Steak",
+    description: "Tender slices of meat, sautéed peppers and onions, melted provolone cheese.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: false,
+    featured: false
+  },
+  {
+    id: "torta-cubana",
+    active: true,
+    category: "Tortas",
+    sortOrder: 4,
+    name: "Cubana",
+    description: "Philly steak, ham, Mexican chorizo, sausage, beans, mayo, lettuce, tomato, avocado.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: false,
+    featured: false
+  },
+
+  {
+    id: "antojito-sopes",
+    active: true,
+    category: "Antojitos",
+    sortOrder: 1,
+    name: "Sopes",
+    description: "Beans, choice of meat, lettuce, queso fresco, sour cream.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: true,
+    featured: false
+  },
+  {
+    id: "antojito-gorditas",
+    active: true,
+    category: "Antojitos",
+    sortOrder: 2,
+    name: "Gorditas",
+    description: "Beans, choice of meat, lettuce, queso fresco, sour cream.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: true,
+    featured: false
+  },
+  {
+    id: "antojito-huaraches",
+    active: true,
+    category: "Antojitos",
+    sortOrder: 3,
+    name: "Huaraches",
+    description: "Beans, choice of meat, lettuce, queso fresco, sour cream.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: true,
+    featured: false
+  },
+  {
+    id: "antojito-flautas",
+    active: true,
+    category: "Antojitos",
+    sortOrder: 4,
+    name: "Flautas",
+    description: "Chicken or beef, lettuce, pico de gallo, avocado, queso fresco, sour cream, rice and beans.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: false,
+    featured: true
+  },
+  {
+    id: "antojito-pambazos",
+    active: true,
+    category: "Antojitos",
+    sortOrder: 5,
+    name: "Pambazos",
+    description: "Chorizo with potato, lettuce, queso fresco, sour cream.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: false,
+    featured: false
+  },
+  {
+    id: "antojito-quesadilla-frita",
+    active: true,
+    category: "Antojitos",
+    sortOrder: 6,
+    name: "Quesadilla Frita",
+    description: "Choice of meat, lettuce, queso fresco, sour cream.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: true,
+    featured: false
+  },
+  {
+    id: "antojito-nachos",
+    active: true,
+    category: "Antojitos",
+    sortOrder: 7,
+    name: "Nachos",
+    description: "Choice of meat, beans, cheese, pico de gallo, sour cream, jalapeños.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: true,
+    featured: false
+  },
+  {
+    id: "antojito-papas-locas",
+    active: true,
+    category: "Antojitos",
+    sortOrder: 8,
+    name: "Papas Locas",
+    description: "French fries, nacho cheese, choice of meat, pico de gallo, sour cream, avocado.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: true,
+    featured: true
+  },
+
+  {
+    id: "kids-fingers",
+    active: true,
+    category: "Kids Menu",
+    sortOrder: 1,
+    name: "Fingers",
+    description: "Kids chicken fingers.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: false,
+    featured: false
+  },
+  {
+    id: "kids-side-fries",
+    active: true,
+    category: "Kids Menu",
+    sortOrder: 2,
+    name: "Side Fries",
+    description: "Side order of fries.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: false,
+    featured: false
+  },
+  {
+    id: "kids-cheese-quesadilla",
+    active: true,
+    category: "Kids Menu",
+    sortOrder: 3,
+    name: "Cheese Quesadilla",
+    description: "Kids cheese quesadilla.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: false,
+    featured: false
+  },
+
+  {
+    id: "drink-coke",
+    active: true,
+    category: "Drinks",
+    sortOrder: 1,
+    name: "Coke",
+    description: "Coca-Cola drink.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: false,
+    featured: false
+  },
+  {
+    id: "drink-jarritos",
+    active: true,
+    category: "Drinks",
+    sortOrder: 2,
+    name: "Jarritos",
+    description: "Mexican soda.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: false,
+    featured: false
+  },
+  {
+    id: "drink-aguas-frescas",
+    active: true,
+    category: "Drinks",
+    sortOrder: 3,
+    name: "Aguas Frescas",
+    description: "Fresh flavored aguas frescas.",
+    price: null,
+    includesFries: false,
+    meatChoiceRequired: false,
+    featured: false
+  }
+];
+
+Category visual colors:
+- Hamburguesas: cyan
+- Tacos: green
+- Tortas: yellow
+- Antojitos: hot pink
+- Kids Menu: orange
+- Drinks: red
+
+Visual menu style:
+- Use the real menu poster as inspiration.
+- Deep purple / plum background.
+- Bright category accent colors.
+- Dotted divider lines between item names and price/status.
+- Playful Mexican food-truck energy, but still polished and premium.
+- Keep the current cinematic one-page style.
+
+============================================================
+PART 2 — MEAT CHOICE ORDER FLOW
+============================================================
+
+For any item with meatChoiceRequired: true:
+- When the customer clicks Add, open a small inline selector or modal first.
+- Customer must select one meat choice before the item goes into cart.
+- Cart line item must display selected meat under the item name.
+
+For Hamburguesas:
+- Show a “With fries” badge.
+- Cart line item should also display “With fries”.
+
+Update OrderContext/cart item types as needed:
+- selectedMeat?: string
+- includesFries?: boolean
+- price: number | null
+
+============================================================
+PART 3 — PRICE TBD / CLOVER PAYMENT BEHAVIOR
+============================================================
+
+Because current prices are unknown, do not force Clover payment for null-price orders.
+
+Update the order drawer behavior:
+- If all cart items have numeric prices, keep existing subtotal/tip/payment/Clover flow.
+- If any cart item has price: null:
+  - Show item price as “Price TBD”.
+  - Show message: “Final price confirmed at pickup.”
+  - Hide or disable paid checkout.
+  - Primary CTA should become “Send Order Request”.
+  - Submit order request without Clover card payment.
+
+Do not delete Clover code.
+Keep Clover ready for the future when menu prices are confirmed.
+
+Update app/api/orders/route.ts:
+- Accept two order modes:
+  1. mode: "request" for null-price / price-confirmation orders
+  2. mode: "payment" for real Clover tokenized payment orders
+- For mode "request": do not require a Clover token.
+- For mode "payment": keep existing token validation behavior.
+- Return mock success for now:
+  { ok: true, orderId: "...", mode: "request" | "payment" }
+
+Success message for request mode:
+“Order request received. We’ll confirm pricing and pickup time.”
+
+============================================================
+PART 4 — GOOGLE SHEETS MENU MANAGEMENT
+============================================================
+
+Add a Google Sheets powered menu adapter so restaurant staff can update the menu without code.
+
+Architecture:
+- Google Sheet published as CSV is the primary menu source when an env var exists.
+- Local TypeScript menu data is the fallback.
+- Frontend should fetch menu through /api/menu.
+- Frontend should not directly import localMenuItems except as fallback inside server menu loader.
+
+Create or adapt these files:
+
+/lib/menu/schema.ts
+/lib/menu/local-menu.ts
+/lib/menu/google-sheet-menu.ts
+/lib/menu/get-menu.ts
+/app/api/menu/route.ts
+
+If the project already has lib/data/menu.ts, either:
+- move the real menu fallback data into /lib/menu/local-menu.ts and update imports, or
+- keep lib/data/menu.ts as a compatibility export that re-exports from /lib/menu/local-menu.ts.
+
+Do whichever causes the least disruption to the existing app.
+
+Google Sheet columns:
+active
+category
+sortOrder
+name
+description
+price
+includesFries
+meatChoiceRequired
+featured
+imageUrl
+
+Optional column:
+id
+
+Parsing rules:
+- active accepts TRUE/FALSE, true/false, yes/no, 1/0
+- includesFries accepts TRUE/FALSE, true/false, yes/no, 1/0
+- meatChoiceRequired accepts TRUE/FALSE, true/false, yes/no, 1/0
+- featured accepts TRUE/FALSE, true/false, yes/no, 1/0
+- price can be blank; blank becomes null
+- price should parse as a number when present
+- id should be generated from category + name when no id column exists
+- inactive rows should not display publicly
+- sort items by category order, then sortOrder, then name
+
+Expected /api/menu response:
+
+{
+  "categories": ["Hamburguesas", "Tacos", "Tortas", "Antojitos", "Kids Menu", "Drinks"],
+  "items": [],
+  "featuredItems": [],
+  "source": "google-sheet" | "local-fallback",
+  "updatedAt": "ISO string"
+}
+
+Environment variables:
+- MENU_CSV_URL should be preferred for server-side fetch.
+- NEXT_PUBLIC_MENU_CSV_URL can also be supported for convenience, but do not require exposing the URL publicly because frontend should call /api/menu.
+
+Caching:
+- Use Next.js fetch caching with revalidate: 300.
+- Add a comment that this refreshes roughly every 5 minutes without redeploying.
+
+Implementation notes:
+- Avoid adding heavy dependencies if possible.
+- Implement a small CSV parser that handles quoted fields, commas inside quotes, and escaped quotes.
+- If Google Sheet fetch fails, fall back to localMenuItems.
+- In development, console.warn when using local fallback due to a fetch/parsing error.
+
+============================================================
+PART 5 — FRONTEND DATA LOADING
+============================================================
+
+Update the homepage/menu components so menu data comes from /api/menu.
+
+Requirements:
+- Show loading skeleton while menu loads.
+- If API fails on client, show local fallback menu only if already safely available through the API route. Do not crash the homepage.
+- Existing interactions must still work:
+  - category switching
+  - menu carousel
+  - add-to-cart
+  - meat choice selector
+  - cart drawer / bottom sheet
+  - featured/popular orders
+  - service rows
+  - final CTAs
+
+Popular Orders:
+- Derive from featuredItems returned by /api/menu.
+- If no featured items are present, fallback to the first several active menu items.
+
+============================================================
+PART 6 — GOOGLE SHEET TEMPLATE
+============================================================
+
+Add a file:
+
+prompt/google-sheet-menu-template.csv
+
+Content:
+
+active,category,sortOrder,name,description,price,includesFries,meatChoiceRequired,featured,imageUrl
+TRUE,Hamburguesas,1,Loca,"Ham patty, ham, white cheese, bacon, mayo, ketchup, mustard, lettuce, tomato, avocado.",,TRUE,FALSE,TRUE,
+TRUE,Hamburguesas,2,Regia,"Ham patty, ham, white cheese, bacon, salami, mayo, ketchup, mustard, lettuce, tomato, avocado.",,TRUE,FALSE,FALSE,
+TRUE,Tacos,6,Quesabirria,"Order of 3 with consommé, onion, cilantro, cheese, and limes.",,FALSE,FALSE,TRUE,
+TRUE,Tacos,8,Street Tacos,"Classic street tacos with choice of meat.",,FALSE,TRUE,TRUE,
+TRUE,Antojitos,8,Papas Locas,"French fries, nacho cheese, choice of meat, pico de gallo, sour cream, avocado.",,FALSE,TRUE,TRUE,
+TRUE,Drinks,2,Jarritos,"Mexican soda.",,FALSE,FALSE,FALSE,
+
+Add documentation in prompt/implementation-notes.md or a new prompt/menu-management.md:
+
+Restaurant menu update process:
+1. Open the Google Sheet.
+2. Add or edit item rows.
+3. Set active to TRUE or FALSE.
+4. Add prices when confirmed.
+5. Mark featured items TRUE to show them in Popular Orders.
+6. Wait up to 5 minutes for the website to refresh.
+
+How to publish Google Sheet as CSV:
+1. File → Share → Publish to web.
+2. Choose the menu sheet tab.
+3. Choose CSV.
+4. Copy the published CSV URL.
+5. Add it to Vercel as MENU_CSV_URL.
+
+============================================================
+PART 7 — ACCEPTANCE CRITERIA
+============================================================
+
+After patching, run:
+
+npm run build
+
+Fix TypeScript, lint, and build errors.
+
+Acceptance criteria:
+- Homepage still loads as a single-page app.
+- Real menu categories and items appear.
+- Category switching works.
+- Items with meatChoiceRequired require a meat selection before adding to cart.
+- Cart shows selected meat.
+- Hamburguesas show “With fries”.
+- Null prices display “Price TBD” / “Final price confirmed at pickup”.
+- Null-price orders submit as order requests without Clover token.
+- Clover payment flow remains intact for future numeric-price orders.
+- /api/menu returns local-fallback data when no MENU_CSV_URL is set.
+- /api/menu returns google-sheet source when MENU_CSV_URL is set and valid.
+- Inactive Google Sheet rows do not display.
+- Featured Google Sheet rows populate Popular Orders.
+- Phone and email are wired correctly.
+- No Stripe is introduced.
+- No separate menu pages are added.
+- npm run build passes.

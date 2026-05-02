@@ -1,0 +1,34 @@
+---
+description: Gringos homepage — fixed brand backdrop + translucent charcoal (do not regress)
+alwaysApply: true
+---
+
+# Gringos homepage backdrop (locked)
+
+## Fixed watermark
+
+- `components/prologue/FixedBrandBackdrop.tsx` renders **one** full-viewport layer: `fixed`, below the nav (`top: var(--nav-h)`), `z-0`, `bg-charcoal`, faded `site-logo.webp` with **vmin** sizing so the **entire** mark stays visible.
+- It stays **fixed** while the page scrolls; do not switch it to `absolute` inside a single section.
+
+## Home shell
+
+- `components/home/HomeView.tsx`: `<main className="relative">` then **`FixedBrandBackdrop` first**, then **`Hero`**. Order matters.
+- **`Hero`**: keep **`relative z-10`** and **opaque** `bg-charcoal` + slides so the slideshow fully covers the fixed layer at the top.
+
+## Section backgrounds (critical)
+
+- **Do not** use opaque `bg-charcoal` or `bg-midnight` on stacked homepage sections — it **hides** the fixed logo and creates visible “blocks.”
+- Use the **unified wash**: `relative z-10 bg-charcoal/45 backdrop-blur-sm` (same pattern on menu, locations, gallery, story, schedule, catering, social, popular).
+- **Footer**: `bg-charcoal/70 backdrop-blur-md` (slightly stronger for legibility).
+- **`FinalConversion`**: no navy / red **gradient slab**; same charcoal glass family as other bands.
+
+## Locations card
+
+- Truck **article**: `border-white/10`, **`bg-charcoal/35 backdrop-blur-md`** — **no** `from-navy/80` / gold ring “second skin” that reads as a different color block.
+- **Hours** sub-panel: `bg-charcoal/30 backdrop-blur-sm` (not `bg-black/30`).
+
+## Prologue
+
+- `Prologue.tsx` is **copy only** (no duplicate logo). Welcome copy sits in a **glass** card (`bg-charcoal/35 backdrop-blur-md`, border) so it matches locations/menu; the section itself stays backdrop-clear above the fixed watermark.
+
+When adding new homepage sections, match the **translucent charcoal + blur** pattern unless the section must be fully opaque (e.g. modals, nav, hero).

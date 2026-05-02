@@ -1,0 +1,3 @@
+id,active,category,section,sortOrder,name,englishName,description,price,includesFries,meatChoiceRequired,featured,imageUrl,imageAlt,availabilityLabel,optionGroupsJson
+tacos-fish,TRUE,Tacos,,1,Fish Tacos,,Fish tacos mentioned publicly. Confirm price/details with owner.,,FALSE,FALSE,TRUE,/gallery/food7.jpg,Fish tacos,,
+burrito-main,TRUE,Burritos,,3,Burrito,,12 inch flour tortilla cheese rice beans meat salsa.,,FALSE,FALSE,TRUE,/gallery/food11.jpg,Burrito,,"[{""id"":""meat"",""label"":""Meat"",""required"":true,""options"":[""Asada"",""Pastor"",""Chicken"",""Birria"",""Other / Confirm""]}]"

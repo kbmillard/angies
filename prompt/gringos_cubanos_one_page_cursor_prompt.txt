@@ -1,0 +1,750 @@
+Build a new Gringos Cubanos food truck website by copying the existing /Users/kyle/Desktop/foodtruck app and rebranding it into a new project.
+
+This should be the same polished, one-page interactive restaurant/food-truck system as the La Hamburguesa Loca build, but with a completely new Gringos Cubanos identity, color scheme, content, menu, gallery, truck-location system, upcoming schedule board, actual social media links, and owner-updatable message board.
+
+Source repo:
+ /Users/kyle/Desktop/foodtruck
+
+New local repo:
+ /Users/kyle/Desktop/foodtruck/gringoscubanos
+
+New GitHub repo:
+ kbmillard/gringoscubanos
+
+Logo assets:
+ /Users/kyle/Desktop/foodtruck/gringoscubanos/gringos_cubanos_logo_web_assets
+
+Allowed gallery/photos path:
+ /Users/kyle/Desktop/foodtruck/gringoscubanos/gallery
+
+CRITICAL IMAGE RULE:
+Do NOT upload, download, scrape, generate, or use any images except:
+1. Logo assets from:
+   /Users/kyle/Desktop/foodtruck/gringoscubanos/gringos_cubanos_logo_web_assets
+
+2. Gallery/photos from:
+   /Users/kyle/Desktop/foodtruck/gringoscubanos/gallery
+
+No stock photos.
+No web-scraped photos.
+No AI-generated photos.
+No La Hamburguesa photos.
+No Taqueria Ibarra photos.
+No random placeholders if a local allowed asset exists.
+
+Gallery/photo priority:
+- Files marked with **** are priority and should be used first.
+- Files with "food" in the filename are for food gallery/menu visuals.
+- Files with "truckskyline", "truckstreet", or "dog" in the filename are for the main slideshow / story / hero slideshow.
+- Use the ***** marked images before other images whenever possible.
+- Inspect filenames carefully and document which assets were used.
+
+High-level goal:
+Create a beautiful, sophisticated, mobile-first website for Gringos Cubanos that makes their truck easy to find, makes the menu feel bold and premium, and gives the owner a simple way to update:
+- current truck location
+- upcoming schedule dates/times/locations
+- message board announcements
+- menu items/prices later through Google Sheets
+
+This food truck is extremely mobile, so the current location and upcoming schedule need to be prominent and easy to update.
+
+Business:
+Gringos Cubanos
+
+Business story/copy:
+Hello, this is Gringos Cubanos. Authentic Cuban Cuisine coming to you in Kansas City and surrounding areas. We come from Florida, where Cuban food is on every corner. We moved here about 5 years ago and have had so much trouble finding good Cubanos, so instead of continuing to search, we decided to bring it here to the great city of Kansas City. My brother and I have been working in kitchens together for 30 years combined, and love what we do. We got a BIG, BOLD, BRIGHT truck, and the food is the same way. So skip all the normal taco and BBQ trucks and come give the best Cubanos KCMO has to offer a try.
+
+Short brand copy:
+Welcome to Gringos Cubanos. Authentic Old World Cuban sandwiches, marinated to perfection and pressed on fresh Cuban bread. Pair your sandwich with hand-cut sides, bold flavors, and refreshing drinks.
+
+Contact / social:
+Call or Text: 417-310-6172
+
+Actual social media links:
+Instagram:
+https://www.instagram.com/gringos.cubanos/
+
+Facebook:
+https://www.facebook.com/p/Gringos-Cubanos-61575376317567/
+
+TikTok:
+https://www.tiktok.com/@gingoscubanoskcmo
+
+Displayed social handles:
+Instagram: @gringos.cubanos
+TikTok: @GingosCubanosKCMO
+Facebook: Gringos Cubanos
+
+Important TikTok note:
+The client-provided TikTok handle is “GingosCubanosKCMO” with one “r” missing in “Gingos.” Use the URL:
+https://www.tiktok.com/@gingoscubanoskcmo
+
+Social promo:
+Follow or tag us on social media and get a free drink.
+
+Architecture:
+Copy/refactor the existing foodtruck repo architecture. Keep the proven one-page interactive system:
+- Next.js App Router
+- TypeScript
+- Tailwind
+- Framer Motion
+- Lucide icons
+- one-page layout
+- cinematic hero
+- sticky editorial nav
+- mobile nav overlay
+- interactive menu board
+- order drawer / request flow
+- Google Sheets menu pipeline
+- Google Sheets locations pipeline
+- Google Maps embedded/current-location support
+- corrected scroll targets
+- no horizontal mobile overflow
+- mobile category swipe cue
+- owner-editable data structure
+
+Do not keep old branding:
+Remove/replace all La Hamburguesa references:
+- business name
+- logo
+- photos
+- menu
+- colors
+- metadata
+- JSON-LD
+- social handles
+- addresses
+- phone
+- copy
+- favicon/manifest/icons
+
+Project setup:
+1. Copy source repo into:
+   /Users/kyle/Desktop/foodtruck/gringoscubanos
+
+2. Exclude:
+   node_modules
+   .next
+   .git
+   old deployment cache files if any
+
+3. Initialize a fresh git repo in:
+   /Users/kyle/Desktop/foodtruck/gringoscubanos
+
+4. Create/connect GitHub repo:
+   https://github.com/kbmillard/gringoscubanos.git
+
+If GitHub repo does not exist and gh CLI is available:
+   gh repo create kbmillard/gringoscubanos --public --source=. --remote=origin --push
+
+If gh CLI is unavailable or auth fails:
+   stop and summarize the exact command I need to run.
+Do not push to the wrong repo.
+
+Brand/design direction:
+Use the Gringos Cubanos logo assets to drive the color scheme.
+
+Create a sophisticated Cuban-food-truck color system:
+- bold Cuban red
+- deep navy / midnight blue
+- bright truck-yellow or golden sandwich color if present in logo
+- cream / pressed-bread beige
+- black / charcoal
+- white highlights
+- subtle tropical teal/blue only if it exists in logo assets
+
+The look should be:
+- bold
+- bright
+- confident
+- mobile-first
+- sophisticated
+- energetic
+- premium food truck
+- Cuban sandwich focused
+- not generic taco/BBQ
+- not a copy of La Hamburguesa colors
+
+Use the existing design quality from foodtruck but re-skin it fully:
+- new gradients
+- new card accents
+- new logo
+- new hero treatment
+- new gallery images
+- new menu data
+- new location/schedule board
+
+Logo/assets:
+Inspect:
+ /Users/kyle/Desktop/foodtruck/gringoscubanos/gringos_cubanos_logo_web_assets
+
+Use those assets for:
+- centered nav/header logo
+- favicon
+- apple-touch-icon
+- manifest icons
+- Open Graph/social image if suitable
+- footer logo
+- prologue/brand badge if useful
+
+Prefer transparent PNG/SVG/WebP.
+Do not distort.
+Keep crisp retina rendering.
+Keep nav logo same footprint as the existing header logo system.
+
+Allowed photos:
+Inspect:
+ /Users/kyle/Desktop/foodtruck/gringoscubanos/gallery
+
+Use files marked with **** first.
+Use "food" filename images for:
+- menu cards
+- food gallery
+- popular items
+- item/category media where appropriate
+
+Use "truckskyline", "truckstreet", and "dog" filename images for:
+- hero slideshow
+- story slideshow
+- truck location section
+- brand/lifestyle panels
+
+Do not use any other images.
+
+Recommended sections:
+1. Hero
+2. Prologue / story
+3. Current truck location + live message board
+4. Interactive menu board
+5. Upcoming schedule board
+6. Food gallery
+7. Social promo
+8. Catering / booking request
+9. Contact / footer
+
+Hero:
+Make this beautiful and bold.
+
+Hero headline ideas:
+“Big, bold Cuban flavor rolling through Kansas City.”
+
+or:
+“Old World Cuban sandwiches. Big bright truck. Kansas City.”
+
+Hero subcopy:
+“Authentic Cuban cuisine from Florida roots, pressed fresh and served around Kansas City.”
+
+Hero CTAs:
+- Find the Truck
+- View Menu
+- Upcoming Schedule
+- Order / Request
+
+Hero media:
+Use priority truck slideshow images:
+- truckskyline
+- truckstreet
+- dog
+Prefer ***** marked versions first.
+Make it a smooth 2–4 photo slideshow if enough approved images exist.
+No extra images.
+
+Navigation:
+Desktop:
+MENU / LOCATION / SCHEDULE / STORY / centered logo / GALLERY / CATERING / CONTACT / ORDER NOW
+
+Mobile:
+hamburger / centered logo / order now
+
+Carry over the fixed mobile overlay:
+- portal overlay
+- dim/blur background
+- links inside glass panel
+- body scroll lock
+- escape closes
+- backdrop closes
+- links close then scroll
+- order now opens drawer
+
+Scroll:
+Carry over corrected scroll helper:
+- sticky nav offset
+- menu-start anchor
+- Find Truck lands at location board
+- Upcoming Schedule lands at schedule board
+- View Menu lands at menu intro/category selector
+- Catering lands at catering section
+- no CTA lands halfway into cards
+
+Menu board:
+Use the same one-page interactive menu system from foodtruck:
+- category selector/carousel
+- active category panel
+- item cards
+- add-to-cart/order drawer
+- optionGroups
+- selected options shown in cart
+- mobile swipe cue
+- no horizontal overflow
+- Price TBD when missing
+
+Menu categories:
+- Sandwiches
+- Sides
+- Bowls
+- Kid’s Meals
+- Beverages
+- Desserts
+- Promo
+
+Menu data:
+Use exact menu data provided below.
+
+Sandwiches
+Each sandwich is a blend of traditional Old World Cuban flavors and served on signature pressed Cuban bread.
+
+Cuban — $15
+Marinated Cuban pulled pork, sliced ham, and swiss cheese topped with mayo, yellow mustard, onions, and pickles.
+
+Chicken Cuban — $15
+Marinated Cuban shredded chicken, sliced ham, and swiss cheese topped with mayo, yellow mustard, onions, and pickles.
+
+Cuban Steak — $17
+Marinated Cuban steak and grilled onions, crowned with crispy potato sticks.
+
+Fritas — $10
+Blend of beef and chorizo burger topped with cheese, grilled onions, and potato sticks.
+Option/add-on:
+Extra patty — $5
+
+Sides
+Beef Empanadas — $5 or 2 for $8
+
+Black Beans & Rice — $5
+
+Tostones / Fried Plantains — $7
+Add homemade lemon garlic oil for an extra burst of flavor.
+
+Fresh Hand-Cut Fries — $5
+
+Bowl w/ Meat
+Pork or Chicken — $10
+Steak — $11
+
+Kid’s Meals
+Includes hand-cut fries and a drink.
+
+Grilled Cheese — $10
+
+Ham and Cheese — $11
+
+Beverages
+Soda — $2
+
+Bottled Water — price unknown / Price TBD
+
+Desserts
+Ask about our desserts.
+
+Social Promo
+Follow or tag us on social media and get a free drink.
+
+Option groups/add-ons:
+Fritas:
+Add-on option group:
+- Extra patty +$5
+
+Beef Empanadas:
+Option group or two separate items:
+Option A:
+- Single — $5
+- Two for $8
+Use whichever is cleaner for current cart system.
+
+Bowl w/ Meat:
+Required protein/style:
+- Pork — $10
+- Chicken — $10
+- Steak — $11
+
+Tostones:
+Optional add-on:
+- Homemade lemon garlic oil
+Price unknown unless specified. If price unknown, use no price change and add TODO to confirm.
+
+Beverages:
+Soda — $2
+Bottled Water — Price TBD unless customer confirms.
+
+Desserts:
+Ask about our desserts — Price TBD / request-only.
+
+Social Promo:
+Follow or tag us on social media and get a free drink.
+This should be displayed as a promo card, not necessarily an orderable menu item unless that fits the current system.
+
+Order flow:
+Keep it request/demo safe unless live POS/payment info is provided.
+Do not assume Clover unless existing architecture requires it from source repo; keep as request-ready and payment-ready later.
+
+Order drawer should support:
+- pickup at truck
+- delivery only if already present from source, but do not emphasize unless customer confirms delivery
+- name
+- phone
+- special instructions
+- order notes
+- selected options/add-ons
+
+For Gringos Cubanos, current truck location matters most.
+
+Current truck location:
+This is critical.
+
+Add a prominent Current Truck Location board near top of site.
+It should include:
+- current status
+- current location name
+- address
+- date/time last updated
+- message board note
+- Open in Google Maps
+- Apple Maps
+- Call/Text button
+- embedded map with pin
+
+Use Google Maps as in source repo.
+Do not switch to Mapbox or Apple MapKit.
+
+Owner-updatable current location:
+Create/update location pipeline so owner can update via Google Sheet.
+
+Location sheet columns should include:
+id,active,type,sortOrder,name,label,address,city,state,zip,hours,phone,email,status,statusNote,mapsUrl,embedUrl,lat,lng,lastUpdated,timezone,weeklyHoursJson,messageBoard
+
+Add support for:
+messageBoard
+This is a short owner-editable announcement tied to current truck location.
+
+Example:
+“We’re parked here tonight until sold out.”
+“Private event today — see schedule for next public stop.”
+“Follow Instagram for same-day updates.”
+
+Public location status:
+Use America/Chicago.
+Do not trust raw Sheet status = Open.
+Compute from weekly hours when available.
+Allow special overrides:
+- Closed
+- Sold Out
+- Private Event
+- Catering Event
+- Moving Soon
+- Weather Delay
+
+Because they are extremely mobile, allow manual status to matter more than fixed hours if marked special.
+If status is blank or Open, compute from hours.
+
+Map:
+The embedded map must be done right:
+- If lat/lng are provided, use them.
+- Else geocode address if key is available.
+- Else use Google address embed fallback.
+- Never show a broken map.
+- Show pin when possible.
+- Use the same browser/public Google Maps handling from source repo.
+- Current truck location should be visually obvious.
+
+Upcoming schedule board:
+Add a new section:
+Upcoming Schedule
+
+Purpose:
+The client needs the ability to update schedule dates, times, and locations from Google Sheets.
+
+Create a new schedule pipeline:
+- lib/schedule/schema.ts
+- lib/schedule/local-schedule.ts
+- lib/schedule/google-sheet-schedule.ts
+- lib/schedule/get-schedule.ts
+- app/api/schedule/route.ts
+- context/ScheduleCatalogContext.tsx if needed
+
+Environment variables:
+SCHEDULE_CSV_URL
+NEXT_PUBLIC_SCHEDULE_CSV_URL
+
+Schedule CSV columns:
+id,active,date,startTime,endTime,title,locationName,address,city,state,zip,status,statusNote,mapsUrl,lat,lng,description,featured,sortOrder
+
+Optional:
+timezone
+updatedAt
+
+Default timezone:
+America/Chicago
+
+Schedule status examples:
+- Public Stop
+- Private Event
+- Sold Out
+- Weather Delay
+- Canceled
+- Moving Soon
+
+Schedule board UI:
+- beautiful horizontal/vertical schedule cards
+- next upcoming stop highlighted
+- featured stop badge if featured TRUE
+- date/time readable
+- location name + address
+- status chip
+- Open in Google Maps button
+- Apple Maps button
+- “Set this as current truck location” should NOT be public UI, only a future admin idea
+- If no schedule rows exist, show a polished fallback:
+  “Schedule coming soon — follow us on Instagram for daily truck updates.”
+
+Schedule sorting:
+- active TRUE only
+- future events first
+- sorted by date + startTime
+- past events hidden or moved to bottom
+- if date parsing fails, keep row but document warning
+
+Local fallback schedule:
+Create 2–3 demo placeholder schedule rows, but clearly mark them as demo/TBD unless actual dates were provided.
+Better fallback:
+- “Schedule coming soon”
+- “Follow Instagram @Gringos.Cubanos for daily truck updates”
+Avoid inventing real dates/locations.
+
+Message board:
+Create/update a simple owner-editable message board.
+
+Option A:
+Add messageBoard to Locations CSV and display the current row’s message.
+
+Option B:
+Create separate Message Board CSV if cleaner:
+MESSAGE_BOARD_CSV_URL
+NEXT_PUBLIC_MESSAGE_BOARD_CSV_URL
+
+Prefer Option A for simplicity:
+messageBoard column in Locations Sheet.
+
+Display message board near current truck location:
+- headline: Today’s Truck Note
+- body from messageBoard
+- fallback: “Follow us on Instagram for today’s truck updates.”
+- if statusNote exists, show statusNote too
+
+Google Sheets templates:
+Create/update:
+- prompt/google-sheet-menu-template.csv
+- prompt/google-sheet-locations-template.csv
+- prompt/google-sheet-schedule-template.csv
+
+Menu headers:
+id,active,category,section,sortOrder,name,englishName,description,price,includesFries,meatChoiceRequired,featured,imageUrl,imageAlt,availabilityLabel,optionGroupsJson
+
+Locations headers:
+id,active,type,sortOrder,name,label,address,city,state,zip,hours,phone,email,status,statusNote,mapsUrl,embedUrl,lat,lng,lastUpdated,timezone,weeklyHoursJson,messageBoard
+
+Schedule headers:
+id,active,date,startTime,endTime,title,locationName,address,city,state,zip,status,statusNote,mapsUrl,lat,lng,description,featured,sortOrder,timezone,updatedAt
+
+Docs:
+Update README with:
+- how to update menu
+- how to update current truck location
+- how to update message board
+- how to update upcoming schedule
+- how maps work
+- where images are allowed to come from
+- where logo assets live
+- env vars needed
+- actual social links
+
+Owner guide:
+Create:
+prompt/owner-info-needed.md
+
+Include checklist:
+- final prices
+- menu add-ons
+- dessert names/prices
+- bottled water price
+- current weekly schedule
+- who updates truck location
+- social links
+- whether online ordering/payment is live
+- catering/private event rules
+- preferred photos from gallery
+- confirmation of status labels
+
+Social links:
+Use these actual links everywhere social media appears:
+- footer
+- social promo section
+- contact section
+- hero/social chips if present
+- metadata/social structured data if applicable
+- README
+- owner guide / prompt docs
+
+Instagram:
+Label: Instagram
+Handle: @gringos.cubanos
+URL: https://www.instagram.com/gringos.cubanos/
+
+Facebook:
+Label: Facebook
+Handle: Gringos Cubanos
+URL: https://www.facebook.com/p/Gringos-Cubanos-61575376317567/
+
+TikTok:
+Label: TikTok
+Handle: @GingosCubanosKCMO
+URL: https://www.tiktok.com/@gingoscubanoskcmo
+
+Make each social item clickable:
+target="_blank"
+rel="noopener noreferrer"
+
+Do not invent YouTube, Twitter/X, DoorDash, or other social links unless already provided.
+
+Add this centralized object if one does not exist:
+
+export const SOCIAL_LINKS = {
+  instagram: {
+    label: "Instagram",
+    handle: "@gringos.cubanos",
+    href: "https://www.instagram.com/gringos.cubanos/"
+  },
+  facebook: {
+    label: "Facebook",
+    handle: "Gringos Cubanos",
+    href: "https://www.facebook.com/p/Gringos-Cubanos-61575376317567/"
+  },
+  tiktok: {
+    label: "TikTok",
+    handle: "@GingosCubanosKCMO",
+    href: "https://www.tiktok.com/@gingoscubanoskcmo"
+  }
+};
+
+Social promo copy:
+“Follow or tag us on social media and get a free drink.”
+
+SEO:
+Update metadata:
+Title:
+Gringos Cubanos | Authentic Cuban Food Truck in Kansas City
+
+Description:
+Authentic Cuban sandwiches, bowls, empanadas, tostones, and bold Cuban flavors from Gringos Cubanos, rolling through Kansas City and surrounding areas.
+
+JSON-LD:
+FoodTruck / FoodEstablishment / LocalBusiness if schema supports.
+Use:
+- name: Gringos Cubanos
+- phone: 417-310-6172
+- cuisine: Cuban
+- areaServed: Kansas City and surrounding areas
+- social links if known
+
+Social links in metadata/sameAs:
+- https://www.instagram.com/gringos.cubanos/
+- https://www.facebook.com/p/Gringos-Cubanos-61575376317567/
+- https://www.tiktok.com/@gingoscubanoskcmo
+
+Color/theme implementation:
+Update:
+- Tailwind theme tokens if used
+- CSS variables
+- app/globals.css
+- component accent classes
+- menu category colors
+- button colors
+- status chip colors
+- gradients
+
+Make the design feel cohesive with logo colors.
+
+Do not leave:
+- La Hamburguesa purple/pink/cyan category colors if they clash
+- Mexican-specific copy
+- old menu categories
+- old addresses
+- old phone
+- old social handles
+- old metadata
+
+Environment variables:
+Update .env.example to include:
+
+NEXT_PUBLIC_SITE_URL=
+MENU_CSV_URL=
+NEXT_PUBLIC_MENU_CSV_URL=
+LOCATIONS_CSV_URL=
+NEXT_PUBLIC_LOCATIONS_CSV_URL=
+SCHEDULE_CSV_URL=
+NEXT_PUBLIC_SCHEDULE_CSV_URL=
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
+GOOGLE_MAPS_SERVER_KEY=
+NEXT_PUBLIC_CLOVER_PUBLIC_TOKEN_SANDBOX=
+NEXT_PUBLIC_CLOVER_MERCHANT_ID_SANDBOX=
+NEXT_PUBLIC_CLOVER_ENV=
+
+Validation:
+Run:
+npm install
+npm run build
+npm run lint
+
+Fix all errors.
+
+Test mobile:
+- 375px
+- 390px
+- 414px
+
+Check:
+- no horizontal overflow
+- nav overlay works
+- menu cards fit
+- schedule board fits
+- current truck map fits
+- order drawer fits
+- slideshow fits
+- social links open correctly
+
+Git:
+After build/lint pass:
+- git status
+- git add .
+- git commit -m "Build Gringos Cubanos one-page food truck site"
+- set remote to kbmillard/gringoscubanos
+- push only if remote is correct
+
+Final summary:
+Report:
+- whether copied/refactored from /Users/kyle/Desktop/foodtruck
+- files changed
+- logo assets selected
+- gallery assets selected and how priority markings were handled
+- color scheme chosen
+- menu categories/items implemented
+- current truck location system
+- schedule board system
+- message board system
+- Google Sheets templates created
+- actual social links wired everywhere
+- env vars needed
+- maps behavior
+- order behavior
+- build/lint status
+- git status
+- GitHub remote status

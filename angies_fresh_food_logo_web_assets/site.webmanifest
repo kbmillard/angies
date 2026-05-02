@@ -1,0 +1,19 @@
+{
+  "name": "Angie's Fresh Food",
+  "short_name": "Angie's",
+  "icons": [
+    {
+      "src": "/logo-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#ec3d16",
+  "background_color": "#ec3d16",
+  "display": "standalone"
+}
