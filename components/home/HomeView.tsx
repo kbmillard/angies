@@ -10,7 +10,6 @@ import { InteractiveMenu } from "@/components/menu/InteractiveMenu";
 import { LocationsSection } from "@/components/locations/LocationsSection";
 import { EditorialNav } from "@/components/nav/EditorialNav";
 import { OrderDrawer } from "@/components/order/OrderDrawer";
-import { PopularOrders } from "@/components/popular/PopularOrders";
 import { FixedBrandBackdrop } from "@/components/prologue/FixedBrandBackdrop";
 import { Prologue } from "@/components/prologue/Prologue";
 import { ScheduleSection } from "@/components/schedule/ScheduleSection";
@@ -34,7 +33,6 @@ export function HomeView() {
         <ScheduleSection />
         <GallerySection />
         <SocialPromoSection />
-        <PopularOrders />
         <CateringSection />
         <FinalConversion />
         <SiteFooter />

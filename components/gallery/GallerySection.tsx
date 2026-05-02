@@ -1,39 +1,51 @@
 "use client";
 
 import Image from "next/image";
+import { useMemo } from "react";
+import { useMenuCatalog } from "@/context/MenuCatalogContext";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { gallerySrc } from "@/lib/data/gallery-path";
+import {
+  GALLERY_FOOD_SHOTS,
+  galleryDedupeKey,
+  galleryShotSrc,
+} from "@/lib/data/gallery-food-shots";
+
+type GridImage = { key: string; src: string; alt: string };
 
 /**
- * Food-focused gallery — filenames containing `food` from approved `gallery/` only.
+ * Featured + gallery in one section: menu “featured” images first, then remaining
+ * `gallery/` food shots — **deduped by file path** so nothing appears twice.
  */
-const SHOTS = [
-  { file: "food.png", alt: "Mexican plate from Angie’s Food Truck" },
-  { file: "food1.png", alt: "Fresh Mexican food" },
-  { file: "food2.png", alt: "Angie’s window favorites" },
-  { file: "food3.jpg", alt: "Rice and sides" },
-  { file: "food4.png", alt: "Tacos and salsa" },
-  { file: "food5.png", alt: "Loaded plate" },
-  { file: "food6.png", alt: "Mexican specialties" },
-  { file: "food7.jpg", alt: "Tacos" },
-  { file: "food8.jpg", alt: "Street tacos" },
-  { file: "food9.jpg", alt: "Truck favorites" },
-  { file: "food10.jpg", alt: "Birria and sides" },
-  { file: "food11.jpg", alt: "Burrito build" },
-  { file: "food12.jpg", alt: "Daily special" },
-  { file: "food13.png", alt: "Fresh Mexican flavors" },
-  { file: "food14.png", alt: "Colorful plates" },
-  { file: "food15.jpg", alt: "Beans and toppings" },
-  { file: "food16.png", alt: "Angie’s spread" },
-  { file: "food17.png", alt: "Mexican food truck plate" },
-  { file: "food18.png", alt: "Fresh-made order" },
-  { file: "food19.png", alt: "Truck menu favorites" },
-  { file: "food20.png", alt: "Hearty Mexican plate" },
-  { file: "food21.png", alt: "From the window" },
-  { file: "food24.jpg", alt: "Angie’s Food Truck plate" },
-] as const;
-
 export function GallerySection() {
+  const { data, loading } = useMenuCatalog();
+
+  const images = useMemo((): GridImage[] => {
+    const seen = new Set<string>();
+    const out: GridImage[] = [];
+
+    const push = (src: string | undefined, alt: string, key: string) => {
+      if (!src?.trim()) return;
+      const k = galleryDedupeKey(src);
+      if (!k || seen.has(k)) return;
+      seen.add(k);
+      out.push({ key, src: src.trim(), alt });
+    };
+
+    if (data) {
+      const tiles =
+        data.featuredItems.length > 0 ? data.featuredItems : data.items.slice(0, 6);
+      for (const item of tiles) {
+        push(item.imageUrl, item.imageAlt ?? `${item.name} — Angie’s Food Truck`, `m-${item.id}`);
+      }
+    }
+
+    for (const s of GALLERY_FOOD_SHOTS) {
+      push(galleryShotSrc(s.file), s.alt, `g-${s.file}`);
+    }
+
+    return out;
+  }, [data]);
+
   return (
     <section
       id="gallery"
@@ -41,29 +53,42 @@ export function GallerySection() {
     >
       <div className="mx-auto max-w-[1400px] px-5 sm:px-8">
         <SectionHeading
-          kicker="Gallery"
-          title="Fresh Mexican flavor from the window."
+          title="Featured picks from the street."
           align="center"
-          subtitle="Real plates from Angie’s Food Truck — tacos, birria, burritos, and aguas frescas around Kansas City."
+          className="max-w-none"
         />
-        <div className="mt-14 columns-1 gap-4 sm:columns-2 lg:columns-3">
-          {SHOTS.map((s, i) => (
-            <div
-              key={s.file}
-              className={`relative mb-4 break-inside-avoid overflow-hidden rounded-3xl border border-white/10 ${
-                i % 3 === 0 ? "aspect-[3/4]" : "aspect-square"
-              }`}
-            >
-              <Image
-                src={gallerySrc(s.file)}
-                alt={s.alt}
-                fill
-                className="object-cover"
-                sizes="400px"
+
+        {loading && !data ? (
+          <div className="mt-14 columns-1 gap-4 sm:columns-2 lg:columns-3">
+            {Array.from({ length: 9 }).map((_, i) => (
+              <div
+                key={i}
+                className={`relative mb-4 break-inside-avoid aspect-square animate-pulse rounded-3xl bg-white/10 ${
+                  i % 3 === 0 ? "sm:aspect-[3/4]" : ""
+                }`}
               />
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-14 columns-1 gap-4 sm:columns-2 lg:columns-3">
+            {images.map((img, i) => (
+              <div
+                key={img.key}
+                className={`relative mb-4 break-inside-avoid overflow-hidden rounded-3xl border border-white/10 ${
+                  i % 3 === 0 ? "aspect-[3/4]" : "aspect-square"
+                }`}
+              >
+                <Image
+                  src={img.src}
+                  alt={img.alt}
+                  fill
+                  className="object-cover"
+                  sizes="400px"
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
