@@ -2,6 +2,8 @@ export type MenuOptionGroup = {
   id: string;
   label: string;
   required: boolean;
+  /** When true, customer may pick multiple options in this group (optional groups only in practice). */
+  multiple?: boolean;
   options: string[];
 };
 

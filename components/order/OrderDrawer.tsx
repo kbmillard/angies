@@ -180,12 +180,14 @@ export function OrderDrawer() {
                             ? Object.entries(line.selectedOptions).map(([gid, val]) => {
                                 const menuItem = itemsById.get(line.menuItemId);
                                 const group = menuItem?.optionGroups?.find((g) => g.id === gid);
-                                const label = group
-                                  ? formatOptionLine(group, val)
-                                  : `${gid}: ${val}`;
+                                const v = val as string | string[];
+                                const labelText = group
+                                  ? formatOptionLine(group, v)
+                                  : `${gid}: ${Array.isArray(v) ? v.join(", ") : v}`;
+                                if (!labelText) return null;
                                 return (
                                   <p key={gid} className="mt-1 text-xs text-cream/70">
-                                    {label}
+                                    {labelText}
                                   </p>
                                 );
                               })

@@ -1,0 +1,50 @@
+Tacos...$3.50
+Lengua tacos $4.00
+Barbacoa tacos $3.75
+Tacobirrias $14.00
+Taco de canasta $9.00
+
+Burrito.$11.00
+Lengua burrito $12.00
+Barbacoa burrito $11.75
+California burrito $12.00
+Breakfast burrito $11.00
+
+Quesadilla $11.00
+Lengua Quesadilla $12.00
+Barbacoa quesadilla $11.75
+Quesabirria $14.00
+
+Chilaquiles $11.00 + meat $14.00
+
+Cemita ...$13.00
+Lengua cemita $14.00
+Barbacoa cemita $13.75
+
+Tostada $4.50
+Barbacoa tostada $5.00
+Lengua tostada $5.50
+
+
+Meat
+- asada (steak)
+- pastor (pork)
+- chicken
+- chorizo with potatoes
+- barbacoa (beef) + $0.50
+- lengua (tongue) beef + $1.00
+- Milanesa de pollo (chicken breast fried)
+
+Side
+Rice $3.00
+Beans $3.00
+Guacamole with chips 4oz $6.50
+Chips with salsa 4oz $4.00
+
+Topping
+Sour cream $1.00
+Lettuce $0.50
+Pico de gallo $1.00
+Guacamole $2.00
+Red salsa (hot)
+Green salsa

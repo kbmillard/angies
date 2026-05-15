@@ -11,7 +11,11 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { cn } from "@/lib/utils/cn";
 import { MeatChoiceModal } from "@/components/menu/MeatChoiceModal";
 import { MenuOptionGroupsModal } from "@/components/menu/MenuOptionGroupsModal";
-import { itemRequiresOptionSelections } from "@/lib/menu/option-groups";
+import {
+  itemOpensOptionsModal,
+  sanitizeOptionSelections,
+  type OptionSelections,
+} from "@/lib/menu/option-groups";
 import {
   categoryActiveRing,
   categoryHeroGradient,
@@ -76,11 +80,11 @@ export function InteractiveMenu() {
   }, [active, data]);
 
   const handleAdd = (item: MenuItem) => {
-    if (item.meatChoiceRequired) {
+    if (item.meatChoiceRequired && !item.optionGroups?.length) {
       setMeatItem(item);
       return;
     }
-    if (itemRequiresOptionSelections(item)) {
+    if (itemOpensOptionsModal(item)) {
       setOptionsItem(item);
       return;
     }
@@ -95,9 +99,10 @@ export function InteractiveMenu() {
     setMeatItem(null);
   };
 
-  const onOptionsChosen = (selections: Record<string, string>) => {
+  const onOptionsChosen = (selections: OptionSelections) => {
     if (!optionsItem) return;
-    addItem(optionsItem.id, { quantity: 1, selectedOptions: selections });
+    const cleaned = sanitizeOptionSelections(selections);
+    addItem(optionsItem.id, { quantity: 1, selectedOptions: cleaned });
     openOrderPanel();
     setOptionsItem(null);
   };
@@ -249,14 +254,24 @@ export function InteractiveMenu() {
                                     With fries
                                   </span>
                                 ) : null}
-                                {item.meatChoiceRequired ? (
+                                {item.meatChoiceRequired && !item.optionGroups?.length ? (
                                   <span className="mt-1 inline-block rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-editorial text-cream/75">
                                     Choice of meat
                                   </span>
                                 ) : null}
-                                {item.optionGroups?.some((g) => g.required) ? (
+                                {item.optionGroups?.some(
+                                  (g) => g.required && /meat/i.test(g.label),
+                                ) ? (
+                                  <span className="mt-1 inline-block rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-editorial text-cream/75">
+                                    Choose meat
+                                  </span>
+                                ) : item.optionGroups?.some((g) => g.required) ? (
                                   <span className="mt-1 inline-block rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-editorial text-cream/75">
                                     Choose options
+                                  </span>
+                                ) : item.optionGroups?.length ? (
+                                  <span className="mt-1 inline-block rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-editorial text-cream/75">
+                                    Customize
                                   </span>
                                 ) : null}
                                 {item.description ? (

@@ -13,6 +13,8 @@ const IMAGE_HOSTS = [
   "lh5.googleusercontent.com",
   "lh6.googleusercontent.com",
   "storage.googleapis.com",
+  /** Vercel Blob — menu/admin uploaded images */
+  "*.public.blob.vercel-storage.com",
 ] as const;
 
 const nextConfig: NextConfig = {

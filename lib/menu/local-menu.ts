@@ -1,13 +1,11 @@
 /** Local menu catalog — Angie’s Food Truck (fallback until Google Sheet is wired). */
 import { gallerySrc } from "@/lib/data/gallery-path";
 import type { MenuItem } from "./schema";
-
-const BURRITO_MEAT_OPTIONS = {
-  id: "meat",
-  label: "Meat",
-  required: true,
-  options: ["Asada", "Pastor", "Chicken", "Birria", "Other / Confirm"],
-};
+import {
+  ANGIES_ADD_EXTRA_SUB,
+  ANGIES_BURRITO_MEAT,
+  ANGIES_STREET_TACO_MEAT,
+} from "@/lib/menu/angies-modifier-groups";
 
 export const localMenuItems: MenuItem[] = [
   {
@@ -23,6 +21,7 @@ export const localMenuItems: MenuItem[] = [
     featured: true,
     imageUrl: gallerySrc("food7.jpg"),
     imageAlt: "Fish tacos from Angie’s Food Truck",
+    optionGroups: [...ANGIES_ADD_EXTRA_SUB],
   },
   {
     id: "tacos-street",
@@ -37,6 +36,7 @@ export const localMenuItems: MenuItem[] = [
     featured: true,
     imageUrl: gallerySrc("food8.jpg"),
     imageAlt: "Street tacos",
+    optionGroups: [ANGIES_STREET_TACO_MEAT, ...ANGIES_ADD_EXTRA_SUB],
   },
   {
     id: "birria-main",
@@ -52,6 +52,7 @@ export const localMenuItems: MenuItem[] = [
     featured: true,
     imageUrl: gallerySrc("food10.jpg"),
     imageAlt: "Birria",
+    optionGroups: [...ANGIES_ADD_EXTRA_SUB],
   },
   {
     id: "burrito-main",
@@ -67,7 +68,7 @@ export const localMenuItems: MenuItem[] = [
     featured: true,
     imageUrl: gallerySrc("food11.jpg"),
     imageAlt: "Burrito",
-    optionGroups: [{ ...BURRITO_MEAT_OPTIONS }],
+    optionGroups: [ANGIES_BURRITO_MEAT, ...ANGIES_ADD_EXTRA_SUB],
   },
   {
     id: "agua-horchata",
@@ -124,6 +125,7 @@ export const localMenuItems: MenuItem[] = [
     featured: true,
     imageUrl: gallerySrc("food12.jpg"),
     imageAlt: "Daily special",
+    optionGroups: [...ANGIES_ADD_EXTRA_SUB],
   },
   {
     id: "side-rice",
@@ -166,5 +168,6 @@ export const localMenuItems: MenuItem[] = [
     featured: true,
     imageUrl: gallerySrc("food16.png"),
     imageAlt: "Catering spread",
+    optionGroups: [...ANGIES_ADD_EXTRA_SUB],
   },
 ];

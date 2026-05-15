@@ -1,55 +1,68 @@
 "use client";
 
-import Image from "next/image";
-import { useMemo } from "react";
-import { useMenuCatalog } from "@/context/MenuCatalogContext";
+import { useEffect, useMemo, useState } from "react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import {
   GALLERY_FOOD_SHOTS,
-  galleryDedupeKey,
   galleryShotSrc,
 } from "@/lib/data/gallery-food-shots";
 
 type GridImage = { key: string; src: string; alt: string };
 
 /**
- * Featured + gallery in one section: menu “featured” images first, then remaining
- * `gallery/` food shots — **deduped by file path** so nothing appears twice.
+ * Probes with `Image()` before painting a tile — no empty rounded box or broken-image
+ * black cell over the fixed backdrop. Gallery is **only** `GALLERY_FOOD_SHOTS` (no menu/Sheet URLs).
  */
-export function GallerySection() {
-  const { data, loading } = useMenuCatalog();
+function LocalGalleryTile({ img }: { img: GridImage }) {
+  const [state, setState] = useState<"probe" | "ok" | "dead">("probe");
 
-  const images = useMemo((): GridImage[] => {
-    const seen = new Set<string>();
-    const out: GridImage[] = [];
-
-    const push = (src: string | undefined, alt: string, key: string) => {
-      if (!src?.trim()) return;
-      const k = galleryDedupeKey(src);
-      if (!k || seen.has(k)) return;
-      seen.add(k);
-      out.push({ key, src: src.trim(), alt });
+  useEffect(() => {
+    let cancelled = false;
+    const i = new Image();
+    i.onload = () => {
+      if (!cancelled) setState("ok");
     };
+    i.onerror = () => {
+      if (!cancelled) setState("dead");
+    };
+    i.src = img.src;
+    return () => {
+      cancelled = true;
+      i.onload = null;
+      i.onerror = null;
+    };
+  }, [img.src]);
 
-    if (data) {
-      const tiles =
-        data.featuredItems.length > 0 ? data.featuredItems : data.items.slice(0, 6);
-      for (const item of tiles) {
-        push(item.imageUrl, item.imageAlt ?? `${item.name} — Angie’s Food Truck`, `m-${item.id}`);
-      }
-    }
+  if (state === "dead") return null;
+  if (state !== "ok") return null;
 
-    for (const s of GALLERY_FOOD_SHOTS) {
-      push(galleryShotSrc(s.file), s.alt, `g-${s.file}`);
-    }
+  return (
+    <div className="relative mb-4 break-inside-avoid aspect-square overflow-hidden rounded-3xl ring-1 ring-inset ring-white/15">
+      {/* eslint-disable-next-line @next/next/no-img-element -- native img after successful probe */}
+      <img
+        src={img.src}
+        alt={img.alt}
+        loading="lazy"
+        decoding="async"
+        className="absolute inset-0 h-full w-full scale-[1.02] object-cover object-center"
+      />
+    </div>
+  );
+}
 
-    return out;
-  }, [data]);
+export function GallerySection() {
+  const images = useMemo((): GridImage[] => {
+    return GALLERY_FOOD_SHOTS.map((s) => ({
+      key: `g-${s.file}`,
+      src: galleryShotSrc(s.file),
+      alt: s.alt,
+    }));
+  }, []);
 
   return (
     <section
       id="gallery"
-      className="relative z-10 scroll-mt-[calc(var(--nav-h)+16px)] bg-charcoal py-24"
+      className="relative z-10 scroll-mt-[calc(var(--nav-h)+16px)] bg-charcoal/45 py-24 backdrop-blur-sm"
     >
       <div className="mx-auto max-w-[1400px] px-5 sm:px-8">
         <SectionHeading
@@ -58,33 +71,11 @@ export function GallerySection() {
           className="max-w-none"
         />
 
-        {loading && !data ? (
-          <div className="mt-14 columns-1 gap-4 sm:columns-2 lg:columns-3">
-            {Array.from({ length: 9 }).map((_, i) => (
-              <div
-                key={i}
-                className="relative mb-4 break-inside-avoid aspect-square animate-pulse rounded-3xl bg-white/10"
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="mt-14 columns-1 gap-4 sm:columns-2 lg:columns-3">
-            {images.map((img) => (
-              <div
-                key={img.key}
-                className="relative mb-4 break-inside-avoid aspect-square overflow-hidden rounded-3xl border border-white/10"
-              >
-                <Image
-                  src={img.src}
-                  alt={img.alt}
-                  fill
-                  className="object-cover"
-                  sizes="400px"
-                />
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="mt-14 columns-1 gap-4 sm:columns-2 lg:columns-3">
+          {images.map((img) => (
+            <LocalGalleryTile key={img.key} img={img} />
+          ))}
+        </div>
       </div>
     </section>
   );

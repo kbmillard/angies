@@ -115,7 +115,7 @@ Messenger:
 Angie’s food truck
 
 Public review snippets:
-- “You will experience close to Mexico flavor will not living Kansas city”
+- “You will experience bold Tex-Mex flavor without leaving Kansas City” (paraphrase for social proof; confirm exact wording with owner)
 - “We had the opportunity to have Angie’s Food Truck present for one of our events. Over 100 guests raved about the food an...”
 
 Use these only as short social proof if tasteful.
@@ -282,13 +282,13 @@ Hero:
 Use truck images from gallery filenames containing "truck".
 
 Headline ideas:
-“Close-to-Mexico flavor, rolling through Kansas City.”
+“Bold Tex-Mex flavor, served fresh across Kansas City.”
 
 or:
 “Angie’s Food Truck — Mexican flavor made fresh in KC.”
 
 Subcopy:
-“Find Angie’s Food Truck near Linwood, follow today’s location, and order Mexican favorites from the truck.”
+“Find Angie’s Food Truck near Linwood and all around Kansas City. Follow today’s location and order fresh Tex-Mex favorites from the truck.”
 
 Hero CTAs:
 - Find the Truck

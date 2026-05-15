@@ -9,6 +9,11 @@ Next.js App Router site modeled on the **Gringos Cubanos** food-truck codebase: 
 
 ## Updating content
 
+### Admin — hosted menu photo URLs
+
+- On production: **`https://angieskc.com/admin`** redirects to **`/admin/photos`** (same for any domain pointed at this Vercel project).
+- Set **`ADMIN_PHOTOS_PASSWORD`** (required). For production uploads, add **`BLOB_READ_WRITE_TOKEN`** (Vercel Blob) and **`DATABASE_URL`** (Postgres) for durable storage; see `.env.example`.
+
 ### Menu
 
 1. Edit the published CSV (Google Sheets → Publish to web → CSV) or use `prompt/google-sheet-menu-template.csv` as a template.
@@ -36,7 +41,7 @@ Next.js App Router site modeled on the **Gringos Cubanos** food-truck codebase: 
 | --- | --- |
 | **`NEXT_PUBLIC_GOOGLE_MAPS_API_KEY`** | Maps JavaScript API in the browser (embed + geocoder). Enough for embedded map + pin behavior. Restrict by HTTP referrer in Google Cloud. |
 | **`GOOGLE_MAPS_SERVER_KEY`** | Optional server-side geocoding (`lib/locations/google-geocode.ts`) — not required for the default iframe + client geocode path. |
-| **`NEXT_PUBLIC_SITE_URL`** | Canonical URL for metadata + JSON-LD (e.g. `https://your-domain.vercel.app`). |
+| **`NEXT_PUBLIC_SITE_URL`** | Canonical URL for metadata + JSON-LD (production: `https://angieskc.com`). |
 
 Without a browser key, the location board still shows a **working** classic Google Maps iframe when an address exists (`lib/locations/helpers.ts`, `GoogleMapClientResolved`).
 

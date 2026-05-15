@@ -24,7 +24,7 @@ const STORY_SLIDES: StorySlide[] = [
   {
     src: gallerySrc("truck3.jpg"),
     alt: "Angie’s Food Truck serving guests",
-    kicker: "Close-to-Mexico flavor",
+    kicker: "Bold Tex-Mex from the window",
     line: "Tacos, birria, burritos, and aguas frescas — made to order from the window.",
   },
   {
@@ -83,7 +83,7 @@ export function StorySection() {
           />
           <blockquote className="mt-6 border-l-2 border-gold/55 pl-5">
             <p className="text-sm italic leading-relaxed text-cream/85">
-              &ldquo;You will experience close to Mexico flavor without living Kansas City.&rdquo;
+              &ldquo;You will experience bold Tex-Mex flavor without leaving Kansas City.&rdquo;
             </p>
             <p className="mt-3 text-sm italic leading-relaxed text-cream/85">
               &ldquo;We had the opportunity to have Angie&apos;s Food Truck present for one of our

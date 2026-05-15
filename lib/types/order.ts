@@ -25,8 +25,8 @@ export type CartLine = {
   notes?: string;
   modifiers?: CartModifier[];
   selectedMeat?: string;
-  /** Values keyed by option group id (e.g. format → Gordita Maíz) */
-  selectedOptions?: Record<string, string>;
+  /** Values keyed by option group id — string (single-select) or string[] (multi-select). */
+  selectedOptions?: Record<string, string | string[]>;
   includesFries?: boolean;
 };
 

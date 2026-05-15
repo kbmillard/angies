@@ -35,11 +35,14 @@ function parseOptionGroupsJson(raw: string): MenuOptionGroup[] | undefined {
       const id = typeof o.id === "string" ? o.id.trim() : "";
       const label = typeof o.label === "string" ? o.label.trim() : "";
       const required = Boolean(o.required);
+      const multiple = Boolean(o.multiple);
       const options = Array.isArray(o.options)
         ? o.options.filter((x): x is string => typeof x === "string" && x.trim().length > 0)
         : [];
       if (!id || !label || options.length === 0) continue;
-      out.push({ id, label, required, options });
+      const row: MenuOptionGroup = { id, label, required, options };
+      if (multiple) row.multiple = true;
+      out.push(row);
     }
     return out.length ? out : undefined;
   } catch {

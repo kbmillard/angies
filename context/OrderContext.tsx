@@ -11,6 +11,7 @@ import { priceDollarsToCents } from "@/lib/menu/schema";
 import {
   itemRequiresOptionSelections,
   optionSelectionsComplete,
+  type OptionSelections,
   selectionsKey,
 } from "@/lib/menu/option-groups";
 import { useMenuCatalog } from "@/context/MenuCatalogContext";
@@ -34,7 +35,7 @@ function newLineId() {
 type AddItemOptions = {
   quantity?: number;
   selectedMeat?: string;
-  selectedOptions?: Record<string, string>;
+  selectedOptions?: OptionSelections;
 };
 
 type OrderContextValue = {
@@ -140,9 +141,10 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
         rawSel && Object.keys(rawSel).length > 0 ? rawSel : undefined;
 
       if (item.meatChoiceRequired && !selectedMeat?.trim()) return;
+      const selForValidate: OptionSelections = selectedOptions ?? {};
       if (
         itemRequiresOptionSelections(item) &&
-        !optionSelectionsComplete(item, selectedOptions ?? {})
+        !optionSelectionsComplete(item, selForValidate)
       ) {
         return;
       }

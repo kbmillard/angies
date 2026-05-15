@@ -62,7 +62,7 @@ export function CateringSection() {
             className="space-y-4 text-sm leading-relaxed text-cream/80"
           >
             <p>
-              When you book Angie&apos;s, you are booking close-to-Mexico flavor on wheels — tacos,
+              When you book Angie&apos;s, you are booking bold Tex-Mex on wheels — tacos,
               birria, burritos, fresh waters, and hospitality tuned for Kansas City crowds.
             </p>
             <p>

@@ -2,6 +2,29 @@ import { localMenuItems } from "./local-menu";
 import { MENU_CATEGORY_ORDER, type MenuCatalogResponse, type MenuItem } from "./schema";
 import { parseMenuFromCsvText } from "./google-sheet-menu";
 
+function localCatalogKey(i: MenuItem): string {
+  return `${i.category.trim().toLowerCase()}|${i.name.trim().toLowerCase()}`;
+}
+
+/** When the Sheet row has no `optionGroupsJson`, copy groups from local fallback (same `id`, or same category+name). */
+function mergeOptionGroupsFromLocalDefaults(items: MenuItem[]): MenuItem[] {
+  const localById = new Map(localMenuItems.map((i) => [i.id, i]));
+  const localByCatName = new Map(localMenuItems.map((i) => [localCatalogKey(i), i]));
+  return items.map((item) => {
+    if (item.optionGroups?.length) return item;
+    const base =
+      localById.get(item.id) ?? localByCatName.get(localCatalogKey(item));
+    if (!base?.optionGroups?.length) return item;
+    return {
+      ...item,
+      optionGroups: base.optionGroups.map((g) => ({
+        ...g,
+        options: [...g.options],
+      })),
+    };
+  });
+}
+
 function categoryRank(label: string): number {
   const i = MENU_CATEGORY_ORDER.findIndex(
     (c) => c.toLowerCase() === label.toLowerCase(),
@@ -67,7 +90,8 @@ export async function getMenuCatalog(): Promise<MenuCatalogResponse> {
       const text = await res.text();
       const parsed = parseMenuFromCsvText(text);
       if (parsed.length === 0) throw new Error("Parsed zero menu rows");
-      return buildCatalog(parsed, "google-sheet", updatedAt);
+      const merged = mergeOptionGroupsFromLocalDefaults(parsed);
+      return buildCatalog(merged, "google-sheet", updatedAt);
     } catch (e) {
       if (process.env.NODE_ENV === "development") {
         console.warn("[menu] Google Sheet / CSV failed, using local fallback:", e);

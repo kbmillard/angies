@@ -61,7 +61,7 @@ export function Hero() {
         ))}
       </div>
       <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-charcoal via-charcoal/80 to-navy/40" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[42%] bg-gradient-to-t from-angie-orange/30 to-transparent" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[28%] bg-gradient-to-t from-angie-orange/18 to-transparent sm:h-[30%]" />
 
       <div className="relative z-[2] mx-auto flex w-full max-w-[1400px] flex-col gap-10 px-5 pb-14 pt-20 sm:px-8 sm:pb-16 sm:pt-24 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl [text-shadow:0_2px_28px_rgba(0,0,0,0.55)]">
@@ -69,13 +69,13 @@ export function Hero() {
             Angie&apos;s Food Truck · Mexican food truck · Kansas City
           </p>
           <h1 className="mt-4 font-display text-5xl leading-[0.95] text-cream sm:text-6xl lg:text-7xl">
-            Close-to-Mexico flavor,
+            Bold Tex-Mex flavor,
             <br />
-            rolling through Kansas City.
+            served fresh across Kansas City.
           </h1>
           <p className="mt-6 max-w-xl text-base leading-relaxed text-cream/85 sm:text-lg">
-            Find Angie&apos;s Food Truck near Linwood, follow today&apos;s location, and order
-            Mexican favorites from the truck.
+            Find Angie&apos;s Food Truck near Linwood and all around Kansas City. Follow today&apos;s
+            location and order fresh Tex-Mex favorites from the truck.
           </p>
           <div className="mt-4 flex gap-1.5" aria-hidden>
             {HERO_SLIDES.map((_, idx) => (

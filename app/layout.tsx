@@ -21,7 +21,7 @@ const sans = DM_Sans({
   display: "swap",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://angies-food-truck.vercel.app";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://angieskc.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

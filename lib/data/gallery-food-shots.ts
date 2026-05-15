@@ -2,12 +2,12 @@ import { gallerySrc } from "@/lib/data/gallery-path";
 
 /**
  * Canonical food gallery filenames (`gallery/` → `public/gallery/`).
- * `food-platter-empanadas.png` — owner-supplied hero plate shot.
- * `food17.png` — rice / beans / meat platter (reference “3rd” grid photo).
+ * `food17.png` — rice / beans / meat platter (listed first so it leads the masonry band).
+ * `food-platter-empanadas.png` — owner empanada + tostones platter (JPEG bytes; `.png` path keeps Sheet URLs stable).
  */
 export const GALLERY_FOOD_SHOTS = [
-  { file: "food-platter-empanadas.png", alt: "Empanadas and tostones from Angie’s Food Truck" },
   { file: "food17.png", alt: "Rice, beans, and seasoned meat platter" },
+  { file: "food-platter-empanadas.png", alt: "Empanadas and tostones from Angie’s Food Truck" },
   { file: "food.png", alt: "Mexican plate from Angie’s Food Truck" },
   { file: "food1.png", alt: "Fresh Mexican food" },
   { file: "food2.png", alt: "Angie’s window favorites" },

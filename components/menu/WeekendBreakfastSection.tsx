@@ -7,7 +7,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMenuCatalog } from "@/context/MenuCatalogContext";
 import { useOrder } from "@/context/OrderContext";
 import type { MenuCategoryColor, MenuItem } from "@/lib/menu/schema";
-import { itemRequiresOptionSelections } from "@/lib/menu/option-groups";
+import {
+  itemOpensOptionsModal,
+  sanitizeOptionSelections,
+  type OptionSelections,
+} from "@/lib/menu/option-groups";
 import { MeatChoiceModal } from "@/components/menu/MeatChoiceModal";
 import { MenuOptionGroupsModal } from "@/components/menu/MenuOptionGroupsModal";
 import { cn } from "@/lib/utils/cn";
@@ -122,11 +126,11 @@ export function WeekendBreakfastSection() {
   const showSwipeCue = !swipeCueDismissed && visibleSubsections.length > 1;
 
   const handleAdd = (item: MenuItem) => {
-    if (item.meatChoiceRequired) {
+    if (item.meatChoiceRequired && !item.optionGroups?.length) {
       setMeatItem(item);
       return;
     }
-    if (itemRequiresOptionSelections(item)) {
+    if (itemOpensOptionsModal(item)) {
       setOptionsItem(item);
       return;
     }
@@ -141,9 +145,10 @@ export function WeekendBreakfastSection() {
     setMeatItem(null);
   };
 
-  const onOptionsChosen = (selections: Record<string, string>) => {
+  const onOptionsChosen = (selections: OptionSelections) => {
     if (!optionsItem) return;
-    addItem(optionsItem.id, { quantity: 1, selectedOptions: selections });
+    const cleaned = sanitizeOptionSelections(selections);
+    addItem(optionsItem.id, { quantity: 1, selectedOptions: cleaned });
     openOrderPanel();
     setOptionsItem(null);
   };
@@ -294,12 +299,18 @@ export function WeekendBreakfastSection() {
                                     {englishSub}
                                   </p>
                                 ) : null}
-                                {item.meatChoiceRequired ? (
+                                {item.meatChoiceRequired && !item.optionGroups?.length ? (
                                   <span className="mt-1 inline-block max-w-full rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-editorial text-cream/75">
                                     Choice of meat
                                   </span>
                                 ) : null}
-                                {item.optionGroups?.some((g) => g.required) ? (
+                                {item.optionGroups?.some(
+                                  (g) => g.required && /meat/i.test(g.label),
+                                ) ? (
+                                  <span className="mt-1 inline-block max-w-full rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-editorial text-cream/75">
+                                    Choose meat
+                                  </span>
+                                ) : item.optionGroups?.some((g) => g.required) ? (
                                   <>
                                     <span className="mt-1 hidden max-w-full rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-editorial text-cream/75 md:inline-block">
                                       Choose options
@@ -308,6 +319,10 @@ export function WeekendBreakfastSection() {
                                       Options
                                     </span>
                                   </>
+                                ) : item.optionGroups?.length ? (
+                                  <span className="mt-1 inline-block max-w-full rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-editorial text-cream/75">
+                                    Customize
+                                  </span>
                                 ) : null}
                                 {item.description ? (
                                   <p className="mt-2 break-words text-xs leading-relaxed text-cream/60">
