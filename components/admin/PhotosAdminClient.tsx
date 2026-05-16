@@ -3,9 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import type { PhotoRecord } from "@/lib/photos/types";
-import type { PhotosAdminStatus } from "@/lib/photos/admin-status";
+import { LocationsCatalogTab } from "@/components/admin/LocationsCatalogTab";
+import { MenuCatalogTab } from "@/components/admin/MenuCatalogTab";
+import { ScheduleCatalogTab } from "@/components/admin/ScheduleCatalogTab";
 import { MENU_CATEGORY_ORDER } from "@/lib/menu/schema";
+import type { PhotosAdminStatus } from "@/lib/photos/admin-status";
+import type { PhotoRecord } from "@/lib/photos/types";
 
 function absolutePublicUrl(url: string): string {
   if (typeof window === "undefined") return url;
@@ -14,13 +17,22 @@ function absolutePublicUrl(url: string): string {
   return `${window.location.origin}${path}`;
 }
 
+type AdminTab = "photos" | "menu" | "locations" | "schedule";
+
+function normalizeTab(t: string | undefined): AdminTab {
+  if (t === "menu" || t === "locations" || t === "schedule" || t === "photos") return t;
+  return "photos";
+}
+
 type Props = {
   initialAuthed: boolean;
   status: PhotosAdminStatus;
+  initialTab?: string;
 };
 
-export function PhotosAdminClient({ initialAuthed, status }: Props) {
+export function PhotosAdminClient({ initialAuthed, status, initialTab }: Props) {
   const router = useRouter();
+  const [tab, setTab] = useState<AdminTab>(() => normalizeTab(initialTab));
   const [authed, setAuthed] = useState(initialAuthed);
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState<string | null>(null);
@@ -33,6 +45,15 @@ export function PhotosAdminClient({ initialAuthed, status }: Props) {
   const [file, setFile] = useState<File | null>(null);
   const [uploadAlt, setUploadAlt] = useState("");
   const [uploadCategory, setUploadCategory] = useState("");
+
+  useEffect(() => {
+    setTab(normalizeTab(initialTab));
+  }, [initialTab]);
+
+  const goTab = (t: AdminTab) => {
+    setTab(t);
+    router.replace(`/admin?tab=${t}`, { scroll: false });
+  };
 
   useEffect(() => {
     setAuthed(initialAuthed);
@@ -177,7 +198,7 @@ export function PhotosAdminClient({ initialAuthed, status }: Props) {
       <main className="mx-auto max-w-sm px-5 py-16">
         <p className="text-xs uppercase tracking-editorial text-cream/50">angieskc.com</p>
         <h1 className="mt-1 font-display text-2xl text-cream">Admin sign-in</h1>
-        <p className="mt-2 text-sm text-cream/65">Photo library (not indexed for search).</p>
+        <p className="mt-2 text-sm text-cream/65">Sign in to manage photos and catalog (not indexed).</p>
         <form onSubmit={handleLogin} className="mt-8 space-y-4">
           <label className="block text-sm font-medium text-cream/90">
             Password
@@ -212,14 +233,15 @@ export function PhotosAdminClient({ initialAuthed, status }: Props) {
   }
 
   return (
-    <main className="mx-auto max-w-5xl px-5 py-10 sm:px-8">
+    <main className="mx-auto max-w-6xl px-5 py-10 sm:px-8">
       <header className="flex flex-wrap items-end justify-between gap-4 border-b border-white/10 pb-6">
         <div>
           <p className="text-xs uppercase tracking-editorial text-cream/50">angieskc.com · admin</p>
-          <h1 className="mt-1 font-display text-3xl text-cream">Photo library</h1>
+          <h1 className="mt-1 font-display text-3xl text-cream">Site admin</h1>
           <p className="mt-2 max-w-xl text-sm text-cream/65">
-            Upload images for menu URLs. Copy the public link into your Google Sheet{" "}
-            <code className="rounded bg-white/10 px-1 text-xs">imageUrl</code> column.
+            Photos, menu, truck locations, and schedule. Set{" "}
+            <code className="rounded bg-white/10 px-1 text-xs">SITE_DATA_SOURCE=database</code> so
+            visitors load this data from Postgres instead of Google Sheets.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -255,8 +277,53 @@ export function PhotosAdminClient({ initialAuthed, status }: Props) {
               ? "Local public/gallery/uploads (dev only)"
               : "Not configured — set BLOB_READ_WRITE_TOKEN on Vercel to enable uploads in production."}
         </p>
+        <p>
+          <span className="text-cream/90">Live site content source:</span>{" "}
+          {status.siteCatalogFromDatabase
+            ? "database (Postgres)"
+            : "Google Sheet CSV or built-in fallback — not reading admin database yet."}
+        </p>
       </div>
 
+      <nav className="mt-8 flex flex-wrap gap-2 border-b border-white/10 pb-4">
+        {(
+          [
+            ["photos", "Photos"],
+            ["menu", "Menu"],
+            ["locations", "Locations"],
+            ["schedule", "Schedule"],
+          ] as const
+        ).map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => goTab(id)}
+            className={`rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-editorial transition ${
+              tab === id
+                ? "bg-angie-orange text-cream"
+                : "border border-white/15 text-cream/75 hover:bg-white/5"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </nav>
+
+      {!status.siteCatalogFromDatabase ? (
+        <p className="mt-4 rounded-xl border border-white/10 bg-black/20 p-3 text-xs text-cream/65">
+          To replace Google Sheets: add{" "}
+          <code className="rounded bg-white/10 px-1">SITE_DATA_SOURCE=database</code> on Vercel, open
+          the <strong>Menu</strong> tab, and use <strong>Seed from built-in</strong> (empty tables
+          only). Then the public site uses Postgres.
+        </p>
+      ) : null}
+
+      {tab === "menu" ? <MenuCatalogTab /> : null}
+      {tab === "locations" ? <LocationsCatalogTab /> : null}
+      {tab === "schedule" ? <ScheduleCatalogTab /> : null}
+
+      {tab === "photos" ? (
+        <>
       {banner ? (
         <p className="mt-4 rounded-xl border border-angie-orange/40 bg-angie-orange/10 px-4 py-2 text-sm text-cream">
           {banner}
@@ -326,6 +393,8 @@ export function PhotosAdminClient({ initialAuthed, status }: Props) {
           <p className="mt-6 text-sm text-cream/50">No uploads yet.</p>
         ) : null}
       </section>
+        </>
+      ) : null}
     </main>
   );
 }

@@ -1,6 +1,8 @@
 import { parseScheduleFromCsvText } from "./google-sheet-schedule";
 import { localScheduleItems } from "./local-schedule";
 import type { ScheduleItem, ScheduleResponse, ScheduleSource } from "./schema";
+import { siteCatalogFromDatabase } from "@/lib/catalog-db/config";
+import { dbGetScheduleItems } from "@/lib/catalog-db/schedule-db";
 
 function chicagoCalendarDate(d: Date): string {
   return new Intl.DateTimeFormat("en-CA", {
@@ -43,6 +45,20 @@ function buildResponse(
  */
 export async function getScheduleCatalog(): Promise<ScheduleResponse> {
   const updatedAt = new Date().toISOString();
+
+  if (siteCatalogFromDatabase()) {
+    try {
+      const fromDb = await dbGetScheduleItems(false);
+      if (fromDb.length > 0) {
+        return buildResponse(fromDb, "database", updatedAt);
+      }
+    } catch (e) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("[schedule] Database catalog failed, falling back:", e);
+      }
+    }
+  }
+
   const url = process.env.SCHEDULE_CSV_URL ?? process.env.NEXT_PUBLIC_SCHEDULE_CSV_URL;
 
   if (url) {

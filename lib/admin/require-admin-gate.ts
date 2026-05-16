@@ -6,7 +6,7 @@ import {
   verifyAdminSession,
 } from "./session";
 
-export async function requirePhotosAdminSession(): Promise<Response | null> {
+export async function requireAdminGate(): Promise<Response | null> {
   if (!isAdminPasswordConfigured()) {
     return NextResponse.json(
       { ok: false, error: "Admin is not configured (set ADMIN_PHOTOS_PASSWORD)." },

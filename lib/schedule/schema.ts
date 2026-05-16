@@ -1,4 +1,4 @@
-export type ScheduleSource = "google-sheet" | "local-fallback";
+export type ScheduleSource = "google-sheet" | "local-fallback" | "database";
 
 export type ScheduleItem = {
   id: string;

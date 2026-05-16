@@ -47,7 +47,7 @@ export type MenuCategoryColor =
   | "orange"
   | "red";
 
-export type MenuCatalogSource = "google-sheet" | "local-fallback";
+export type MenuCatalogSource = "google-sheet" | "local-fallback" | "database";
 
 export type MenuCatalogResponse = {
   categories: string[];

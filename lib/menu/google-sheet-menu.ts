@@ -22,7 +22,7 @@ function slugId(category: string, name: string) {
   return base.slice(0, 96) || `item-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-function parseOptionGroupsJson(raw: string): MenuOptionGroup[] | undefined {
+export function parseOptionGroupsJson(raw: string): MenuOptionGroup[] | undefined {
   const t = raw.trim();
   if (!t) return undefined;
   try {

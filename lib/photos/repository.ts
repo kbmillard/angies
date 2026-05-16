@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import postgres from "postgres";
+import { getSql } from "@/lib/db/sql";
 import type { PhotoRecord, PhotoRepository } from "./types";
 
 const DATA_DIR = path.join(process.cwd(), ".data");
@@ -27,20 +27,10 @@ function mapRow(r: {
   };
 }
 
-let sqlClient: ReturnType<typeof postgres> | null = null;
-let postgresTableReady = false;
+let photosTableReady = false;
 
-function getPostgres() {
-  const url = process.env.DATABASE_URL;
-  if (!url) return null;
-  if (!sqlClient) {
-    sqlClient = postgres(url, { max: 1, idle_timeout: 20, connect_timeout: 10 });
-  }
-  return sqlClient;
-}
-
-async function ensurePostgresTable(sql: NonNullable<ReturnType<typeof getPostgres>>) {
-  if (postgresTableReady) return;
+async function ensurePhotosTable(sql: NonNullable<ReturnType<typeof getSql>>) {
+  if (photosTableReady) return;
   await sql`
     CREATE TABLE IF NOT EXISTS photos (
       id TEXT PRIMARY KEY,
@@ -51,13 +41,13 @@ async function ensurePostgresTable(sql: NonNullable<ReturnType<typeof getPostgre
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
   `;
-  postgresTableReady = true;
+  photosTableReady = true;
 }
 
-function createPostgresRepository(sql: NonNullable<ReturnType<typeof getPostgres>>): PhotoRepository {
+function createPostgresRepository(sql: NonNullable<ReturnType<typeof getSql>>): PhotoRepository {
   return {
     async list() {
-      await ensurePostgresTable(sql);
+      await ensurePhotosTable(sql);
       const rows = await sql<
         {
           id: string;
@@ -71,7 +61,7 @@ function createPostgresRepository(sql: NonNullable<ReturnType<typeof getPostgres
       return rows.map(mapRow);
     },
     async create(input) {
-      await ensurePostgresTable(sql);
+      await ensurePhotosTable(sql);
       const rows = await sql<
         {
           id: string;
@@ -95,7 +85,7 @@ function createPostgresRepository(sql: NonNullable<ReturnType<typeof getPostgres
       return mapRow(rows[0]!);
     },
     async update(id, patch) {
-      await ensurePostgresTable(sql);
+      await ensurePhotosTable(sql);
       const existing = await sql<
         {
           id: string;
@@ -194,12 +184,12 @@ function createFileRepository(): PhotoRepository {
 
 /** Postgres when `DATABASE_URL` is set; otherwise JSON file under `.data/photos.json`. */
 export function getPhotoRepository(): PhotoRepository {
-  const pg = getPostgres();
+  const pg = getSql();
   if (pg) return createPostgresRepository(pg);
   return createFileRepository();
 }
 
 /** `postgres` when `DATABASE_URL` is set; otherwise local `.data/photos.json` (ephemeral on serverless). */
 export function getPhotoMetadataMode(): "postgres" | "local-json" {
-  return getPostgres() ? "postgres" : "local-json";
+  return getSql() ? "postgres" : "local-json";
 }

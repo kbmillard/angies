@@ -3,6 +3,8 @@ import { parseLocationsFromCsvText } from "./google-sheet-locations";
 import { buildMapEmbedSrcForResponse, formatAddressLine } from "./helpers";
 import { localLocationItems } from "./local-locations";
 import type { LocationItem, LocationsResponse, LocationsSource } from "./schema";
+import { siteCatalogFromDatabase } from "@/lib/catalog-db/config";
+import { dbGetLocationItems } from "@/lib/catalog-db/location-db";
 
 function sortLocations(items: LocationItem[]): LocationItem[] {
   return [...items].sort((a, b) => {
@@ -101,6 +103,21 @@ function buildResponse(
  */
 export async function getLocationsCatalog(): Promise<LocationsResponse> {
   const updatedAt = new Date().toISOString();
+
+  if (siteCatalogFromDatabase()) {
+    try {
+      const fromDb = await dbGetLocationItems(false);
+      if (fromDb.length > 0) {
+        const enriched = await enrichLocationItems(fromDb);
+        return buildResponse(enriched, "database", updatedAt);
+      }
+    } catch (e) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("[locations] Database catalog failed, falling back:", e);
+      }
+    }
+  }
+
   const url = process.env.LOCATIONS_CSV_URL ?? process.env.NEXT_PUBLIC_LOCATIONS_CSV_URL;
 
   if (url) {

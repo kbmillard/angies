@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { requirePhotosAdminSession } from "@/lib/admin/require-photos-session";
+import { requireAdminGate } from "@/lib/admin/require-admin-gate";
 import { getPhotoRepository } from "@/lib/photos/repository";
 
 type PatchBody = {
@@ -11,7 +11,7 @@ export async function PATCH(
   req: Request,
   ctx: { params: Promise<{ id: string }> },
 ) {
-  const gate = await requirePhotosAdminSession();
+  const gate = await requireAdminGate();
   if (gate) return gate;
 
   const { id } = await ctx.params;

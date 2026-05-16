@@ -1,6 +1,6 @@
 export type LocationType = "restaurant" | "food_truck";
 
-export type LocationsSource = "google-sheet" | "local-fallback";
+export type LocationsSource = "google-sheet" | "local-fallback" | "database";
 
 export type LocationGeocodeSource = "sheet" | "google-geocode" | "fallback";
 

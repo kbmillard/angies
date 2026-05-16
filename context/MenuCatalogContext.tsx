@@ -33,9 +33,13 @@ export function MenuCatalogProvider({ children }: { children: React.ReactNode })
       .then((json) => {
         if (cancelled) return;
         setData(json);
-        if (process.env.NODE_ENV === "development" && json.source === "local-fallback") {
+        if (
+          process.env.NODE_ENV === "development" &&
+          json.source === "local-fallback" &&
+          !process.env.SITE_DATA_SOURCE?.toLowerCase().includes("database")
+        ) {
           console.warn(
-            "Menu source: local fallback. Set NEXT_PUBLIC_MENU_CSV_URL or MENU_CSV_URL to enable Google Sheets menu updates.",
+            "Menu source: local fallback. Set NEXT_PUBLIC_MENU_CSV_URL or MENU_CSV_URL for Sheets, or SITE_DATA_SOURCE=database for Postgres.",
           );
         }
       })

@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
-import { requirePhotosAdminSession } from "@/lib/admin/require-photos-session";
+import { requireAdminGate } from "@/lib/admin/require-admin-gate";
 import { getPhotoRepository } from "@/lib/photos/repository";
 import {
   putPublicImage,
@@ -8,7 +8,7 @@ import {
 } from "@/lib/photos/storage";
 
 export async function GET() {
-  const gate = await requirePhotosAdminSession();
+  const gate = await requireAdminGate();
   if (gate) return gate;
   try {
     const repo = getPhotoRepository();
@@ -24,7 +24,7 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const gate = await requirePhotosAdminSession();
+  const gate = await requireAdminGate();
   if (gate) return gate;
 
   let form: FormData;

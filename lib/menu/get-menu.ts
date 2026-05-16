@@ -1,6 +1,8 @@
 import { localMenuItems } from "./local-menu";
 import { MENU_CATEGORY_ORDER, type MenuCatalogResponse, type MenuItem } from "./schema";
 import { parseMenuFromCsvText } from "./google-sheet-menu";
+import { siteCatalogFromDatabase } from "@/lib/catalog-db/config";
+import { dbGetMenuItems } from "@/lib/catalog-db/menu-db";
 
 function localCatalogKey(i: MenuItem): string {
   return `${i.category.trim().toLowerCase()}|${i.name.trim().toLowerCase()}`;
@@ -81,6 +83,21 @@ function buildCatalog(
  */
 export async function getMenuCatalog(): Promise<MenuCatalogResponse> {
   const updatedAt = new Date().toISOString();
+
+  if (siteCatalogFromDatabase()) {
+    try {
+      const fromDb = await dbGetMenuItems(false);
+      if (fromDb.length > 0) {
+        const merged = mergeOptionGroupsFromLocalDefaults(fromDb);
+        return buildCatalog(merged, "database", updatedAt);
+      }
+    } catch (e) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("[menu] Database catalog failed, falling back:", e);
+      }
+    }
+  }
+
   const url = process.env.MENU_CSV_URL ?? process.env.NEXT_PUBLIC_MENU_CSV_URL;
 
   if (url) {
