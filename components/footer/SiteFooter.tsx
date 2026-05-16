@@ -13,13 +13,13 @@ export function SiteFooter() {
   return (
     <footer
       id="contact"
-      className="relative z-10 scroll-mt-[calc(var(--nav-h)+16px)] border-t border-white/10 bg-charcoal/70 py-16 backdrop-blur-md"
+      className="relative z-10 scroll-mt-[calc(var(--nav-h)+16px)] border-t border-white/10 bg-charcoal/70 py-6 backdrop-blur-md sm:py-8"
     >
-      <div className="mx-auto flex max-w-[1200px] flex-col gap-10 px-5 sm:flex-row sm:justify-between sm:px-8">
-        <div>
-          <BrandLogo width={72} height={72} />
+      <div className="mx-auto flex max-w-[1200px] flex-col gap-6 px-5 sm:flex-row sm:items-start sm:justify-between sm:gap-8 sm:px-8">
+        <div className="shrink-0">
+          <BrandLogo width={56} height={56} />
         </div>
-        <div className="grid gap-8 sm:grid-cols-2">
+        <div className="grid gap-6 sm:grid-cols-2 sm:gap-10">
           <div>
             <p className="text-xs uppercase tracking-editorial text-cream/50">Visit</p>
             {visitTruck.address?.trim() ? (

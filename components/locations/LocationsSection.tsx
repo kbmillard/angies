@@ -11,9 +11,17 @@ import { LocationPublicStatus } from "@/components/locations/LocationPublicStatu
 import {
   formatAddressLine,
   resolvedAppleMapsUrl,
+  resolvedEmbedSrc,
   resolvedMapsUrl,
   telHrefFromDisplay,
 } from "@/lib/locations/helpers";
+import { DEFAULT_MAP_PIN_LAT, DEFAULT_MAP_PIN_LNG } from "@/lib/maps/default-map-pin";
+import { GoogleMapClientResolved } from "@/components/locations/GoogleMapClientResolved";
+import { GoogleMapGreedy } from "@/components/locations/GoogleMapGreedy";
+import { ScheduleListBlock } from "@/components/schedule/ScheduleListBlock";
+
+const MAP_FRAME_CLASS =
+  "h-[min(58vw,420px)] w-full min-h-[260px] bg-charcoal sm:min-h-[300px] lg:min-h-[340px]";
 
 function addressLines(loc: LocationItem): string[] {
   const cityLine = [loc.city, loc.state, loc.zip].filter(Boolean).join(" ").trim();
@@ -25,13 +33,74 @@ function hasPublishedAddress(loc: LocationItem): boolean {
   return formatAddressLine(loc).trim().length > 0;
 }
 
+function parseCoord(n: number | null | undefined): number | null {
+  if (n == null) return null;
+  const v = Number(n);
+  return Number.isFinite(v) ? v : null;
+}
+
+function MapEmbedBlock({ loc }: { loc: LocationItem }) {
+  const line = formatAddressLine(loc);
+  const ownerEmbed = loc.embedUrl?.trim();
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY?.trim();
+  const placeId = loc.placeId?.trim();
+  const lat = parseCoord(loc.lat);
+  const lng = parseCoord(loc.lng);
+  const coordsOk = lat != null && lng != null;
+  const useGreedyJsMap = coordsOk && Boolean(apiKey);
+  const useClientResolve =
+    Boolean(apiKey) &&
+    !coordsOk &&
+    (Boolean(placeId) || Boolean(line.trim())) &&
+    !ownerEmbed?.trim();
+  const src = useGreedyJsMap ? null : resolvedEmbedSrc(loc);
+
+  return (
+    <>
+      {useGreedyJsMap && lat != null && lng != null ? (
+        <div className="w-full overflow-hidden rounded-2xl border border-white/10">
+          <GoogleMapGreedy lat={lat} lng={lng} title={loc.name} className={MAP_FRAME_CLASS} />
+        </div>
+      ) : useClientResolve ? (
+        <div className="w-full overflow-hidden rounded-2xl border border-white/10">
+          <GoogleMapClientResolved loc={loc} title={loc.name} className={MAP_FRAME_CLASS} />
+        </div>
+      ) : src && apiKey ? (
+        <div className="w-full overflow-hidden rounded-2xl border border-white/10">
+          <GoogleMapGreedy
+            lat={DEFAULT_MAP_PIN_LAT}
+            lng={DEFAULT_MAP_PIN_LNG}
+            title={loc.name}
+            className={MAP_FRAME_CLASS}
+          />
+        </div>
+      ) : src ? (
+        <div className="w-full overflow-hidden rounded-2xl border border-white/10">
+          <iframe
+            title={`Map — ${loc.name}`}
+            className={MAP_FRAME_CLASS}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            src={src}
+          />
+        </div>
+      ) : (
+        <div className="w-full rounded-2xl border border-dashed border-white/20 bg-charcoal/60 p-6 text-sm text-cream/75">
+          <p className="font-medium text-cream">Map</p>
+          <p className="mt-2 text-cream/70">TBD</p>
+        </div>
+      )}
+    </>
+  );
+}
+
 function MapButton({ label, href, accent }: { label: string; href: string; accent?: boolean }) {
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className={cn("w-full sm:w-auto", accent ? glassCtaAccent : glassCtaBase)}
+      className={cn("w-full", accent ? glassCtaAccent : glassCtaBase)}
     >
       {label}
     </a>
@@ -51,7 +120,7 @@ export function LocationsSection() {
   return (
     <section
       id="locations"
-      className="relative z-10 scroll-mt-[calc(var(--nav-h)+16px)] bg-charcoal/45 pb-12 pt-12 backdrop-blur-sm sm:pb-14 sm:pt-14"
+      className="relative z-10 scroll-mt-[calc(var(--nav-h)+16px)] bg-charcoal/45 pb-16 pt-12 backdrop-blur-sm sm:pb-20 sm:pt-14"
     >
       <div className="mx-auto max-w-[1200px] px-5 sm:px-8">
         <div id="locations-start" tabIndex={-1} className="outline-none focus:outline-none">
@@ -77,35 +146,56 @@ export function LocationsSection() {
         ) : null}
 
         {loading ? (
-          <div className="mt-8 h-40 animate-pulse rounded-3xl bg-white/10" />
+          <div className="mt-8 h-64 animate-pulse rounded-3xl bg-white/10" />
         ) : primaryTruck ? (
-          <article className="mt-8 overflow-hidden rounded-3xl border border-white/10 bg-charcoal/35 p-5 backdrop-blur-md sm:p-6">
-            <p className="text-xs uppercase tracking-editorial text-gold/90">Current truck location</p>
-            <h3 className="mt-1 font-display text-2xl text-cream sm:text-3xl">{primaryTruck.name}</h3>
-            <LocationPublicStatus location={primaryTruck} variant="card" showNote={false} />
-            <div className="mt-3 flex items-start gap-2 text-sm text-cream/90">
-              <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden />
-              <div>
-                {hasPublishedAddress(primaryTruck) ? (
-                  addressLines(primaryTruck).map((l) => <p key={l}>{l}</p>)
-                ) : (
-                  <p className="text-cream/75">TBD</p>
-                )}
+          <article className="mt-8 overflow-hidden rounded-3xl border border-white/10 bg-charcoal/35 p-5 backdrop-blur-md sm:p-6 lg:p-8">
+            <div className="max-w-xl">
+              <p className="text-xs uppercase tracking-editorial text-gold/90">Current truck location</p>
+              <h3 className="mt-1 font-display text-2xl text-cream sm:text-3xl">{primaryTruck.name}</h3>
+              <LocationPublicStatus location={primaryTruck} variant="card" showNote={false} />
+              <div className="mt-3 flex items-start gap-2 text-sm text-cream/90">
+                <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-gold" aria-hidden />
+                <div>
+                  {hasPublishedAddress(primaryTruck) ? (
+                    addressLines(primaryTruck).map((l) => <p key={l}>{l}</p>)
+                  ) : (
+                    <p className="text-cream/75">TBD</p>
+                  )}
+                </div>
               </div>
             </div>
-            <div
-              id="schedule"
-              tabIndex={-1}
-              className="sr-only scroll-mt-[calc(var(--nav-h)+16px)] outline-none"
-              aria-hidden
-            />
-            <div className="mt-6 grid grid-cols-1 gap-3 border-t border-white/10 pt-6 sm:grid-cols-3 sm:gap-4">
-              <MapButton label="Open in Google Maps" href={resolvedMapsUrl(primaryTruck)} />
-              <MapButton label="Apple Maps" href={resolvedAppleMapsUrl(primaryTruck)} />
-              <a href={phoneTel} className={cn(glassCtaAccent, "w-full gap-2 sm:w-auto")}>
-                <Phone className="h-4 w-4 shrink-0" aria-hidden />
-                Call / text
-              </a>
+
+            <div className="mt-8 grid grid-cols-1 gap-10 lg:grid-cols-2 lg:gap-8">
+              <div className="flex flex-col items-center">
+                <MapEmbedBlock loc={primaryTruck} />
+                <div className="mt-4 grid w-full max-w-md grid-cols-1 gap-3 sm:grid-cols-2">
+                  <MapButton label="Open in Google Maps" href={resolvedMapsUrl(primaryTruck)} />
+                  <MapButton label="Apple Maps" href={resolvedAppleMapsUrl(primaryTruck)} />
+                </div>
+              </div>
+
+              <div
+                id="schedule"
+                tabIndex={-1}
+                className="flex scroll-mt-[calc(var(--nav-h)+16px)] flex-col items-center outline-none focus:outline-none"
+              >
+                <p className="text-xs font-semibold uppercase tracking-editorial text-gold/90">
+                  Upcoming schedule
+                </p>
+                <p className="mt-1 max-w-sm text-center text-sm text-cream/65">
+                  Where we&apos;re rolling next.
+                </p>
+                <div className="mt-4 w-full max-w-md">
+                  <ScheduleListBlock variant="embedded" />
+                </div>
+                <a
+                  href={phoneTel}
+                  className={cn(glassCtaAccent, "mt-4 w-full max-w-md gap-2")}
+                >
+                  <Phone className="h-4 w-4 shrink-0" aria-hidden />
+                  Call / text
+                </a>
+              </div>
             </div>
           </article>
         ) : (
