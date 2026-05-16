@@ -1,0 +1,270 @@
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const root = path.join(__dirname, "..");
+const menu = JSON.parse(
+  fs.readFileSync(path.join(root, "public/menu/menu.json"), "utf8"),
+).menu;
+
+const ordinals = ["01", "02", "03", "04"];
+const price = (n) => `$${Number(n).toFixed(2)}`;
+const esc = (s) =>
+  String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+
+let menuHtml = "";
+menu.categories.forEach((cat, i) => {
+  const num = ordinals[i] ?? String(i + 1).padStart(2, "0");
+  menuHtml += `\n      <motion.div class="menu-category" id="menu-${esc(cat.slug)}">\n`;
+  menuHtml += `        <p class="kicker kicker-gold">${num} / ${esc(cat.name)}</p>\n`;
+  menuHtml += `        <h2 class="section-title">${esc(cat.name)}</h2>\n`;
+  cat.items.forEach((item) => {
+    menuHtml += `        <article class="menu-item">\n`;
+    menuHtml += `          <div class="menu-item-head"><h3>${esc(item.name)}</h3><span class="price">${price(item.basePrice)}</span></div>\n`;
+    if (item.description)
+      menuHtml += `          <p class="item-desc">${esc(item.description)}</p>\n`;
+    menuHtml += `          <div class="menu-actions"><button type="button" class="btn btn-orange btn-sm">Add</button><button type="button" class="btn btn-outline btn-sm">Checkout</button></div>\n`;
+    menuHtml += `        </article>\n`;
+  });
+  menuHtml += `      </div>\n`;
+});
+
+const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Angie's Food Truck | Kansas City Mexican Food Truck</title>
+  <meta name="description" content="Find Angie's Food Truck in Kansas City for Mexican food, tacos, birria, burritos, aguas frescas, catering, and daily truck updates." />
+  <link rel="icon" href="/icons/logo-512x512.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --nav-h:64px; --charcoal:#1a1f2e; --midnight:#0c121f; --cream:#f5f0e8; --gold:#c9a227; --orange:#e85d2c; --green:#6bcf7f; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:"DM Sans",system-ui,sans-serif;background:var(--charcoal);color:var(--cream);line-height:1.6;padding-bottom:2.5rem}
+    h1,h2,h3{font-family:"Playfair Display",Georgia,serif;font-weight:600;line-height:1.1}
+    a{color:inherit}
+    img{max-width:100%;height:auto;display:block}
+    .container{width:100%;max-width:1200px;margin:0 auto;padding:0 1.25rem}
+    .container-wide{max-width:1400px;margin:0 auto;padding:0 1.25rem}
+    .kicker{font-size:.7rem;text-transform:uppercase;letter-spacing:.14em;color:rgba(245,240,232,.65)}
+    .kicker-gold{color:var(--gold)}
+    .section-title{font-size:clamp(2rem,5vw,3rem);margin-top:.35rem}
+    .text-muted{color:rgba(245,240,232,.75)}
+    .glass-section{position:relative;z-index:10;background:rgba(26,31,46,.45);backdrop-filter:blur(6px)}
+    .section-pad{padding:4rem 0;scroll-margin-top:calc(var(--nav-h) + 16px)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;border-radius:9999px;padding:.75rem 1.75rem;font-size:.65rem;font-weight:600;text-transform:uppercase;letter-spacing:.12em;text-decoration:none;border:none;cursor:pointer;transition:opacity .15s}
+    .btn:hover{opacity:.92}
+    .btn-orange{background:var(--orange);color:var(--cream);box-shadow:0 4px 20px rgba(232,93,44,.35)}
+    .btn-cream{background:var(--cream);color:var(--charcoal)}
+    .btn-outline{background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.2);color:var(--cream)}
+    .btn-sm{padding:.45rem .9rem;font-size:.6rem}
+    .backdrop-fixed{position:fixed;top:var(--nav-h);left:0;right:0;bottom:0;z-index:0;background:var(--charcoal) url('/site-logo.webp') center/min(72vmin,520px) no-repeat;opacity:.12;pointer-events:none}
+    header.site-header{position:fixed;top:0;left:0;right:0;z-index:50;height:var(--nav-h);border-bottom:1px solid rgba(255,255,255,.1);background:rgba(12,18,31,.88);backdrop-filter:blur(12px)}
+    .nav-row{height:100%;display:flex;align-items:center;justify-content:space-between;max-width:1600px;margin:0 auto;padding:0 1rem;position:relative}
+    .nav-links{display:none;gap:.85rem;list-style:none;flex-wrap:wrap}
+    @media(min-width:1024px){.nav-links{display:flex}}
+    .nav-links a{font-size:.65rem;text-transform:uppercase;letter-spacing:.12em;color:rgba(245,240,232,.7);text-decoration:none}
+    .nav-links a:hover{color:var(--cream)}
+    .nav-logo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+    .nav-logo img{width:44px;height:44px;border-radius:50%}
+    #hero{position:relative;z-index:10;min-height:min(80svh,860px);padding-top:var(--nav-h);display:flex;align-items:flex-end;background:var(--charcoal)}
+    .hero-bg{position:absolute;inset:0;z-index:0;background:linear-gradient(to top,var(--charcoal) 0%,rgba(26,31,46,.85) 45%,rgba(12,18,31,.5) 100%),url('/gallery/truck.png') center/cover no-repeat}
+    .hero-inner{position:relative;z-index:2;width:100%;max-width:1400px;margin:0 auto;padding:4rem 1.25rem 3.5rem;display:flex;flex-wrap:wrap;gap:2.5rem;justify-content:space-between;align-items:flex-end}
+    .hero h1{font-size:clamp(2.75rem,7vw,4.5rem);text-shadow:0 2px 28px rgba(0,0,0,.55)}
+    .hero-ctas{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;width:100%;max-width:18rem}
+    .hero-ctas .span-2{grid-column:span 2}
+    .prologue-card{max-width:48rem;margin:0 auto;border:1px solid rgba(255,255,255,.1);border-radius:1.5rem;padding:2.5rem;background:rgba(26,31,46,.92);text-align:center}
+    .prologue-card h2{font-size:clamp(1.75rem,4vw,2.25rem)}
+    .prologue-card p{margin-top:1rem;font-size:1rem}
+    blockquote{font-style:italic;margin-top:1.5rem;font-size:1.1rem;max-width:40rem}
+    #menu .menu-category{margin-top:3rem;padding-top:2rem;border-top:1px solid rgba(255,255,255,.08)}
+    #menu .menu-category:first-child{margin-top:1.5rem;border-top:none;padding-top:0}
+    .menu-item{padding:1.25rem 0;border-bottom:1px solid rgba(255,255,255,.08)}
+    .menu-item-head{display:flex;justify-content:space-between;align-items:baseline;gap:1rem}
+    .menu-item-head h3{font-size:1.15rem;font-family:"DM Sans",sans-serif;font-weight:600}
+    .price{font-size:1rem;color:var(--gold);white-space:nowrap}
+    .item-desc{margin-top:.5rem;font-size:.85rem;color:rgba(245,240,232,.6)}
+    .menu-actions{margin-top:.75rem;display:flex;flex-wrap:wrap;gap:.5rem}
+    .location-card{border:1px solid rgba(255,255,255,.1);border-radius:1.5rem;padding:2rem;background:rgba(26,31,46,.35);backdrop-filter:blur(8px);margin-top:1.5rem}
+    .status-open{color:var(--green);font-size:1.5rem;font-family:"Playfair Display",serif}
+    .cta-row{display:grid;grid-template-columns:1fr;gap:1rem;max-width:48rem;margin:2.5rem auto 0}
+    @media(min-width:640px){.cta-row{grid-template-columns:repeat(3,1fr)}}
+    footer{border-top:1px solid rgba(255,255,255,.1);background:rgba(26,31,46,.7);backdrop-filter:blur(10px);padding:4rem 0}
+    .footer-grid{display:grid;gap:2.5rem}
+    @media(min-width:640px){.footer-grid{grid-template-columns:1.2fr 1fr 1fr}}
+    .footer-grid ul{list-style:none;margin-top:.5rem}
+    .footer-grid li{font-size:.9rem;color:rgba(245,240,232,.8);margin-top:.15rem}
+    .footer-links{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1rem;font-size:.85rem}
+    .footer-links a{text-decoration:underline;text-underline-offset:3px}
+    .static-banner{position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--orange);color:var(--cream);font-size:11px;text-align:center;padding:7px}
+    .static-banner a{color:var(--cream);text-decoration:underline}
+  </style>
+</head>
+<body>
+  <div class="backdrop-fixed" aria-hidden="true"></motion.div>
+  <p class="static-banner">Static HTML snapshot — live ordering &amp; maps: <a href="/">angieskc.com</a></p>
+
+  <header class="site-header">
+    <div class="nav-row">
+      <nav aria-label="Primary"><ul class="nav-links">
+        <li><a href="#menu">Menu</a></li>
+        <li><a href="#locations">Location</a></li>
+        <li><a href="#schedule">Schedule</a></li>
+      </ul></nav>
+      <a href="#hero" class="nav-logo" aria-label="Angie's Food Truck home">
+        <img src="/icons/logo-512x512.png" alt="" width="44" height="44" />
+      </a>
+      <nav aria-label="Secondary"><ul class="nav-links">
+        <li><a href="#story">Story</a></li>
+        <li><a href="#catering">Catering</a></li>
+        <li><a href="#contact">Contact</a></li>
+        <li><a href="#menu" class="btn btn-orange" style="padding:.5rem 1rem">Menu</a></li>
+      </ul></nav>
+    </motion.div>
+  </header>
+
+  <main>
+    <section id="hero">
+      <div class="hero-bg" aria-hidden="true"></motion.div>
+      <div class="hero-inner container-wide">
+        <div>
+          <p class="kicker">Angie's Food Truck · Mexican food truck · Kansas City</p>
+          <h1 style="margin-top:1rem">Bold Tex-Mex flavor,<br />served fresh across Kansas City.</h1>
+          <p class="text-muted" style="margin-top:1.5rem;max-width:36rem;font-size:1.05rem">Find Angie's Food Truck near Linwood and all around Kansas City. Follow today's location and order fresh Tex-Mex favorites from the truck.</p>
+        </motion.div>
+        <div class="hero-ctas">
+          <a href="#menu" class="btn btn-orange">Menu</a>
+          <a href="#locations" class="btn btn-outline">Find the truck</a>
+          <a href="#catering" class="btn btn-outline span-2">Book catering / event</a>
+        </motion.div>
+      </motion.div>
+    </section>
+
+    <section id="prologue" class="section-pad glass-section">
+      <div class="container">
+        <div class="prologue-card">
+          <h2>Welcome to Angie's Food Truck.</h2>
+          <p class="text-muted">Fresh Mexican plates from the window — tacos, birria, burritos, aguas frescas, and daily specials. Follow the pin for today's stop, or book us for your next event.</p>
+        </motion.div>
+      </motion.div>
+    </section>
+
+    <section id="story" class="section-pad glass-section">
+      <div class="container">
+        <p class="kicker kicker-gold">Our story</p>
+        <h2 class="section-title">Mexican flavor, rolling through Kansas City.</h2>
+        <blockquote>“You will experience bold Tex-Mex flavor without leaving Kansas City.”</blockquote>
+        <blockquote class="text-muted" style="font-size:1rem">“We had the opportunity to have Angie's Food Truck present for one of our events. Over 100 guests raved about the food…”</blockquote>
+      </motion.div>
+    </section>
+
+    <section id="menu" class="section-pad">
+      <div class="container">
+        <p class="kicker kicker-gold">Menu</p>
+        <h2 class="section-title">Order at the window</h2>
+        <p class="text-muted" style="margin-top:.5rem">Full menu from public/menu/menu.json — buttons are display-only in this static file.</p>
+${menuHtml}
+      </motion.div>
+    </section>
+
+    <section id="locations" class="section-pad glass-section">
+      <div class="container">
+        <p class="kicker kicker-gold">Current truck location</p>
+        <div class="location-card">
+          <h2 class="section-title" style="font-size:2rem">Angie's food truck</h2>
+          <p class="status-open" style="margin-top:.75rem">Open · Service hours vary by day</p>
+          <p style="margin-top:1rem">400 E Linwood Blvd<br />Kansas City, MO 64109</p>
+          <p class="text-muted" style="margin-top:1rem;font-size:.8rem">Live status loads from /api/locations on the Next.js site.</p>
+          <p style="margin-top:1.25rem">
+            <a class="btn btn-outline btn-sm" href="https://www.google.com/maps/search/?api=1&amp;query=Angie%27s%20food%20truck%20400%20E%20Linwood%20Blvd%20Kansas%20City%20MO">Google Maps</a>
+            <a class="btn btn-orange btn-sm" href="tel:+19139548745" style="margin-left:.5rem">Call / Text</a>
+          </p>
+        </motion.div>
+      </motion.div>
+    </section>
+
+    <section id="schedule" class="section-pad">
+      <div class="container">
+        <p class="kicker kicker-gold">Upcoming schedule</p>
+        <h2 class="section-title">Where we're rolling next</h2>
+        <p class="text-muted" style="margin-top:1rem">Follow <a href="https://www.facebook.com/p/Angies-food-truck-100066851974098/">Facebook</a> or <a href="https://www.instagram.com/angiesfoodtruck/">Instagram</a> for same-day updates.</p>
+      </motion.div>
+    </section>
+
+    <section id="social" class="section-pad glass-section">
+      <div class="container">
+        <p class="kicker kicker-gold">Social</p>
+        <h2 class="section-title">Follow the truck — same-day updates.</h2>
+        <p class="text-muted" style="margin-top:1rem">Facebook and Instagram carry the live pin, specials, and catering highlights.</p>
+      </motion.div>
+    </section>
+
+    <section id="catering" class="section-pad glass-section">
+      <div class="container">
+        <p class="kicker kicker-gold">Catering &amp; private events</p>
+        <h2 class="section-title">Bring the truck — bring the party.</h2>
+        <p class="text-muted" style="margin-top:1rem;max-width:36rem">Festivals, office lunches, birthdays, and private parties — Angie's rolls up with a bright truck, Mexican favorites, aguas frescas, and a crew that keeps the line moving.</p>
+      </motion.div>
+    </section>
+
+    <section id="ready" class="section-pad glass-section" style="text-align:center">
+      <div class="container" style="max-width:900px">
+        <p class="kicker">Ready</p>
+        <h2 class="section-title" style="font-size:clamp(2.5rem,6vw,3.5rem)">READY TO EAT?</h2>
+        <div class="cta-row">
+          <a href="#menu" class="btn btn-orange">Menu</a>
+          <a href="#menu" class="btn btn-cream">Checkout</a>
+          <a href="#catering" class="btn btn-outline">Truck &amp; catering request</a>
+        </motion.div>
+      </motion.div>
+    </section>
+  </main>
+
+  <footer id="contact">
+    <div class="container footer-grid">
+      <div>
+        <img src="/icons/logo-512x512.png" alt="Angie's Food Truck" width="72" height="72" style="border-radius:50%" />
+        <p class="text-muted" style="margin-top:1rem;font-size:.9rem">Angie's Food Truck — Mexican food in Kansas City.</p>
+        <div class="footer-links">
+          <a href="tel:+19139548745">(913) 954-8745</a>
+          <a href="mailto:angiesfoodtruck83@gmail.com">angiesfoodtruck83@gmail.com</a>
+          <a href="https://www.instagram.com/angiesfoodtruck/" target="_blank" rel="noopener">@angiesfoodtruck</a>
+          <a href="https://www.facebook.com/p/Angies-food-truck-100066851974098/" target="_blank" rel="noopener">Facebook</a>
+        </motion.div>
+      </motion.div>
+      <div>
+        <p class="kicker">Visit</p>
+        <p style="margin-top:.5rem">400 E Linwood Blvd</p>
+        <p class="text-muted">Linwood location</p>
+        <p class="text-muted">Kansas City, MO 64109</p>
+      </motion.div>
+      <div>
+        <p class="kicker">Hours</p>
+        <ul>
+          <li>Monday &amp; Tuesday</li>
+          <li>10:00 AM to 2:00 PM</li>
+          <li>Wednesday – Friday</li>
+          <li>10:00 AM to 8:00 PM</li>
+          <li>Saturday</li>
+          <li>10:00 AM to 4:00 PM</li>
+        </ul>
+      </motion.div>
+    </motion.div>
+  </footer>
+</body>
+</html>`;
+
+// Fix accidental motion.div typos from editor habits
+const fixed = html.replace(/<\/?motion\.div/g, (m) => m.replace("motion.", ""));
+const outPath = path.join(root, "public/full-page.html");
+fs.writeFileSync(outPath, fixed);
+console.log("Wrote", outPath, "(" + fixed.length + " bytes)");
