@@ -3,7 +3,7 @@
 import { useOrder } from "@/context/OrderContext";
 
 export function FinalConversion() {
-  const { openOrderPanel, focusCatering } = useOrder();
+  const { openOrderPanel, focusCatering, focusMenu } = useOrder();
 
   return (
     <section className="relative z-10 border-t border-white/10 bg-charcoal/50 py-24 backdrop-blur-sm">
@@ -14,13 +14,20 @@ export function FinalConversion() {
           Find the truck for tacos, birria, and burritos — round it out with aguas frescas. Catering
           and private events stay one scroll away.
         </p>
-        <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-4">
+        <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-4">
+          <button
+            type="button"
+            onClick={focusMenu}
+            className="w-full rounded-full bg-angie-orange px-8 py-3 text-xs font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-angie-orange/90 sm:w-auto"
+          >
+            Menu
+          </button>
           <button
             type="button"
             onClick={openOrderPanel}
             className="w-full rounded-full bg-cream px-8 py-3 text-xs font-semibold uppercase tracking-editorial text-charcoal sm:w-auto"
           >
-            Order
+            Checkout
           </button>
           <button
             type="button"
