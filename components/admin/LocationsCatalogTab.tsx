@@ -103,6 +103,56 @@ export function LocationsCatalogTab() {
     }
   }
 
+  async function geocodeFromAddress() {
+    setMsg(null);
+    const line = [
+      draft.address?.trim(),
+      [draft.city?.trim(), draft.state?.trim(), draft.zip?.trim()].filter(Boolean).join(" "),
+    ]
+      .filter(Boolean)
+      .join(", ");
+    if (!line.trim()) {
+      setMsg("Fill address, city, state, and zip first.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const r = await fetch("/api/admin/geocode", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ address: line }),
+      });
+      const d = (await r.json()) as {
+        ok?: boolean;
+        latitude?: number;
+        longitude?: number;
+        addressNormalized?: string;
+        addressComponents?: { city?: string; state?: string; postal_code?: string };
+        source?: string;
+        error?: string;
+      };
+      if (!r.ok || !d.ok) {
+        setMsg(d.error ?? "Geocode failed");
+        return;
+      }
+      setDraft((prev) => ({
+        ...prev,
+        lat: d.latitude ?? prev.lat,
+        lng: d.longitude ?? prev.lng,
+        city: d.addressComponents?.city?.trim() || prev.city,
+        state: d.addressComponents?.state?.trim() || prev.state,
+        zip: d.addressComponents?.postal_code?.trim() || prev.zip,
+        formattedAddress: d.addressNormalized?.trim() || prev.formattedAddress,
+      }));
+      setMsg(
+        `Geocoded (${d.source ?? "ok"}): ${d.latitude?.toFixed(5)}, ${d.longitude?.toFixed(5)}`,
+      );
+    } finally {
+      setBusy(false);
+    }
+  }
+
   const field = (
     label: string,
     key: keyof LocationItem,
@@ -215,6 +265,24 @@ export function LocationsCatalogTab() {
           {field("city", "city")}
           {field("state", "state")}
           {field("zip", "zip")}
+          <div className="rounded-xl border border-white/10 bg-black/20 p-3">
+            <p className="text-[10px] uppercase tracking-editorial text-cream/55">
+              Geocode (fill address lines above)
+            </p>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void geocodeFromAddress()}
+              className="mt-2 rounded-full border border-gold/40 px-4 py-2 text-[10px] font-semibold uppercase tracking-editorial text-gold hover:bg-gold/10 disabled:opacity-40"
+            >
+              Autofill lat/lng + city/state/ZIP
+            </button>
+            <p className="mt-2 text-[10px] text-cream/45">
+              Uses Nominatim / Mapbox / Google per server env. For DMS paste, POST{" "}
+              <code className="text-cream/70">paste</code> to{" "}
+              <code className="text-cream/70">/api/admin/geocode</code>.
+            </p>
+          </div>
           {field("hours", "hours")}
           {field("phone", "phone")}
           {field("email", "email")}

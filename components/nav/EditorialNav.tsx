@@ -13,7 +13,6 @@ const LINKS: { label: string; id: string }[] = [
   { label: "Location", id: "locations" },
   { label: "Schedule", id: "schedule" },
   { label: "Story", id: "story" },
-  { label: "Gallery", id: "gallery" },
   { label: "Catering", id: "catering" },
   { label: "Contact", id: "contact" },
 ];

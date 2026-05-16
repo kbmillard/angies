@@ -208,6 +208,14 @@ export function MenuCatalogTab() {
 
       <section className="rounded-2xl border border-white/10 bg-black/25 p-5">
         <h3 className="font-display text-lg text-cream">Import menu JSON</h3>
+        <p className="mt-2 rounded-lg border border-gold/25 bg-gold/5 px-3 py-2 text-xs leading-relaxed text-cream/85">
+          <span className="font-semibold text-cream">Live angieskc.com menu</span> only updates after you
+          run <span className="font-semibold text-cream">Import JSON</span> here (or change rows in the
+          editor below). A file on your laptop is not connected until imported. For category hero
+          photos, set each item&apos;s <span className="font-semibold text-cream">image URL</span> in
+          admin to a path like <code className="text-cream/90">/gallery/…</code> or paste the public URL
+          from the Photos tab after upload.
+        </p>
         <p className="mt-2 text-xs text-cream/65">
           Replaces the relational menu in Postgres (categories, items, modifiers, meat price
           overrides). Requires admin session and <code className="text-cream/90">DATABASE_URL</code>

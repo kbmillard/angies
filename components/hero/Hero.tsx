@@ -3,8 +3,8 @@
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { HERO_SLIDES } from "@/lib/data/hero-slides";
 import { useOrder } from "@/context/OrderContext";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 
 const SLIDE_MS = 5500;
 /** Crossfade — keep well under SLIDE_MS so the next slide reads as a new beat, not “same photo twice.” */
@@ -13,18 +13,25 @@ const CROSSFADE_EASE: [number, number, number, number] = [0.33, 0, 0.2, 1];
 
 export function Hero() {
   const { openOrderPanel, focusMenu, scrollToSection, focusCatering, focusSchedule } = useOrder();
+  const site = useSiteSettings();
+  const heroSlides = site.hero.slides;
+  const cta = site.hero.cta;
   const reduceMotion = useReducedMotion();
   const [i, setI] = useState(0);
 
   useEffect(() => {
+    setI((v) => (heroSlides.length === 0 ? 0 : Math.min(v, heroSlides.length - 1)));
+  }, [heroSlides.length]);
+
+  useEffect(() => {
     if (reduceMotion) return undefined;
-    const len = HERO_SLIDES.length;
+    const len = heroSlides.length;
     if (len < 2) return undefined;
     const id = window.setInterval(() => {
       setI((v) => (v + 1) % len);
     }, SLIDE_MS);
     return () => window.clearInterval(id);
-  }, [reduceMotion]);
+  }, [reduceMotion, heroSlides.length]);
 
   return (
     <section
@@ -33,7 +40,7 @@ export function Hero() {
     >
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-charcoal" aria-hidden />
-        {HERO_SLIDES.map((slideItem, idx) => (
+        {heroSlides.map((slideItem, idx) => (
           <motion.div
             key={slideItem.src}
             className={`absolute inset-0 ${idx !== i ? "pointer-events-none" : ""}`}
@@ -65,20 +72,17 @@ export function Hero() {
 
       <div className="relative z-[2] mx-auto flex w-full max-w-[1400px] flex-col gap-10 px-5 pb-14 pt-20 sm:px-8 sm:pb-16 sm:pt-24 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-3xl [text-shadow:0_2px_28px_rgba(0,0,0,0.55)]">
-          <p className="text-xs uppercase tracking-editorial text-cream/75">
-            Angie&apos;s Food Truck · Mexican food truck · Kansas City
-          </p>
+          <p className="text-xs uppercase tracking-editorial text-cream/75">{site.hero.eyebrow}</p>
           <h1 className="mt-4 font-display text-5xl leading-[0.95] text-cream sm:text-6xl lg:text-7xl">
-            Bold Tex-Mex flavor,
+            {site.hero.headlineLine1}
             <br />
-            served fresh across Kansas City.
+            {site.hero.headlineLine2}
           </h1>
           <p className="mt-6 max-w-xl text-base leading-relaxed text-cream/85 sm:text-lg">
-            Find Angie&apos;s Food Truck near Linwood and all around Kansas City. Follow today&apos;s
-            location and order fresh Tex-Mex favorites from the truck.
+            {site.hero.body}
           </p>
           <div className="mt-4 flex gap-1.5" aria-hidden>
-            {HERO_SLIDES.map((_, idx) => (
+            {heroSlides.map((_, idx) => (
               <button
                 key={idx}
                 type="button"
@@ -93,11 +97,11 @@ export function Hero() {
         </div>
 
         <div className="grid w-full max-w-md grid-cols-2 gap-3 sm:grid-cols-2 lg:w-auto">
-          <Cta primary label="Order" onClick={openOrderPanel} />
-          <Cta label="View menu" onClick={focusMenu} />
-          <Cta label="Find the truck" onClick={() => scrollToSection("locations")} />
-          <Cta label="Upcoming schedule" onClick={focusSchedule} />
-          <Cta label="Book catering / event" onClick={focusCatering} className="col-span-2 sm:col-span-1" />
+          <Cta primary label={cta.order} onClick={openOrderPanel} />
+          <Cta label={cta.viewMenu} onClick={focusMenu} />
+          <Cta label={cta.findTruck} onClick={() => scrollToSection("locations")} />
+          <Cta label={cta.schedule} onClick={focusSchedule} />
+          <Cta label={cta.catering} onClick={focusCatering} className="col-span-2 sm:col-span-1" />
         </div>
       </div>
     </section>

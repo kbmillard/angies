@@ -4,58 +4,42 @@ import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { gallerySrc } from "@/lib/data/gallery-path";
-
-type StorySlide = {
-  src: string;
-  alt: string;
-  kicker: string;
-  line: string;
-};
-
-/** Truck slides — `truck*` filenames from `gallery/` only. */
-const STORY_SLIDES: StorySlide[] = [
-  {
-    src: gallerySrc("truck1.jpg"),
-    alt: "Angie’s Food Truck on the street in Kansas City",
-    kicker: "Bright truck, fresh masa energy",
-    line: "A Mexican food truck built for flavor, speed, and Kansas City curbs.",
-  },
-  {
-    src: gallerySrc("truck3.jpg"),
-    alt: "Angie’s Food Truck serving guests",
-    kicker: "Bold Tex-Mex from the window",
-    line: "Tacos, birria, burritos, and aguas frescas — made to order from the window.",
-  },
-  {
-    src: gallerySrc("truck4.jpg"),
-    alt: "Angie’s Food Truck exterior",
-    kicker: "Linwood roots, KC-wide stops",
-    line: "Follow today’s pin for catering, events, and everyday truck service.",
-  },
-];
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 
 const AUTO_ADVANCE_MS = 5000;
 const SLIDE_ZOOM_OUT_S = 5.25;
 
 export function StorySection() {
+  const site = useSiteSettings();
+  const slides = site.story.slides;
+  const slideFingerprints = slides.map((s) => s.src).join("|");
   const prefersReducedMotion = useReducedMotion();
   const [index, setIndex] = useState(0);
-  const [zoomKeys, setZoomKeys] = useState(STORY_SLIDES.map(() => 0));
+  const [zoomKeys, setZoomKeys] = useState(slides.map(() => 0));
   const prevIndexRef = useRef(-1);
 
   useEffect(() => {
-    if (prefersReducedMotion) return;
+    setZoomKeys(slides.map(() => 0));
+    setIndex(0);
+    prevIndexRef.current = -1;
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only reset when the ordered list of slide URLs changes
+  }, [slideFingerprints]);
+
+  useEffect(() => {
+    if (prefersReducedMotion) return undefined;
+    const len = slides.length;
+    if (len < 2) return undefined;
     const id = window.setInterval(() => {
-      setIndex((i) => (i + 1) % STORY_SLIDES.length);
+      setIndex((i) => (i + 1) % len);
     }, AUTO_ADVANCE_MS);
     return () => window.clearInterval(id);
-  }, [prefersReducedMotion]);
+  }, [prefersReducedMotion, slides.length]);
 
   useEffect(() => {
     if (prevIndexRef.current === index) return;
     setZoomKeys((keys) => {
       const next = [...keys];
+      if (next[index] == null) next[index] = 0;
       next[index] += 1;
       return next;
     });
@@ -63,7 +47,7 @@ export function StorySection() {
   }, [index]);
 
   const fadeDuration = prefersReducedMotion ? 0 : 1.15;
-  const slide = STORY_SLIDES[index]!;
+  const slide = slides[index] ?? slides[0]!;
 
   return (
     <section
@@ -77,20 +61,16 @@ export function StorySection() {
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6 }}
         >
-          <SectionHeading
-            kicker="Our story"
-            title="Mexican flavor, rolling through Kansas City."
-          />
+          <SectionHeading kicker={site.story.sectionKicker} title={site.story.sectionTitle} />
           <blockquote className="mt-6 border-l-2 border-gold/55 pl-5">
             <p className="text-sm italic leading-relaxed text-cream/85">
-              &ldquo;You will experience bold Tex-Mex flavor without leaving Kansas City.&rdquo;
+              &ldquo;{site.story.quote1}&rdquo;
             </p>
             <p className="mt-3 text-sm italic leading-relaxed text-cream/85">
-              &ldquo;We had the opportunity to have Angie&apos;s Food Truck present for one of our
-              events. Over 100 guests raved about the food…&rdquo;
+              &ldquo;{site.story.quote2}&rdquo;
             </p>
             <footer className="mt-4 text-xs font-medium tracking-editorial text-cream/65">
-              Short public review snippets — confirm exact wording with owner.
+              {site.story.quoteFooter}
             </footer>
           </blockquote>
         </motion.div>
@@ -108,7 +88,7 @@ export function StorySection() {
             aria-roledescription="carousel"
             aria-label="Angie’s Food Truck story slideshow"
           >
-            {STORY_SLIDES.map((s, i) => (
+            {slides.map((s, i) => (
               <motion.div
                 key={s.src}
                 className="absolute inset-0"
@@ -124,7 +104,7 @@ export function StorySection() {
               >
                 {!prefersReducedMotion ? (
                   <motion.div
-                    key={zoomKeys[i]}
+                    key={zoomKeys[i] ?? 0}
                     className="absolute inset-0 h-full w-full"
                     initial={{ scale: 1.1 }}
                     animate={{ scale: index === i ? 1 : 1.08 }}

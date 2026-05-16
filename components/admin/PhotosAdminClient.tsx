@@ -6,6 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 import { LocationsCatalogTab } from "@/components/admin/LocationsCatalogTab";
 import { MenuCatalogTab } from "@/components/admin/MenuCatalogTab";
 import { ScheduleCatalogTab } from "@/components/admin/ScheduleCatalogTab";
+import { SiteSettingsTab } from "@/components/admin/SiteSettingsTab";
 import { MENU_CATEGORY_ORDER } from "@/lib/menu/schema";
 import type { PhotosAdminStatus } from "@/lib/photos/admin-status";
 import type { PhotoRecord } from "@/lib/photos/types";
@@ -17,10 +18,10 @@ function absolutePublicUrl(url: string): string {
   return `${window.location.origin}${path}`;
 }
 
-type AdminTab = "photos" | "menu" | "locations" | "schedule";
+type AdminTab = "site" | "photos" | "menu" | "locations" | "schedule";
 
 function normalizeTab(t: string | undefined): AdminTab {
-  if (t === "menu" || t === "locations" || t === "schedule" || t === "photos") return t;
+  if (t === "site" || t === "menu" || t === "locations" || t === "schedule" || t === "photos") return t;
   return "photos";
 }
 
@@ -288,6 +289,7 @@ export function PhotosAdminClient({ initialAuthed, status, initialTab }: Props) 
       <nav className="mt-8 flex flex-wrap gap-2 border-b border-white/10 pb-4">
         {(
           [
+            ["site", "Homepage"],
             ["photos", "Photos"],
             ["menu", "Menu"],
             ["locations", "Locations"],
@@ -320,6 +322,7 @@ export function PhotosAdminClient({ initialAuthed, status, initialTab }: Props) 
         </p>
       ) : null}
 
+      {tab === "site" ? <SiteSettingsTab /> : null}
       {tab === "menu" ? <MenuCatalogTab /> : null}
       {tab === "locations" ? <LocationsCatalogTab /> : null}
       {tab === "schedule" ? <ScheduleCatalogTab /> : null}

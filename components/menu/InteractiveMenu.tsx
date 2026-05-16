@@ -2,6 +2,7 @@
 
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MENU_CATEGORY_META } from "@/lib/menu/category-meta";
 import type { MenuItem } from "@/lib/menu/schema";
@@ -79,6 +80,18 @@ export function InteractiveMenu() {
     );
   }, [active, data]);
 
+  const categoryHero = useMemo(() => {
+    if (!items.length) return null;
+    const featured = items.find((i) => i.featured && i.imageUrl?.trim());
+    const any = items.find((i) => i.imageUrl?.trim());
+    const pick = featured ?? any;
+    if (!pick?.imageUrl?.trim()) return null;
+    return {
+      src: pick.imageUrl.trim(),
+      alt: (pick.imageAlt?.trim() || pick.name).trim(),
+    };
+  }, [items]);
+
   const handleAdd = (item: MenuItem) => {
     if (item.meatChoiceRequired && !item.optionGroups?.length) {
       setMeatItem(item);
@@ -133,8 +146,8 @@ export function InteractiveMenu() {
         >
           <SectionHeading
             kicker="Menu"
-            title="Tacos, birria, burritos — aguas frescas on repeat."
-            subtitle="Built fresh at the window. Prices TBD until confirmed with the owner."
+            title="Fresh Tex-Mex plates, drinks, and daily specials."
+            subtitle="Everything is built at the window — see each item for price when set in admin."
           />
         </div>
 
@@ -229,14 +242,29 @@ export function InteractiveMenu() {
                         </p>
                         <div
                           className={cn(
-                            "relative mt-8 aspect-[4/3] w-full max-w-full overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br",
-                            categoryHeroGradient(active.color),
+                            "relative mt-8 aspect-[4/3] w-full max-w-full overflow-hidden rounded-2xl border border-white/10",
+                            !categoryHero && cn("bg-gradient-to-br", categoryHeroGradient(active.color)),
                           )}
                         >
-                          <div
-                            className="pointer-events-none absolute inset-0 bg-gradient-to-br from-black/45 via-black/15 to-transparent"
-                          />
-                          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.12),transparent_55%)]" />
+                          {categoryHero ? (
+                            <>
+                              <Image
+                                src={categoryHero.src}
+                                alt={categoryHero.alt}
+                                fill
+                                className="object-cover"
+                                sizes="(min-width: 1024px) 480px, 100vw"
+                                priority={false}
+                              />
+                              <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-black/50 via-black/20 to-transparent" />
+                              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.08),transparent_55%)]" />
+                            </>
+                          ) : (
+                            <>
+                              <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-black/45 via-black/15 to-transparent" />
+                              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.12),transparent_55%)]" />
+                            </>
+                          )}
                         </div>
                       </div>
 

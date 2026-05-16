@@ -17,6 +17,7 @@ import {
 import { DEFAULT_MAP_PIN_LAT, DEFAULT_MAP_PIN_LNG } from "@/lib/maps/default-map-pin";
 import { GoogleMapClientResolved } from "@/components/locations/GoogleMapClientResolved";
 import { GoogleMapGreedy } from "@/components/locations/GoogleMapGreedy";
+import { ScheduleListBlock } from "@/components/schedule/ScheduleListBlock";
 
 function addressLines(loc: LocationItem): string[] {
   const cityLine = [loc.city, loc.state, loc.zip].filter(Boolean).join(" ").trim();
@@ -219,8 +220,25 @@ export function LocationsSection() {
                   </a>
                 </div>
               </div>
-              <div className="w-full min-w-0 shrink-0 lg:max-w-md">
-                <MapEmbedBlock loc={primaryTruck} />
+              <div className="w-full min-w-0 shrink-0 lg:min-w-0 lg:flex-1">
+                <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-start">
+                  <div className="min-w-0">
+                    <MapEmbedBlock loc={primaryTruck} />
+                  </div>
+                  <div
+                    id="schedule"
+                    tabIndex={-1}
+                    className="min-w-0 scroll-mt-[calc(var(--nav-h)+16px)] outline-none focus:outline-none"
+                  >
+                    <p className="text-xs font-semibold uppercase tracking-editorial text-gold/90">
+                      Upcoming schedule
+                    </p>
+                    <p className="mt-1 text-sm text-cream/65">
+                      Where we&apos;re rolling next — same dates as the full site feed.
+                    </p>
+                    <ScheduleListBlock variant="embedded" />
+                  </div>
+                </div>
               </div>
             </div>
           </article>

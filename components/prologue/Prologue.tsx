@@ -1,8 +1,11 @@
 "use client";
 
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 
 export function Prologue() {
+  const site = useSiteSettings();
+
   return (
     <section
       id="prologue"
@@ -11,8 +14,8 @@ export function Prologue() {
       <div className="mx-auto max-w-[1200px] px-5 sm:px-8">
         <div className="mx-auto mb-10 max-w-3xl rounded-3xl border border-white/10 bg-charcoal/92 p-6 shadow-[0_12px_40px_rgba(0,0,0,0.25)] sm:mb-14 sm:p-10">
           <SectionHeading
-            title="Welcome to Angie&apos;s Food Truck."
-            subtitle="Fresh Mexican plates from the window — tacos, birria, burritos, aguas frescas, and daily specials. Follow the pin for today’s stop, or book us for your next event."
+            title={site.prologue.title}
+            subtitle={site.prologue.subtitle}
             align="center"
             className="max-w-none [&_h2]:text-balance [&_p]:text-pretty"
           />
