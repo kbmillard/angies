@@ -49,6 +49,37 @@ export function MenuCatalogTab() {
     void load();
   }, [load]);
 
+  async function importFinalBundled() {
+    setBusy(true);
+    setMsg(null);
+    try {
+      const r = await fetch("/api/admin/menu-import-final", {
+        method: "POST",
+        credentials: "include",
+      });
+      const d = (await r.json()) as {
+        ok?: boolean;
+        error?: string;
+        categories?: number;
+        items?: number;
+        modifiers?: number;
+        meatPriceOverrides?: number;
+        warnings?: string[];
+      };
+      if (!r.ok) {
+        setMsg(d.error ?? "Import failed");
+        return;
+      }
+      const w = (d.warnings ?? []).join(" ");
+      setMsg(
+        `Loaded site menu.json: ${d.categories ?? 0} categories, ${d.items ?? 0} items, ${d.modifiers ?? 0} modifiers.${w ? ` Warnings: ${w}` : ""}`,
+      );
+      await load();
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function importJson() {
     if (!importFile) {
       setMsg("Choose a .json file first.");
@@ -223,6 +254,14 @@ export function MenuCatalogTab() {
           reads from the database.
         </p>
         <div className="mt-4 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void importFinalBundled()}
+            className="rounded-full bg-gold/90 px-5 py-2 text-xs font-semibold uppercase tracking-editorial text-charcoal hover:bg-gold disabled:opacity-40"
+          >
+            Load finalized menu.json (site)
+          </button>
           <input
             type="file"
             accept="application/json,.json"
