@@ -1,3 +1,4 @@
+import { ANGIES_TRUCK_WEEKLY_HOURS } from "./angies-truck-hours";
 import type { LocationItem } from "./schema";
 
 export type DayKey = "sun" | "mon" | "tue" | "wed" | "thu" | "fri" | "sat";
@@ -12,8 +13,8 @@ export type WeeklyHours = Partial<Record<DayKey, DailyHoursWindow[]>>;
 
 export const DEFAULT_TIMEZONE = "America/Chicago";
 
-/** Empty until a location row ships `weeklyHoursJson` from the sheet. */
-export const DEFAULT_WEEKLY_HOURS: WeeklyHours = {};
+/** Site-wide truck hours when a row has no usable `weeklyHoursJson`. */
+export const DEFAULT_WEEKLY_HOURS: WeeklyHours = { ...ANGIES_TRUCK_WEEKLY_HOURS };
 
 const DAY_KEYS: DayKey[] = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 
@@ -120,14 +121,19 @@ export function parseWeeklyHoursJson(raw: string | undefined): Partial<WeeklyHou
 }
 
 export function resolveWeeklyHours(loc: LocationItem): WeeklyHours {
-  const merged = cloneWeeklyHours(DEFAULT_WEEKLY_HOURS);
+  const base =
+    loc.type === "food_truck"
+      ? cloneWeeklyHours(ANGIES_TRUCK_WEEKLY_HOURS)
+      : cloneWeeklyHours(DEFAULT_WEEKLY_HOURS);
   const partial = parseWeeklyHoursJson(loc.weeklyHoursJson);
-  if (!partial) return merged;
+  if (!partial) return base;
+  // Food trucks: canonical hours win (legacy sheet rows used 5:00 PM close).
+  if (loc.type === "food_truck") return base;
   for (const d of DAY_KEYS) {
     const arr = partial[d];
-    if (arr?.length) merged[d] = arr.map((w) => ({ ...w }));
+    if (arr?.length) base[d] = arr.map((w) => ({ ...w }));
   }
-  return merged;
+  return base;
 }
 
 function formatMinutes12h(mins: number): string {

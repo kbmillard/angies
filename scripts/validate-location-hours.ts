@@ -1,16 +1,16 @@
 /**
- * Lightweight checks for `getLocationPublicStatus` (America/Chicago, sheet `Open` ignored).
+ * Lightweight checks for `getLocationPublicStatus` (America/Chicago).
  * Run: npx tsx scripts/validate-location-hours.ts
  */
 import { getLocationPublicStatus } from "../lib/locations/hours";
 import type { LocationItem } from "../lib/locations/schema";
 
-const base: LocationItem = {
-  id: "test-loc",
+const truck: LocationItem = {
+  id: "angies-food-truck-linwood",
   active: true,
-  type: "restaurant",
+  type: "food_truck",
   sortOrder: 0,
-  name: "Test",
+  name: "Angie's food truck",
   label: "",
   address: "",
   city: "",
@@ -20,46 +20,43 @@ const base: LocationItem = {
   phone: "",
   email: "",
   status: "Open",
-  statusNote: "Note",
+  statusNote: "",
   mapsUrl: "",
   embedUrl: "",
   lat: null,
   lng: null,
   lastUpdated: "",
+  timezone: "America/Chicago",
+  weeklyHoursJson:
+    '{"wed":[{"open":"10:00","close":"17:00"}],"sat":[{"open":"10:00","close":"17:00"}]}',
 };
 
 function assert(cond: boolean, msg: string) {
   if (!cond) throw new Error(msg);
 }
 
-// Tuesday 2:28 AM CDT (2025-04-29 07:28 UTC)
-const tueEarly = new Date("2025-04-29T07:28:00.000Z");
-let s = getLocationPublicStatus(base, tueEarly);
-assert(s.label === "Closed" && s.detail.includes("5:00 PM"), `Tue 2:28 AM: got ${JSON.stringify(s)}`);
-
-// Saturday 10:30 AM CDT (2025-05-03 15:30 UTC ≈ 10:30 CDT)
-const satMorning = new Date("2025-05-03T15:30:00.000Z");
-s = getLocationPublicStatus(base, satMorning);
+// Saturday 4:35 PM CDT — after 4:00 PM close
+const satAfterClose = new Date("2026-05-16T21:35:00.000Z");
+let s = getLocationPublicStatus(truck, satAfterClose);
 assert(
-  s.label === "Open" && s.detail.includes("Desayuno de Fin de Semana"),
-  `Sat 10:30 AM: got ${JSON.stringify(s)}`,
+  s.label === "Closed" && s.isOpen === false,
+  `Sat 4:35 PM should be closed: got ${JSON.stringify(s)}`,
 );
 
-// Saturday 4:30 PM CDT (2025-05-03 21:30 UTC)
-const satGap = new Date("2025-05-03T21:30:00.000Z");
-s = getLocationPublicStatus(base, satGap);
+// Saturday 11:00 AM CDT — open until 4 PM
+const satMorning = new Date("2026-05-16T16:00:00.000Z");
+s = getLocationPublicStatus(truck, satMorning);
 assert(
-  s.label === "Closed" && s.detail.includes("Regular Menu") && s.detail.includes("today"),
-  `Sat 4:30 PM gap: got ${JSON.stringify(s)}`,
+  s.label === "Open" && s.detail.includes("4:00 PM"),
+  `Sat 11 AM should be open until 4 PM: got ${JSON.stringify(s)}`,
 );
 
-// Saturday 7:00 PM CDT (2025-05-04T00:00:00.000Z) — 7pm CDT = midnight UTC next calendar day in Chicago; use explicit offset-safe instant:
-// 2025-05-03 19:00 Chicago = 2025-05-04 00:00 UTC
-const satEvening = new Date("2025-05-04T00:00:00.000Z");
-s = getLocationPublicStatus(base, satEvening);
+// Wednesday 7:30 PM CDT — open until 8 PM
+const wedEvening = new Date("2026-05-14T00:30:00.000Z"); // Wed May 13 2026 7:30 PM CDT
+s = getLocationPublicStatus(truck, wedEvening);
 assert(
-  s.label === "Open" && s.detail.includes("Regular Menu") && s.detail.includes("11:00 PM"),
-  `Sat 7:00 PM: got ${JSON.stringify(s)}`,
+  s.label === "Open" && s.detail.includes("8:00 PM"),
+  `Wed 7:30 PM should be open: got ${JSON.stringify(s)}`,
 );
 
 console.log("validate-location-hours: all checks passed.");

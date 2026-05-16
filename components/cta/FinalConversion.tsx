@@ -8,7 +8,7 @@ export function FinalConversion() {
   const { openOrderPanel, focusCatering, focusMenu } = useOrder();
 
   return (
-    <section className="relative z-10 border-t border-white/10 bg-charcoal/50 py-24 backdrop-blur-sm">
+    <section className="relative z-10 border-t border-white/10 bg-charcoal/50 py-16 backdrop-blur-sm sm:py-20">
       <div className="mx-auto max-w-[1100px] px-5 text-center sm:px-8">
         <p className="text-xs uppercase tracking-editorial text-cream/70">Ready</p>
         <h2 className="mt-3 font-display text-5xl text-cream sm:text-6xl">READY TO EAT?</h2>

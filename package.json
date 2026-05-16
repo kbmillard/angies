@@ -11,6 +11,7 @@
     "import:menu:final": "tsx scripts/import-menu.ts public/menu/menu.json",
     "validate:sheets": "node scripts/run-sheet-validation.mjs",
     "validate:location-hours": "tsx scripts/validate-location-hours.ts",
+    "sync:location-hours": "tsx scripts/sync-angies-location-hours.ts",
     "icons": "node scripts/generate-brand-icons.mjs"
   },
   "dependencies": {

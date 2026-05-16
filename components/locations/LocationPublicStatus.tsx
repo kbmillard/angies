@@ -107,15 +107,26 @@ export function LocationPublicStatus({
 
   return (
     <div className={className}>
-      <p className="mt-3 text-xs text-cream/90">
+      <p className="mt-3 flex items-center gap-2 text-xs text-cream/90">
         {pending ? (
           <span className="text-cream/50">Checking hours…</span>
         ) : (
           <>
-            <span className={clsx("font-semibold", labelColorClass(publicStatus.isOpen))}>
-              {publicStatus.label}
+            <span
+              className={clsx(
+                "h-2 w-2 shrink-0 rounded-full",
+                publicStatus.isOpen ? "bg-accent-green" : "bg-salsa",
+              )}
+              aria-hidden
+            />
+            <span>
+              <span className={clsx("font-semibold", labelColorClass(publicStatus.isOpen))}>
+                {publicStatus.label}
+              </span>
+              {publicStatus.detail ? (
+                <span className="text-cream/80"> · {publicStatus.detail}</span>
+              ) : null}
             </span>
-            {publicStatus.detail ? <span className="text-cream/80"> · {publicStatus.detail}</span> : null}
           </>
         )}
       </p>
