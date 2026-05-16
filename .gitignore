@@ -40,3 +40,4 @@ yarn-error.log*
 
 # Customer workbook (copy to repo root to run npm run validate:sheets; not committed)
 la_hamburguesa_loca_customer_google_sheets.xlsx
+.env.vercel.production
