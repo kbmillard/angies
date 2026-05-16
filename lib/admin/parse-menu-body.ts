@@ -1,6 +1,10 @@
 import { randomUUID } from "node:crypto";
 import type { MenuItem, MenuOptionGroup } from "@/lib/menu/schema";
 
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return typeof v === "object" && v !== null && !Array.isArray(v);
+}
+
 function asBool(v: unknown, def: boolean): boolean {
   if (typeof v === "boolean") return v;
   if (v === "true" || v === 1 || v === "1") return true;
@@ -49,6 +53,22 @@ export function parseMenuItemForAdmin(
     optionGroups = o.optionGroups as MenuOptionGroup[];
   }
 
+  let meatOptionPrices: Record<string, number> | undefined;
+  if (isRecord(o.meatOptionPrices)) {
+    meatOptionPrices = {};
+    for (const [k, v] of Object.entries(o.meatOptionPrices)) {
+      if (!k.trim()) continue;
+      const n =
+        typeof v === "number" && Number.isFinite(v)
+          ? v
+          : typeof v === "string"
+            ? Number(v.replace(/[$,]/g, ""))
+            : NaN;
+      if (Number.isFinite(n)) meatOptionPrices[k.trim()] = n;
+    }
+    if (Object.keys(meatOptionPrices).length === 0) meatOptionPrices = undefined;
+  }
+
   const item: MenuItem = {
     id,
     active: asBool(o.active, true),
@@ -73,6 +93,7 @@ export function parseMenuItemForAdmin(
         ? o.availabilityLabel.trim()
         : undefined,
     optionGroups,
+    meatOptionPrices,
   };
 
   return { ok: true, item };

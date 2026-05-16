@@ -4,6 +4,7 @@ import { revalidatePublicCatalog } from "@/lib/admin/revalidate-public";
 import { parseMenuItemForAdmin } from "@/lib/admin/parse-menu-body";
 import { getSql } from "@/lib/db/sql";
 import { dbUpdateMenuItem, dbDeleteMenuItem } from "@/lib/catalog-db/menu-db";
+import { isRelationalMenuCatalogActive } from "@/lib/catalog-db/menu-relational-db";
 
 export async function PATCH(
   req: Request,
@@ -13,6 +14,16 @@ export async function PATCH(
   if (gate) return gate;
   if (!getSql()) {
     return NextResponse.json({ ok: false, error: "DATABASE_URL is required." }, { status: 503 });
+  }
+  if (await isRelationalMenuCatalogActive()) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          "Relational menu is active. Use Menu → Import menu JSON to replace the catalog.",
+      },
+      { status: 409 },
+    );
   }
 
   const { id } = await ctx.params;
@@ -56,6 +67,16 @@ export async function DELETE(
   if (gate) return gate;
   if (!getSql()) {
     return NextResponse.json({ ok: false, error: "DATABASE_URL is required." }, { status: 503 });
+  }
+  if (await isRelationalMenuCatalogActive()) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          "Relational menu is active. Use Menu → Import menu JSON to replace the catalog.",
+      },
+      { status: 409 },
+    );
   }
   const { id } = await ctx.params;
   if (!id?.trim()) {

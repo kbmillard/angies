@@ -90,3 +90,62 @@ export async function ensureCatalogTables(): Promise<boolean> {
   catalogTablesReady = true;
   return true;
 }
+
+let relationalMenuTablesReady = false;
+
+/** Normalized menu (JSON import) — separate from legacy `menu_items`. */
+export async function ensureRelationalMenuCatalogTables(): Promise<boolean> {
+  const sql = getSql();
+  if (!sql) return false;
+  if (relationalMenuTablesReady) return true;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS catalog_menu_categories (
+      slug TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      sort_order INT NOT NULL DEFAULT 0
+    )
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS catalog_menu_modifiers (
+      id BIGSERIAL PRIMARY KEY,
+      kind TEXT NOT NULL CHECK (kind IN ('meat', 'side', 'topping')),
+      slug TEXT NOT NULL,
+      name TEXT NOT NULL,
+      amount NUMERIC(10, 2) NOT NULL DEFAULT 0,
+      sort_order INT NOT NULL DEFAULT 0,
+      UNIQUE (kind, slug)
+    )
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS catalog_menu_items (
+      slug TEXT PRIMARY KEY,
+      category_slug TEXT NOT NULL REFERENCES catalog_menu_categories (slug) ON UPDATE CASCADE ON DELETE CASCADE,
+      name TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      base_price NUMERIC(10, 2) NOT NULL,
+      requires_meat_selection BOOLEAN NOT NULL DEFAULT FALSE,
+      sort_order INT NOT NULL DEFAULT 0,
+      active BOOLEAN NOT NULL DEFAULT TRUE,
+      featured BOOLEAN NOT NULL DEFAULT FALSE,
+      image_url TEXT,
+      image_alt TEXT,
+      option_groups_json TEXT,
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )
+  `;
+
+  await sql`
+    CREATE TABLE IF NOT EXISTS catalog_menu_item_meat_prices (
+      item_slug TEXT NOT NULL REFERENCES catalog_menu_items (slug) ON DELETE CASCADE,
+      meat_modifier_id BIGINT NOT NULL REFERENCES catalog_menu_modifiers (id) ON DELETE CASCADE,
+      price NUMERIC(10, 2) NOT NULL,
+      PRIMARY KEY (item_slug, meat_modifier_id)
+    )
+  `;
+
+  relationalMenuTablesReady = true;
+  return true;
+}

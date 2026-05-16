@@ -13,6 +13,7 @@ import {
   countScheduleItems,
   dbInsertScheduleItem,
 } from "@/lib/catalog-db/schedule-db";
+import { isRelationalMenuCatalogActive } from "@/lib/catalog-db/menu-relational-db";
 
 /** Copy built-in fallbacks into Postgres (only when tables are empty). */
 export async function seedCatalogFromBuiltinsIfEmpty(): Promise<{
@@ -23,7 +24,7 @@ export async function seedCatalogFromBuiltinsIfEmpty(): Promise<{
   const seeded: string[] = [];
 
   try {
-    if ((await countMenuItems()) === 0) {
+    if ((await countMenuItems()) === 0 && !(await isRelationalMenuCatalogActive())) {
       for (const item of localMenuItems) {
         await dbInsertMenuItem(item);
       }

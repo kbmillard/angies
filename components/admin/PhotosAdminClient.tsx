@@ -311,10 +311,12 @@ export function PhotosAdminClient({ initialAuthed, status, initialTab }: Props) 
 
       {!status.siteCatalogFromDatabase ? (
         <p className="mt-4 rounded-xl border border-white/10 bg-black/20 p-3 text-xs text-cream/65">
-          To replace Google Sheets: add{" "}
-          <code className="rounded bg-white/10 px-1">SITE_DATA_SOURCE=database</code> on Vercel, open
-          the <strong>Menu</strong> tab, and use <strong>Seed from built-in</strong> (empty tables
-          only). Then the public site uses Postgres.
+          For Postgres-backed catalog: add{" "}
+          <code className="rounded bg-white/10 px-1">SITE_DATA_SOURCE=database</code> on Vercel with{" "}
+          <code className="rounded bg-white/10 px-1">DATABASE_URL</code>. Use the <strong>Menu</strong>{" "}
+          tab to <strong>Import menu JSON</strong> (relational tables) or <strong>Seed from built-in</strong>{" "}
+          for legacy empty tables. Locations/schedule can still use Sheet CSV until you move them to
+          the database.
         </p>
       ) : null}
 

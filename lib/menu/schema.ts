@@ -27,6 +27,11 @@ export type MenuItem = {
   availabilityLabel?: string;
   /** Required/optional choices */
   optionGroups?: MenuOptionGroup[];
+  /**
+   * When set, cart uses this USD price for the line when the customer’s meat choice
+   * matches the key (exact string in the required `meat` option group, or `selectedMeat`).
+   */
+  meatOptionPrices?: Record<string, number>;
 };
 
 export type MenuCategoryMeta = {
@@ -64,6 +69,8 @@ export const MENU_CATEGORY_ORDER = [
   "Tacos",
   "Birria",
   "Burritos",
+  "Quesadillas",
+  "Classics",
   "Aguas Frescas",
   "Specials",
   "Sides",

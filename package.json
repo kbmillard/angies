@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "import:menu": "tsx scripts/import-menu.ts",
     "validate:sheets": "node scripts/run-sheet-validation.mjs",
     "validate:location-hours": "tsx scripts/validate-location-hours.ts",
     "icons": "node scripts/generate-brand-icons.mjs"

@@ -39,7 +39,7 @@ export function MenuCatalogProvider({ children }: { children: React.ReactNode })
           !process.env.SITE_DATA_SOURCE?.toLowerCase().includes("database")
         ) {
           console.warn(
-            "Menu source: local fallback. Set NEXT_PUBLIC_MENU_CSV_URL or MENU_CSV_URL for Sheets, or SITE_DATA_SOURCE=database for Postgres.",
+            "Menu source: local fallback. Set SITE_DATA_SOURCE=database with DATABASE_URL and import menu JSON from /admin (Menu tab), or rely on built-in local menu for dev.",
           );
         }
       })

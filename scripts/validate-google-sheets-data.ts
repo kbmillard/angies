@@ -250,7 +250,7 @@ function main() {
   console.log(`\nMeat choice list (${meatChoices.length} options) is app-defined in MeatChoiceModal — sheet only sets meatChoiceRequired TRUE/FALSE.`);
 
   console.log("\nValidation passed. Safe next steps:");
-  console.log("- Publish Menu tab as CSV → MENU_CSV_URL");
+  console.log("- Menu: import finalized JSON via /admin (Menu tab) or npm run import:menu (relational Postgres).");
   console.log("- Publish Locations tab as CSV → LOCATIONS_CSV_URL");
   console.log("- Optional Sheet columns: placeId, formattedAddress (geocodeSource/geocodedAt are server-only).");
 }

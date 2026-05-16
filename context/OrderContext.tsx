@@ -140,7 +140,13 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       const selectedOptions =
         rawSel && Object.keys(rawSel).length > 0 ? rawSel : undefined;
 
-      if (item.meatChoiceRequired && !selectedMeat?.trim()) return;
+      if (
+        item.meatChoiceRequired &&
+        !item.optionGroups?.length &&
+        !selectedMeat?.trim()
+      ) {
+        return;
+      }
       const selForValidate: OptionSelections = selectedOptions ?? {};
       if (
         itemRequiresOptionSelections(item) &&
@@ -149,14 +155,23 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const unitPriceCents = priceDollarsToCents(item.price);
+      const meatFromOptions =
+        typeof selectedOptions?.meat === "string"
+          ? selectedOptions.meat.trim()
+          : "";
+      const meatKey = normMeat(selectedMeat) || meatFromOptions;
+      const priceUsd =
+        meatKey && item.meatOptionPrices?.[meatKey] != null
+          ? item.meatOptionPrices[meatKey]!
+          : item.price;
+      const unitPriceCents = priceDollarsToCents(priceUsd);
       const includesFries = item.includesFries;
 
       setCart((prev) => {
         const existing = prev.find(
           (l) =>
             l.menuItemId === menuItemId &&
-            normMeat(l.selectedMeat) === normMeat(selectedMeat) &&
+            normMeat(l.selectedMeat) === normMeat(meatKey) &&
             selectionsKey(l.selectedOptions) === selectionsKey(selectedOptions) &&
             !(l.notes?.trim()),
         );
@@ -173,7 +188,12 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
           imageUrl: item.imageUrl,
           unitPriceCents,
           quantity: qty,
-          selectedMeat: selectedMeat?.trim() || undefined,
+          selectedMeat:
+            selectedMeat?.trim() ||
+            (typeof selectedOptions?.meat === "string"
+              ? selectedOptions.meat.trim()
+              : undefined) ||
+            undefined,
           selectedOptions,
           includesFries: includesFries || undefined,
         };

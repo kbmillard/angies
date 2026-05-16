@@ -1,8 +1,12 @@
 import { localMenuItems } from "./local-menu";
 import { MENU_CATEGORY_ORDER, type MenuCatalogResponse, type MenuItem } from "./schema";
-import { parseMenuFromCsvText } from "./google-sheet-menu";
 import { siteCatalogFromDatabase } from "@/lib/catalog-db/config";
 import { dbGetMenuItems } from "@/lib/catalog-db/menu-db";
+import {
+  dbGetRelationalMenuAsMenuItems,
+  isRelationalMenuCatalogActive,
+} from "@/lib/catalog-db/menu-relational-db";
+import { getSql } from "@/lib/db/sql";
 
 function localCatalogKey(i: MenuItem): string {
   return `${i.category.trim().toLowerCase()}|${i.name.trim().toLowerCase()}`;
@@ -79,10 +83,26 @@ function buildCatalog(
 }
 
 /**
- * Menu CSV is cached ~5 minutes via fetch `revalidate: 300`.
+ * Menu: relational Postgres (JSON import) when populated, else legacy `menu_items` when
+ * `SITE_DATA_SOURCE=database`, else built-in local fallback. Google Sheet CSV is no longer used.
  */
 export async function getMenuCatalog(): Promise<MenuCatalogResponse> {
   const updatedAt = new Date().toISOString();
+
+  if (getSql()) {
+    try {
+      if (await isRelationalMenuCatalogActive()) {
+        const relational = await dbGetRelationalMenuAsMenuItems(false);
+        if (relational.length > 0) {
+          return buildCatalog(relational, "database", updatedAt);
+        }
+      }
+    } catch (e) {
+      if (process.env.NODE_ENV === "development") {
+        console.warn("[menu] Relational catalog read failed:", e);
+      }
+    }
+  }
 
   if (siteCatalogFromDatabase()) {
     try {
@@ -93,25 +113,7 @@ export async function getMenuCatalog(): Promise<MenuCatalogResponse> {
       }
     } catch (e) {
       if (process.env.NODE_ENV === "development") {
-        console.warn("[menu] Database catalog failed, falling back:", e);
-      }
-    }
-  }
-
-  const url = process.env.MENU_CSV_URL ?? process.env.NEXT_PUBLIC_MENU_CSV_URL;
-
-  if (url) {
-    try {
-      const res = await fetch(url, { next: { revalidate: 300 } });
-      if (!res.ok) throw new Error(`CSV fetch ${res.status}`);
-      const text = await res.text();
-      const parsed = parseMenuFromCsvText(text);
-      if (parsed.length === 0) throw new Error("Parsed zero menu rows");
-      const merged = mergeOptionGroupsFromLocalDefaults(parsed);
-      return buildCatalog(merged, "google-sheet", updatedAt);
-    } catch (e) {
-      if (process.env.NODE_ENV === "development") {
-        console.warn("[menu] Google Sheet / CSV failed, using local fallback:", e);
+        console.warn("[menu] Legacy database catalog failed, falling back:", e);
       }
     }
   }

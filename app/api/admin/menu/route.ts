@@ -4,6 +4,10 @@ import { revalidatePublicCatalog } from "@/lib/admin/revalidate-public";
 import { parseMenuItemForAdmin } from "@/lib/admin/parse-menu-body";
 import { getSql } from "@/lib/db/sql";
 import { dbGetMenuItems, dbInsertMenuItem } from "@/lib/catalog-db/menu-db";
+import {
+  dbGetRelationalMenuAsMenuItems,
+  isRelationalMenuCatalogActive,
+} from "@/lib/catalog-db/menu-relational-db";
 
 export async function GET() {
   const gate = await requireAdminGate();
@@ -15,8 +19,15 @@ export async function GET() {
     );
   }
   try {
-    const items = await dbGetMenuItems(true);
-    return NextResponse.json({ ok: true, items });
+    const relational = await isRelationalMenuCatalogActive();
+    const items = relational
+      ? await dbGetRelationalMenuAsMenuItems(true)
+      : await dbGetMenuItems(true);
+    return NextResponse.json({
+      ok: true,
+      items,
+      catalogSource: relational ? ("relational" as const) : ("legacy" as const),
+    });
   } catch (e) {
     console.error("[admin/menu GET]", e);
     return NextResponse.json({ ok: false, error: "Failed to load menu" }, { status: 500 });
@@ -28,6 +39,16 @@ export async function POST(req: Request) {
   if (gate) return gate;
   if (!getSql()) {
     return NextResponse.json({ ok: false, error: "DATABASE_URL is required." }, { status: 503 });
+  }
+  if (await isRelationalMenuCatalogActive()) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          "Relational menu is active. Use Menu → Import menu JSON (or POST /api/admin/menu-import) to replace the catalog.",
+      },
+      { status: 409 },
+    );
   }
   let body: unknown;
   try {

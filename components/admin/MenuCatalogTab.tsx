@@ -21,6 +21,8 @@ function emptyDraft(): MenuItem {
 
 export function MenuCatalogTab() {
   const [items, setItems] = useState<MenuItem[]>([]);
+  const [relationalSource, setRelationalSource] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
   const [draft, setDraft] = useState<MenuItem>(emptyDraft);
   const [optJson, setOptJson] = useState("[]");
   const [msg, setMsg] = useState<string | null>(null);
@@ -29,17 +31,62 @@ export function MenuCatalogTab() {
   const load = useCallback(async () => {
     setMsg(null);
     const r = await fetch("/api/admin/menu", { credentials: "include" });
-    const d = (await r.json()) as { ok?: boolean; items?: MenuItem[]; error?: string };
+    const d = (await r.json()) as {
+      ok?: boolean;
+      items?: MenuItem[];
+      catalogSource?: "relational" | "legacy";
+      error?: string;
+    };
     if (!r.ok) {
       setMsg(d.error ?? `Error ${r.status}`);
       return;
     }
+    setRelationalSource(d.catalogSource === "relational");
     setItems(d.items ?? []);
   }, []);
 
   useEffect(() => {
     void load();
   }, [load]);
+
+  async function importJson() {
+    if (!importFile) {
+      setMsg("Choose a .json file first.");
+      return;
+    }
+    setBusy(true);
+    setMsg(null);
+    try {
+      const text = await importFile.text();
+      const r = await fetch("/api/admin/menu-import", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: text,
+      });
+      const d = (await r.json()) as {
+        ok?: boolean;
+        error?: string;
+        categories?: number;
+        items?: number;
+        modifiers?: number;
+        meatPriceOverrides?: number;
+        warnings?: string[];
+      };
+      if (!r.ok) {
+        setMsg(d.error ?? "Import failed");
+        return;
+      }
+      const w = (d.warnings ?? []).join(" ");
+      setMsg(
+        `Imported: ${d.categories ?? 0} categories, ${d.items ?? 0} items, ${d.modifiers ?? 0} modifiers, ${d.meatPriceOverrides ?? 0} meat price overrides.${w ? ` Warnings: ${w}` : ""}`,
+      );
+      setImportFile(null);
+      await load();
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function seed() {
     setBusy(true);
@@ -132,25 +179,65 @@ export function MenuCatalogTab() {
       <div className="flex flex-wrap items-center gap-3">
         <button
           type="button"
-          disabled={busy}
+          disabled={busy || relationalSource}
           onClick={() => void seed()}
           className="rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-editorial text-cream/90 hover:bg-white/5 disabled:opacity-40"
+          title={
+            relationalSource
+              ? "Built-in seed skips menu when relational catalog is active."
+              : undefined
+          }
         >
           Seed from built-in (empty DB only)
         </button>
-        <button
-          type="button"
-          disabled={busy}
-          onClick={() => {
-            setDraft(emptyDraft());
-            setOptJson("[]");
-            setMsg(null);
-          }}
-          className="rounded-full border border-angie-orange/50 px-4 py-2 text-xs uppercase tracking-editorial text-angie-orange hover:bg-angie-orange/10 disabled:opacity-40"
-        >
-          New item
-        </button>
+        {!relationalSource ? (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => {
+              setDraft(emptyDraft());
+              setOptJson("[]");
+              setMsg(null);
+            }}
+            className="rounded-full border border-angie-orange/50 px-4 py-2 text-xs uppercase tracking-editorial text-angie-orange hover:bg-angie-orange/10 disabled:opacity-40"
+          >
+            New item
+          </button>
+        ) : null}
       </div>
+
+      <section className="rounded-2xl border border-white/10 bg-black/25 p-5">
+        <h3 className="font-display text-lg text-cream">Import menu JSON</h3>
+        <p className="mt-2 text-xs text-cream/65">
+          Replaces the relational menu in Postgres (categories, items, modifiers, meat price
+          overrides). Requires admin session and <code className="text-cream/90">DATABASE_URL</code>
+          . Set <code className="text-cream/90">SITE_DATA_SOURCE=database</code> so the public site
+          reads from the database.
+        </p>
+        <div className="mt-4 flex flex-wrap items-center gap-3">
+          <input
+            type="file"
+            accept="application/json,.json"
+            disabled={busy}
+            onChange={(e) => setImportFile(e.target.files?.[0] ?? null)}
+            className="text-sm text-cream/80 file:mr-3 file:rounded-full file:border-0 file:bg-angie-orange file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:text-cream"
+          />
+          <button
+            type="button"
+            disabled={busy || !importFile}
+            onClick={() => void importJson()}
+            className="rounded-full bg-angie-orange px-5 py-2 text-xs font-semibold uppercase tracking-editorial text-cream disabled:opacity-40"
+          >
+            Import JSON
+          </button>
+        </div>
+        {relationalSource ? (
+          <p className="mt-3 text-xs text-angie-orange/90">
+            Relational catalog is active — the form below is read-only. Use a new JSON import to
+            change prices or items.
+          </p>
+        ) : null}
+      </section>
 
       {msg ? (
         <p className="rounded-xl border border-white/15 bg-black/30 px-4 py-2 text-sm text-cream/85">{msg}</p>
@@ -184,7 +271,11 @@ export function MenuCatalogTab() {
         </div>
 
         <div className="space-y-4 rounded-2xl border border-white/10 bg-charcoal/40 p-5">
-          <h3 className="font-display text-lg text-cream">Edit</h3>
+          <h3 className="font-display text-lg text-cream">
+            Edit{relationalSource ? " (disabled)" : ""}
+          </h3>
+          {!relationalSource ? (
+            <>
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block text-xs sm:col-span-2">
               <span className="text-cream/60">id (blank = new)</span>
@@ -328,6 +419,25 @@ export function MenuCatalogTab() {
               Delete
             </button>
           </div>
+            </>
+          ) : (
+            <pre className="max-h-[55vh] overflow-auto rounded-lg border border-white/10 bg-black/40 p-3 text-left text-xs leading-relaxed text-cream/85">
+              {JSON.stringify(
+                {
+                  ...draft,
+                  optionGroups: draft.optionGroups ?? (() => {
+                    try {
+                      return JSON.parse(optJson || "[]");
+                    } catch {
+                      return [];
+                    }
+                  })(),
+                },
+                null,
+                2,
+              )}
+            </pre>
+          )}
         </div>
       </div>
     </div>

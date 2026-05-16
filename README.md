@@ -1,6 +1,6 @@
 # Angie’s Food Truck — one-page site
 
-Next.js App Router site modeled on the **Gringos Cubanos** food-truck codebase: one-page layout, Google Sheets CSV pipelines (menu, locations, schedule), embedded Google Maps with fallbacks, interactive menu + order drawer, schedule and message boards, gallery, and mobile nav/scroll polish.
+Next.js App Router site modeled on the **Gringos Cubanos** food-truck codebase: one-page layout, Postgres-backed catalog (menu JSON import, locations, schedule) with optional Google Sheets CSV for **locations** and **schedule**, embedded Google Maps with fallbacks, interactive menu + order drawer, schedule and message boards, gallery, and mobile nav/scroll polish.
 
 ## Brand assets
 
@@ -11,15 +11,15 @@ Next.js App Router site modeled on the **Gringos Cubanos** food-truck codebase: 
 
 ### Admin — hosted menu photo URLs
 
-- On production: **`https://angieskc.com/admin`** redirects to **`/admin/photos`** (same for any domain pointed at this Vercel project).
+- On production: **`https://angieskc.com/admin`** (tabs for photos, menu, locations, schedule).
 - Set **`ADMIN_PHOTOS_PASSWORD`** (required). For production uploads, add **`BLOB_READ_WRITE_TOKEN`** (Vercel Blob) and **`DATABASE_URL`** (Postgres) for durable storage; see `.env.example`.
 
 ### Menu
 
-1. Edit the published CSV (Google Sheets → Publish to web → CSV) or use `prompt/google-sheet-menu-template.csv` as a template.
-2. Set **`MENU_CSV_URL`** or **`NEXT_PUBLIC_MENU_CSV_URL`** to the CSV URL.
-3. Headers must match `lib/menu/google-sheet-menu.ts` (see template): `id`, `active`, `category`, `section`, `sortOrder`, `name`, `englishName`, `description`, `price`, `includesFries`, `meatChoiceRequired`, `featured`, `imageUrl`, `imageAlt`, `availabilityLabel`, `optionGroupsJson`.
-4. Use **`/gallery/...`** paths for local images, or Google-hosted URLs allowlisted in `next.config.ts`.
+1. Set **`DATABASE_URL`** and (for the public site) **`SITE_DATA_SOURCE=database`**.
+2. Import the finalized menu JSON from **Admin → Menu → Import menu JSON**, or run **`npm run import:menu ./path/to/menu.json`** locally/CI with `DATABASE_URL` set.
+3. Data is stored in relational tables (`catalog_menu_*`). The app no longer fetches menu from Google Sheet CSV.
+4. Use **`/gallery/...`** paths for local images, or absolute URLs allowlisted in `next.config.ts`.
 
 ### Current truck location
 
