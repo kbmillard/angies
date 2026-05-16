@@ -299,24 +299,6 @@ export function WeekendBreakfastSection() {
                                     {englishSub}
                                   </p>
                                 ) : null}
-                                {item.optionGroups?.some(
-                                  (g) => g.required && g.id !== "meat" && !/meat/i.test(g.label),
-                                ) ? (
-                                  <>
-                                    <span className="mt-1 hidden max-w-full rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-editorial text-cream/75 md:inline-block">
-                                      Choose options
-                                    </span>
-                                    <span className="mt-1 inline-block w-fit max-w-full rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-xs uppercase tracking-[0.12em] text-cream/75 md:hidden">
-                                      Options
-                                    </span>
-                                  </>
-                                ) : item.optionGroups?.some(
-                                    (g) => g.id !== "meat" && !/meat/i.test(g.label),
-                                  ) ? (
-                                  <span className="mt-1 inline-block max-w-full rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-editorial text-cream/75">
-                                    Customize
-                                  </span>
-                                ) : null}
                                 {item.description ? (
                                   <p className="mt-2 break-words text-xs leading-relaxed text-cream/60">
                                     {item.description}

@@ -342,27 +342,6 @@ export function InteractiveMenu() {
                                     With fries
                                   </span>
                                 ) : null}
-                                {(() => {
-                                  const nonMeatGroups =
-                                    item.optionGroups?.filter(
-                                      (g) => g.id !== "meat" && !/meat/i.test(g.label),
-                                    ) ?? [];
-                                  if (nonMeatGroups.some((g) => g.required)) {
-                                    return (
-                                      <span className="mt-1 inline-block rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-editorial text-cream/75">
-                                        Choose options
-                                      </span>
-                                    );
-                                  }
-                                  if (nonMeatGroups.length > 0) {
-                                    return (
-                                      <span className="mt-1 inline-block rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-editorial text-cream/75">
-                                        Customize
-                                      </span>
-                                    );
-                                  }
-                                  return null;
-                                })()}
                                 {item.description ? (
                                   <p className="mt-2 break-words text-xs leading-relaxed text-cream/60">
                                     {item.description}
