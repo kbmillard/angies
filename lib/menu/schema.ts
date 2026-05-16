@@ -79,8 +79,8 @@ export const meatChoices = [
   "Chicken",
   "Chorizo with Potatoes",
   "Milanesa de pollo (Fried Chicken Breast)",
-  "Barbacoa (Beef)",
-  "Lengua (Tongue)",
+  "Barbacoa (Beef) (+$0.50)",
+  "Lengua (Tongue) (+$1.00)",
   "With meat (any style — specify at window)",
 ] as const;
 

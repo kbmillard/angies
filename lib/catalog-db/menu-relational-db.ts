@@ -85,6 +85,21 @@ function pricedSideToppingLabel(name: string, priceUsd: number): string {
   return `${name} (+$${priceUsd.toFixed(2)})`;
 }
 
+/** Meat line in the options modal — shows per-item override total or global upcharge. */
+function pricedMeatOptionLabel(
+  name: string,
+  defaultUpcharge: number,
+  itemOverride: number | undefined,
+): string {
+  if (itemOverride !== undefined) {
+    return `${name} — $${itemOverride.toFixed(2)}`;
+  }
+  if (defaultUpcharge > 0) {
+    return `${name} (+$${defaultUpcharge.toFixed(2)})`;
+  }
+  return name;
+}
+
 export function relationalPayloadToMenuItems(
   meats: ModifierRow[],
   sides: ModifierRow[],
@@ -135,14 +150,15 @@ export function relationalPayloadToMenuItems(
     const meatMods = [...meats].sort((a, b) => a.sort_order - b.sort_order);
 
     const meatOptionPrices: Record<string, number> = {};
+    const meatOptions: string[] = [];
     for (const m of meatMods) {
       const ov = overrideByItemMeat.get(`${row.slug}\t${m.slug}`);
       const up = money(m.amount) ?? 0;
       const resolved = ov ?? (base !== null ? base + up : null);
-      if (resolved !== null) meatOptionPrices[m.name] = resolved;
+      const label = pricedMeatOptionLabel(m.name, up, ov);
+      meatOptions.push(label);
+      if (resolved !== null) meatOptionPrices[label] = resolved;
     }
-
-    const meatOptions = meatMods.map((m) => m.name);
     const optionGroups: MenuOptionGroup[] = [...groupsFromGlobals()];
 
     if (row.requires_meat_selection && meatOptions.length) {
