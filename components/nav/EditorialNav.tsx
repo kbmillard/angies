@@ -8,10 +8,13 @@ import { BrandLogo } from "@/components/ui/BrandLogo";
 import { useOrder } from "@/context/OrderContext";
 import { cn } from "@/lib/utils/cn";
 
-const LINKS: { label: string; id: string }[] = [
+type NavLink = { label: string; id: string; disabled?: boolean };
+
+const LINKS: NavLink[] = [
   { label: "Menu", id: "menu" },
   { label: "Location", id: "locations" },
-  { label: "Schedule", id: "schedule" },
+  /** Schedule lives inside the location card until a dedicated feed ships. */
+  { label: "Schedule", id: "schedule", disabled: true },
   { label: "Story", id: "story" },
   { label: "Catering", id: "catering" },
   { label: "Contact", id: "contact" },
@@ -97,11 +100,12 @@ export function EditorialNav() {
     return () => window.cancelAnimationFrame(t);
   }, [open]);
 
-  const go = (id: string) => {
+  const go = (link: NavLink) => {
+    if (link.disabled) return;
     setOpen(false);
     window.requestAnimationFrame(() => {
       window.requestAnimationFrame(() => {
-        scrollToSection(id);
+        scrollToSection(link.id);
       });
     });
   };
@@ -162,10 +166,21 @@ export function EditorialNav() {
                       <button
                         type="button"
                         data-mobile-nav-link
-                        className="flex w-full items-center border-b border-white/10 py-4 text-left text-sm font-medium uppercase tracking-editorial text-cream transition hover:bg-white/5 active:bg-white/10"
-                        onClick={() => go(l.id)}
+                        disabled={l.disabled}
+                        className={cn(
+                          "flex w-full items-center border-b border-white/10 py-4 text-left text-sm font-medium uppercase tracking-editorial transition",
+                          l.disabled
+                            ? "cursor-not-allowed text-cream/35"
+                            : "text-cream hover:bg-white/5 active:bg-white/10",
+                        )}
+                        onClick={() => go(l)}
                       >
                         {l.label}
+                        {l.disabled ? (
+                          <span className="ml-2 text-[10px] normal-case tracking-normal text-cream/40">
+                            (coming soon)
+                          </span>
+                        ) : null}
                       </button>
                     </motion.li>
                   ))}
@@ -174,7 +189,7 @@ export function EditorialNav() {
                   type="button"
                   data-mobile-nav-link
                   className="mt-4 w-full rounded-full bg-angie-orange py-4 text-center text-xs font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-angie-orange/90"
-                  onClick={() => go("menu")}
+                  onClick={() => go({ label: "Menu", id: "menu" })}
                 >
                   Menu
                 </button>
@@ -205,19 +220,29 @@ export function EditorialNav() {
             {open ? <X className="h-5 w-5" aria-hidden /> : <Menu className="h-5 w-5" aria-hidden />}
           </button>
           <nav className="hidden flex-wrap items-center gap-x-3 gap-y-2 lg:flex" aria-label="Primary">
-            {left.map((l) => (
-              <button
-                key={l.id}
-                type="button"
-                onClick={() => go(l.id)}
-                className={cn(
-                  "text-[10px] uppercase tracking-editorial text-cream/70 transition hover:text-cream sm:text-[11px]",
-                  active === l.id && "text-cream",
-                )}
-              >
-                {l.label}
-              </button>
-            ))}
+            {left.map((l) =>
+              l.disabled ? (
+                <span
+                  key={l.id}
+                  className="cursor-not-allowed text-[10px] uppercase tracking-editorial text-cream/35 sm:text-[11px]"
+                  title="Schedule coming soon"
+                >
+                  {l.label}
+                </span>
+              ) : (
+                <button
+                  key={l.id}
+                  type="button"
+                  onClick={() => go(l)}
+                  className={cn(
+                    "text-[10px] uppercase tracking-editorial text-cream/70 transition hover:text-cream sm:text-[11px]",
+                    active === l.id && "text-cream",
+                  )}
+                >
+                  {l.label}
+                </button>
+              ),
+            )}
           </nav>
         </div>
 
@@ -237,7 +262,7 @@ export function EditorialNav() {
               <button
                 key={l.id}
                 type="button"
-                onClick={() => go(l.id)}
+                onClick={() => go(l)}
                 className={cn(
                   "text-[10px] uppercase tracking-editorial text-cream/70 transition hover:text-cream sm:text-[11px]",
                   active === l.id && "text-cream",
@@ -249,7 +274,7 @@ export function EditorialNav() {
           </nav>
           <button
             type="button"
-            onClick={() => go("menu")}
+            onClick={() => go({ label: "Menu", id: "menu" })}
             className={cn(
               "rounded-full bg-angie-orange px-4 py-2 text-[10px] font-semibold uppercase tracking-editorial text-cream shadow-md transition hover:bg-angie-orange/90 sm:text-[11px]",
               open && "max-lg:hidden",

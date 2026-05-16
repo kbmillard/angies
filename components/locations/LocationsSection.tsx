@@ -2,8 +2,9 @@
 
 import { MapPin, Phone } from "lucide-react";
 import { CONTACT } from "@/lib/data/locations";
-import { SOCIAL_LINKS } from "@/lib/data/social";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { glassCtaAccent, glassCtaBase } from "@/components/ui/glass-cta";
+import { cn } from "@/lib/utils/cn";
 import { useLocationsCatalog } from "@/context/LocationsCatalogContext";
 import type { LocationItem } from "@/lib/locations/schema";
 import { LocationPublicStatus } from "@/components/locations/LocationPublicStatus";
@@ -103,13 +104,13 @@ function MapEmbedBlock({ loc }: { loc: LocationItem }) {
   );
 }
 
-function MapButton({ label, href }: { label: string; href: string }) {
+function MapButton({ label, href, accent }: { label: string; href: string; accent?: boolean }) {
   return (
     <a
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="rounded-full border border-white/15 px-4 py-2 text-[10px] uppercase tracking-editorial text-cream hover:bg-white/5"
+      className={cn("w-full sm:w-auto", accent ? glassCtaAccent : glassCtaBase)}
     >
       {label}
     </a>
@@ -162,18 +163,6 @@ export function LocationsSection() {
           <article className="mt-12 overflow-hidden rounded-3xl border border-white/10 bg-charcoal/35 p-6 backdrop-blur-md sm:p-10">
             <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
               <div className="min-w-0 flex-1 space-y-4">
-                <p className="text-sm leading-relaxed text-cream/75">
-                  You can always keep up with us in real time on{" "}
-                  <a
-                    href={SOCIAL_LINKS.instagram.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-cream underline-offset-4 hover:underline"
-                  >
-                    Instagram {SOCIAL_LINKS.instagram.handle}
-                  </a>{" "}
-                  as well.
-                </p>
                 <p className="text-xs uppercase tracking-editorial text-gold/90">Current truck location</p>
                 <h3 className="font-display text-3xl text-cream sm:text-4xl">{primaryTruck.name}</h3>
                 <LocationPublicStatus location={primaryTruck} variant="card" showNote />
@@ -208,17 +197,6 @@ export function LocationsSection() {
                     </p>
                   ) : null}
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <MapButton label="Open in Google Maps" href={resolvedMapsUrl(primaryTruck)} />
-                  <MapButton label="Apple Maps" href={resolvedAppleMapsUrl(primaryTruck)} />
-                  <a
-                    href={phoneTel}
-                    className="inline-flex items-center gap-2 rounded-full bg-angie-orange px-4 py-2 text-[10px] font-semibold uppercase tracking-editorial text-cream shadow-sm transition hover:bg-angie-orange/90"
-                  >
-                    <Phone className="h-4 w-4" aria-hidden />
-                    Call / text
-                  </a>
-                </div>
               </div>
               <div className="w-full min-w-0 shrink-0 lg:min-w-0 lg:flex-1">
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-start">
@@ -240,6 +218,14 @@ export function LocationsSection() {
                   </div>
                 </div>
               </div>
+            </div>
+            <div className="mt-10 grid grid-cols-1 gap-3 border-t border-white/10 pt-8 sm:grid-cols-3 sm:gap-4">
+              <MapButton label="Open in Google Maps" href={resolvedMapsUrl(primaryTruck)} />
+              <MapButton label="Apple Maps" href={resolvedAppleMapsUrl(primaryTruck)} />
+              <a href={phoneTel} className={cn(glassCtaAccent, "w-full gap-2 sm:w-auto")}>
+                <Phone className="h-4 w-4 shrink-0" aria-hidden />
+                Call / text
+              </a>
             </div>
           </article>
         ) : (
