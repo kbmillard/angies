@@ -1,10 +1,10 @@
 "use client";
 
 import { BrandLogo } from "@/components/ui/BrandLogo";
-import { CONTACT, HOURS_LINES } from "@/lib/data/locations";
+import { CONTACT, PUBLIC_HOURS_LINES } from "@/lib/data/locations";
 import { SOCIAL_LINKS } from "@/lib/data/social";
 import { useLocationsCatalog } from "@/context/LocationsCatalogContext";
-import { footerHoursLines, footerTruckVisit } from "@/lib/locations/footer-visit-from-catalog";
+import { footerTruckVisit } from "@/lib/locations/footer-visit-from-catalog";
 import { telHrefFromDisplay } from "@/lib/locations/helpers";
 
 export function SiteFooter() {
@@ -22,8 +22,6 @@ export function SiteFooter() {
 
   const emailAddr =
     truckLoc?.email?.trim() || restaurantLoc?.email?.trim() || CONTACT.email;
-
-  const hoursLines = footerHoursLines(data, HOURS_LINES[1]);
 
   return (
     <footer
@@ -114,13 +112,10 @@ export function SiteFooter() {
           <div>
             <p className="text-xs uppercase tracking-editorial text-cream/50">Hours</p>
             <ul className="mt-2 space-y-1 text-sm text-cream/80">
-              {hoursLines.map((h) => (
+              {PUBLIC_HOURS_LINES.map((h) => (
                 <li key={h}>{h}</li>
               ))}
             </ul>
-            <p className="mt-6 text-xs text-cream/50">
-              Order requests are sent to the team; confirm pickup at the truck.
-            </p>
           </div>
         </div>
       </div>

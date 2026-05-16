@@ -1,9 +1,13 @@
 import { SOCIAL_LINKS } from "@/lib/data/social";
 
-/** Hours copy when no location hours are loaded yet. */
-export const HOURS_LINES = [
-  "Hours are owner-editable via the Locations Sheet — confirm final public hours (demo: Wed–Sat 10am–5pm, America/Chicago).",
-  `Same-day truck updates: ${SOCIAL_LINKS.facebook.handle} on Facebook and ${SOCIAL_LINKS.instagram.handle} on Instagram`,
+/** Public footer hours (fixed marketing copy). */
+export const PUBLIC_HOURS_LINES = [
+  "Monday & Tuesday",
+  "10:00 AM to 2:00 PM",
+  "Wednesday – Friday",
+  "10:00 AM to 8:00 PM",
+  "Saturday",
+  "10:00 AM to 4:00 PM",
 ] as const;
 
 /** Public catering / contact lines (both numbers). */
