@@ -21,16 +21,12 @@ import { GoogleMapGreedy } from "@/components/locations/GoogleMapGreedy";
 import { ScheduleListBlock } from "@/components/schedule/ScheduleListBlock";
 
 const MAP_FRAME_CLASS =
-  "h-[min(52vw,320px)] w-full min-h-[220px] bg-charcoal lg:min-h-[280px]";
+  "h-[min(48vw,320px)] w-full min-h-[200px] bg-charcoal lg:min-h-[240px]";
 
-function addressLines(loc: LocationItem): string[] {
+function addressOneLine(loc: LocationItem): string {
   const cityLine = [loc.city, loc.state, loc.zip].filter(Boolean).join(" ").trim();
-  const lines = [loc.address, cityLine].filter(Boolean);
-  return lines.length > 0 ? lines : [];
-}
-
-function hasPublishedAddress(loc: LocationItem): boolean {
-  return formatAddressLine(loc).trim().length > 0;
+  const parts = [loc.address?.trim(), cityLine].filter(Boolean);
+  return parts.join(", ");
 }
 
 function parseCoord(n: number | null | undefined): number | null {
@@ -85,9 +81,11 @@ function MapEmbedBlock({ loc }: { loc: LocationItem }) {
           />
         </div>
       ) : (
-        <div className="rounded-2xl border border-dashed border-white/20 bg-charcoal/60 p-6 text-sm text-cream/75">
-          <p className="font-medium text-cream">Map</p>
-          <p className="mt-2 text-cream/70">TBD</p>
+        <div className="flex min-h-[200px] items-center justify-center rounded-2xl border border-dashed border-white/20 bg-charcoal/60 p-6 text-sm text-cream/75">
+          <div className="text-center">
+            <p className="font-medium text-cream">Map</p>
+            <p className="mt-2 text-cream/70">TBD</p>
+          </div>
         </div>
       )}
     </>
@@ -116,6 +114,8 @@ export function LocationsSection() {
   const phoneTel = phoneDisplay
     ? telHrefFromDisplay(phoneDisplay, CONTACT.phones[0]!.tel)
     : `tel:${CONTACT.phones[0]!.tel}`;
+
+  const addressLine = primaryTruck ? addressOneLine(primaryTruck) : "";
 
   return (
     <section
@@ -149,44 +149,44 @@ export function LocationsSection() {
           <div className="mt-8 h-96 animate-pulse rounded-3xl bg-white/10" />
         ) : primaryTruck ? (
           <article className="mt-8 overflow-hidden rounded-3xl border border-white/10 bg-charcoal/35 p-5 backdrop-blur-md sm:p-8 lg:p-10">
-            <div className="flex flex-col gap-8 lg:flex-row lg:items-start">
-              <div className="min-w-0 flex-1 space-y-4">
-                <p className="text-xs uppercase tracking-editorial text-gold/90">Current truck location</p>
-                <h3 className="font-display text-3xl text-cream sm:text-4xl">{primaryTruck.name}</h3>
-                <LocationPublicStatus location={primaryTruck} variant="card" showNote={false} />
-                <div className="flex items-start gap-2 text-cream/90">
-                  <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-gold" aria-hidden />
-                  <div>
-                    {hasPublishedAddress(primaryTruck) ? (
-                      addressLines(primaryTruck).map((l) => <p key={l}>{l}</p>)
-                    ) : (
-                      <p className="text-cream/75">TBD</p>
-                    )}
-                  </div>
+            <div className="flex flex-col gap-4 border-b border-white/10 pb-6 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-8 lg:gap-y-3">
+              <p className="w-full text-xs uppercase tracking-editorial text-gold/90 lg:w-auto lg:shrink-0">
+                Current truck location
+              </p>
+              <h3 className="shrink-0 font-display text-2xl text-cream sm:text-3xl">
+                {primaryTruck.name}
+              </h3>
+              <LocationPublicStatus
+                location={primaryTruck}
+                variant="card"
+                showNote={false}
+                className="shrink-0 [&_p]:mt-0"
+              />
+              <div className="flex min-w-0 items-center gap-2 text-sm text-cream/90 lg:ml-auto">
+                <MapPin className="h-4 w-4 shrink-0 text-gold" aria-hidden />
+                <span className="truncate">
+                  {addressLine || <span className="text-cream/75">TBD</span>}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-6 grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-6">
+              <div
+                id="schedule"
+                tabIndex={-1}
+                className="min-w-0 scroll-mt-[calc(var(--nav-h)+16px)] outline-none focus:outline-none"
+              >
+                <p className="text-xs font-semibold uppercase tracking-editorial text-gold/90">
+                  Upcoming schedule
+                </p>
+                <p className="mt-1 text-sm text-cream/65">Where we&apos;re rolling next.</p>
+                <div className="mt-3">
+                  <ScheduleListBlock variant="embedded" />
                 </div>
               </div>
 
-              <div className="w-full min-w-0 lg:flex-[1.35]">
-                <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:items-start">
-                  <div className="min-w-0">
-                    <MapEmbedBlock loc={primaryTruck} />
-                  </div>
-                  <div
-                    id="schedule"
-                    tabIndex={-1}
-                    className="min-w-0 scroll-mt-[calc(var(--nav-h)+16px)] outline-none focus:outline-none"
-                  >
-                    <p className="text-xs font-semibold uppercase tracking-editorial text-gold/90">
-                      Upcoming schedule
-                    </p>
-                    <p className="mt-1 text-sm text-cream/65">
-                      Where we&apos;re rolling next — same dates as the full site feed.
-                    </p>
-                    <div className="mt-3">
-                      <ScheduleListBlock variant="embedded" />
-                    </div>
-                  </div>
-                </div>
+              <div className="min-w-0">
+                <MapEmbedBlock loc={primaryTruck} />
               </div>
             </div>
 
