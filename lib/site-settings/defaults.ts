@@ -11,7 +11,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsResolved = {
     slides: HERO_SLIDES.map((s) => ({ src: s.src, alt: s.alt })),
     cta: {
       order: "Order",
-      viewMenu: "View menu",
+      viewMenu: "Menu",
       findTruck: "Find the truck",
       schedule: "Upcoming schedule",
       catering: "Book catering / event",
@@ -30,5 +30,20 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsResolved = {
       "We had the opportunity to have Angie's Food Truck present for one of our events. Over 100 guests raved about the food…",
     quoteFooter: "Short public review snippets — confirm exact wording with owner.",
     slides: DEFAULT_STORY_SLIDES.map((s) => ({ ...s })),
+  },
+  catering: {
+    kicker: "Catering & private events",
+    title: "Bring the truck — bring the party.",
+    subtitle:
+      "Festivals, office lunches, birthdays, and private parties — Angie's rolls up with a bright truck, Mexican favorites, aguas frescas, and a crew that keeps the line moving.",
+    body: "",
+  },
+  social: {
+    kicker: "Social",
+    title: "Follow the truck — same-day updates.",
+    subtitle: "Facebook and Instagram carry the live pin, specials, and catering highlights.",
+    body: "Tag us when you order — we love resharing KC neighborhoods enjoying Angie's.",
+    instagramHandle: "@angiesfoodtruck",
+    facebookHandle: "Angie's Food Truck",
   },
 };

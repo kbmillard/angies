@@ -18,7 +18,7 @@ const LINKS: { label: string; id: string }[] = [
 ];
 
 export function EditorialNav() {
-  const { scrollToSection, openOrderPanel } = useOrder();
+  const { scrollToSection } = useOrder();
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -106,11 +106,6 @@ export function EditorialNav() {
     });
   };
 
-  const openOrderFromMenu = () => {
-    setOpen(false);
-    openOrderPanel();
-  };
-
   const backdropTransition = reduceMotion ? { duration: 0.15 } : { duration: 0.22, ease: [0.22, 1, 0.36, 1] as const };
   const panelTransition = reduceMotion
     ? { duration: 0.15 }
@@ -179,9 +174,9 @@ export function EditorialNav() {
                   type="button"
                   data-mobile-nav-link
                   className="mt-4 w-full rounded-full bg-angie-orange py-4 text-center text-xs font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-angie-orange/90"
-                  onClick={openOrderFromMenu}
+                  onClick={() => go("menu")}
                 >
-                  Order now
+                  Menu
                 </button>
               </div>
             </motion.nav>
@@ -254,13 +249,13 @@ export function EditorialNav() {
           </nav>
           <button
             type="button"
-            onClick={openOrderPanel}
+            onClick={() => go("menu")}
             className={cn(
               "rounded-full bg-angie-orange px-4 py-2 text-[10px] font-semibold uppercase tracking-editorial text-cream shadow-md transition hover:bg-angie-orange/90 sm:text-[11px]",
               open && "max-lg:hidden",
             )}
           >
-            Order now
+            Menu
           </button>
         </div>
       </div>
