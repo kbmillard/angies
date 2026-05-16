@@ -23,10 +23,13 @@ import { ScheduleListBlock } from "@/components/schedule/ScheduleListBlock";
 const MAP_FRAME_CLASS =
   "h-[min(48vw,320px)] w-full min-h-[200px] bg-charcoal lg:min-h-[240px]";
 
-function addressOneLine(loc: LocationItem): string {
+function addressLines(loc: LocationItem): string[] {
   const cityLine = [loc.city, loc.state, loc.zip].filter(Boolean).join(" ").trim();
-  const parts = [loc.address?.trim(), cityLine].filter(Boolean);
-  return parts.join(", ");
+  return [loc.address?.trim(), cityLine].filter((line): line is string => Boolean(line));
+}
+
+function hasPublishedAddress(loc: LocationItem): boolean {
+  return formatAddressLine(loc).trim().length > 0;
 }
 
 function parseCoord(n: number | null | undefined): number | null {
@@ -115,8 +118,6 @@ export function LocationsSection() {
     ? telHrefFromDisplay(phoneDisplay, CONTACT.phones[0]!.tel)
     : `tel:${CONTACT.phones[0]!.tel}`;
 
-  const addressLine = primaryTruck ? addressOneLine(primaryTruck) : "";
-
   return (
     <section
       id="locations"
@@ -149,24 +150,34 @@ export function LocationsSection() {
           <div className="mt-8 h-96 animate-pulse rounded-3xl bg-white/10" />
         ) : primaryTruck ? (
           <article className="mt-8 overflow-hidden rounded-3xl border border-white/10 bg-charcoal/35 p-5 backdrop-blur-md sm:p-8 lg:p-10">
-            <div className="flex flex-col gap-4 border-b border-white/10 pb-6 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-8 lg:gap-y-3">
-              <p className="w-full text-xs uppercase tracking-editorial text-gold/90 lg:w-auto lg:shrink-0">
-                Current truck location
-              </p>
-              <h3 className="shrink-0 font-display text-2xl text-cream sm:text-3xl">
-                {primaryTruck.name}
-              </h3>
-              <LocationPublicStatus
-                location={primaryTruck}
-                variant="card"
-                showNote={false}
-                className="shrink-0 [&_p]:mt-0"
-              />
-              <div className="flex min-w-0 items-center gap-2 text-sm text-cream/90 lg:ml-auto">
-                <MapPin className="h-4 w-4 shrink-0 text-gold" aria-hidden />
-                <span className="truncate">
-                  {addressLine || <span className="text-cream/75">TBD</span>}
-                </span>
+            <div className="grid gap-5 border-b border-white/10 pb-6 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-x-12">
+              <div className="min-w-0 space-y-2 sm:space-y-3">
+                <p className="text-xs uppercase tracking-editorial text-gold/90">
+                  Current truck location
+                </p>
+                <h3 className="font-display text-3xl text-cream sm:text-4xl">
+                  {primaryTruck.name}
+                </h3>
+                <LocationPublicStatus
+                  location={primaryTruck}
+                  variant="card"
+                  showNote={false}
+                  className="[&_p]:mt-0"
+                />
+              </div>
+              <div className="flex items-start gap-2 text-sm text-cream/90 sm:text-base lg:justify-end lg:pt-7 lg:text-right">
+                <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-gold" aria-hidden />
+                <div className="min-w-0">
+                  {hasPublishedAddress(primaryTruck) ? (
+                    addressLines(primaryTruck).map((line) => (
+                      <p key={line} className="leading-snug">
+                        {line}
+                      </p>
+                    ))
+                  ) : (
+                    <p className="text-cream/75">TBD</p>
+                  )}
+                </div>
               </div>
             </div>
 
