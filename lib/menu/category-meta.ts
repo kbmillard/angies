@@ -1,63 +1,39 @@
 import type { MenuCategoryMeta } from "./schema";
 
 /**
- * Editorial styling for menu category tabs. Labels must match sheet `category` values.
+ * Editorial styling for menu category tabs. Labels must match `category` / DB category names.
  */
 export const MENU_CATEGORY_META: MenuCategoryMeta[] = [
   {
     id: "tacos",
     label: "Tacos",
-    panelKickerEn: "Street favorites",
-    subtitle: "Street-style tacos — meats and toppings confirmed at the window.",
+    panelKickerEn: "Street & birria",
+    subtitle: "Street tacos, tacos de canasta, and tacos de birria — built at the window.",
     color: "red",
     number: "01",
-  },
-  {
-    id: "birria",
-    label: "Birria",
-    panelKickerEn: "Slow-cooked",
-    subtitle: "Beef birria — confirm tacos, plate, or consommé with owner",
-    color: "orange",
-    number: "02",
   },
   {
     id: "burritos",
     label: "Burritos",
     panelKickerEn: "12″ builds",
-    subtitle: "Flour tortilla, cheese, rice, beans, meat, salsa",
+    subtitle: "Classic, breakfast, and California — choose your meat when it applies.",
     color: "yellow",
+    number: "02",
+  },
+  {
+    id: "quesadillas",
+    label: "Quesadillas",
+    panelKickerEn: "Melted cheese",
+    subtitle: "Quesadilla and quesabirria with consommé for dipping.",
+    color: "orange",
     number: "03",
   },
   {
-    id: "aguas-frescas",
-    label: "Aguas Frescas",
-    panelKickerEn: "Fresh waters",
-    subtitle: "Horchata, mango, rotating flavors",
-    color: "cyan",
-    number: "04",
-  },
-  {
-    id: "specials",
-    label: "Specials",
-    panelKickerEn: "Hot board",
-    subtitle: "Daily hot specials — confirm at the window.",
+    id: "classics",
+    label: "Classics",
+    panelKickerEn: "Torta & more",
+    subtitle: "Cemita, tostada, and chilaquiles — bold plates from the classics line.",
     color: "pink",
-    number: "05",
-  },
-  {
-    id: "sides",
-    label: "Sides",
-    panelKickerEn: "Sides",
-    subtitle: "Rice, beans, and more",
-    color: "green",
-    number: "06",
-  },
-  {
-    id: "catering",
-    label: "Catering",
-    panelKickerEn: "Events",
-    subtitle: "Festivals, offices, private parties — request a quote",
-    color: "red",
-    number: "07",
+    number: "04",
   },
 ];

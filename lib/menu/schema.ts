@@ -67,23 +67,21 @@ export type MenuResponse = MenuCatalogResponse;
 
 export const MENU_CATEGORY_ORDER = [
   "Tacos",
-  "Birria",
   "Burritos",
   "Quesadillas",
   "Classics",
-  "Aguas Frescas",
-  "Specials",
-  "Sides",
-  "Catering",
 ] as const;
 
-/** Sheet-driven `meatChoiceRequired` rows (e.g. plates with pick-one meat). */
+/** Fallback meat labels for legacy meat modal when `optionGroups` are absent (prefer DB-driven menu). */
 export const meatChoices = [
-  "Asada",
-  "Pastor",
+  "Asada (Steak)",
+  "Pastor (Pork)",
   "Chicken",
-  "Birria",
-  "Other / Confirm",
+  "Chorizo with Potatoes",
+  "Milanesa de pollo (Fried Chicken Breast)",
+  "Barbacoa (Beef)",
+  "Lengua (Tongue)",
+  "With meat (any style — specify at window)",
 ] as const;
 
 /** Price in dollars → cents for cart math; null stays null */

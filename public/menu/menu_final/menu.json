@@ -1,0 +1,164 @@
+{
+  "menu": {
+    "categories": [
+      {
+        "slug": "tacos",
+        "name": "Tacos",
+        "items": [
+          {
+            "slug": "street-tacos",
+            "name": "Street Tacos",
+            "description": "Corn tortilla with your choice of meat, cilantro, onions, lettuce, cheese, and salsa. Served with lemon & cucumber on the side.",
+            "basePrice": 3.5,
+            "requiresMeatSelection": true,
+            "variantOverrides": {
+              "lengua-tongue": 4.0,
+              "barbacoa-beef": 3.75
+            }
+          },
+          {
+            "slug": "tacos-de-canasta",
+            "name": "Tacos de Canasta",
+            "description": "Three corn tortillas filled with potatoes & chorizo. Served with lettuce, jalapeño, & salsa on the side.",
+            "basePrice": 9.0,
+            "requiresMeatSelection": false
+          },
+          {
+            "slug": "tacos-de-birria",
+            "name": "Tacos de Birria",
+            "description": "Three light & crispy corn tortillas loaded with cheese, birria, cilantro, and onions. Served with consommé, salsa, lemon, & cucumber on the side.",
+            "basePrice": 14.0,
+            "requiresMeatSelection": false
+          }
+        ]
+      },
+      {
+        "slug": "burritos",
+        "name": "Burritos",
+        "items": [
+          {
+            "slug": "classic-burrito",
+            "name": "Classic Burrito",
+            "description": "12\" flour tortilla packed with your choice of meat, cheese, rice, and beans. Served with salsa on the side.",
+            "basePrice": 11.0,
+            "requiresMeatSelection": true,
+            "variantOverrides": {
+              "lengua-tongue": 12.0,
+              "barbacoa-beef": 11.75
+            }
+          },
+          {
+            "slug": "breakfast-burrito",
+            "name": "Breakfast Burrito",
+            "description": "12\" flour tortilla filled with your choice of meat, cheese, eggs, and potatoes. Served with salsa on the side.",
+            "basePrice": 11.0,
+            "requiresMeatSelection": true
+          },
+          {
+            "slug": "california-burrito",
+            "name": "California Burrito",
+            "description": "12\" flour tortilla loaded with your choice of meat, crispy potatoes, pico de gallo, and cream.",
+            "basePrice": 12.0,
+            "requiresMeatSelection": true
+          }
+        ]
+      },
+      {
+        "slug": "quesadillas",
+        "name": "Quesadillas",
+        "items": [
+          {
+            "slug": "quesadilla",
+            "name": "Quesadilla",
+            "description": "12\" flour tortilla filled with your choice of meat and melted cheese. Served with a lettuce mix, pico de gallo, & sour cream on the side.",
+            "basePrice": 11.0,
+            "requiresMeatSelection": true,
+            "variantOverrides": {
+              "lengua-tongue": 12.0,
+              "barbacoa-beef": 11.75
+            }
+          },
+          {
+            "slug": "quesabirria",
+            "name": "Quesabirria",
+            "description": "12\" flour tortilla loaded with melted cheese, savory birria, cilantro, and onions. Served with a side of rich consommé for dipping.",
+            "basePrice": 14.0,
+            "requiresMeatSelection": false
+          }
+        ]
+      },
+      {
+        "slug": "classics",
+        "name": "Classics",
+        "items": [
+          {
+            "slug": "cemita",
+            "name": "Cemita (Mexican Torta)",
+            "description": "Your choice of meat, beans, lettuce, melted Oaxaca cheese, mayo, and avocado. Served with jalapeño on the side.",
+            "basePrice": 13.0,
+            "requiresMeatSelection": true,
+            "variantOverrides": {
+              "lengua-tongue": 14.0,
+              "barbacoa-beef": 13.75
+            }
+          },
+          {
+            "slug": "tostada",
+            "name": "Tostada",
+            "description": "Crispy flat tortilla stacked with your choice of meat, beans, lettuce, pico de gallo, cream, and queso fresco.",
+            "basePrice": 4.5,
+            "requiresMeatSelection": true,
+            "variantOverrides": {
+              "lengua-tongue": 5.5,
+              "barbacoa-beef": 5.0
+            }
+          },
+          {
+            "slug": "chilaquiles",
+            "name": "Chilaquiles",
+            "description": "Crispy tortilla chips tossed in red salsa, topped with cream, cilantro, onions, queso fresco, and a perfectly fried egg.",
+            "basePrice": 11.0,
+            "requiresMeatSelection": true,
+            "variantOverrides": {
+              "any-meat": 14.0
+            }
+          }
+        ]
+      }
+    ],
+    "globalModifiers": {
+      "meats": [
+        { "slug": "asada-steak", "name": "Asada (Steak)", "defaultUpcharge": 0.0 },
+        { "slug": "pastor-pork", "name": "Pastor (Pork)", "defaultUpcharge": 0.0 },
+        { "slug": "chicken", "name": "Chicken", "defaultUpcharge": 0.0 },
+        { "slug": "chorizo-with-potatoes", "name": "Chorizo with Potatoes", "defaultUpcharge": 0.0 },
+        {
+          "slug": "milanesa-de-pollo",
+          "name": "Milanesa de pollo (Fried Chicken Breast)",
+          "defaultUpcharge": 0.0
+        },
+        { "slug": "barbacoa-beef", "name": "Barbacoa (Beef)", "defaultUpcharge": 0.5 },
+        { "slug": "lengua-tongue", "name": "Lengua (Tongue)", "defaultUpcharge": 1.0 },
+        {
+          "slug": "any-meat",
+          "name": "With meat (any style — specify at window)",
+          "defaultUpcharge": 0.0
+        }
+      ],
+      "sides": [
+        { "slug": "rice", "name": "Rice", "price": 3.0 },
+        { "slug": "beans", "name": "Beans", "price": 3.0 },
+        { "slug": "guacamole-chips", "name": "Guacamole with chips (4oz)", "price": 6.5 },
+        { "slug": "chips-salsa", "name": "Chips with salsa (4oz)", "price": 4.0 }
+      ],
+      "toppings": [
+        { "slug": "sour-cream", "name": "Sour cream", "price": 1.0 },
+        { "slug": "lettuce", "name": "Lettuce", "price": 0.5 },
+        { "slug": "pico-de-gallo", "name": "Pico de gallo", "price": 1.0 },
+        { "slug": "guacamole", "name": "Guacamole", "price": 2.0 },
+        { "slug": "red-salsa", "name": "Red salsa (hot)", "price": 0.0 },
+        { "slug": "green-salsa", "name": "Green salsa", "price": 0.0 }
+      ]
+    }
+  }
+}

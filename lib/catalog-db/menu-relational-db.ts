@@ -40,6 +40,26 @@ const MEAT_GROUP_ID = "meat";
 const SIDES_GROUP_ID = "sides";
 const TOPPINGS_GROUP_ID = "toppings";
 
+function menuFinalImageForItemSlug(slug: string): { url: string; alt: string } | null {
+  const m: Record<string, readonly [file: string, alt: string]> = {
+    "street-tacos": ["tacos.png", "Street tacos"],
+    "tacos-de-canasta": ["Taco de canasta.png", "Tacos de canasta"],
+    "tacos-de-birria": ["Taco birrias.png", "Tacos de birria"],
+    "classic-burrito": ["Burrito.png", "Classic burrito"],
+    "breakfast-burrito": ["Breakfast burrito.png", "Breakfast burrito"],
+    "california-burrito": ["California burrito.png", "California burrito"],
+    "quesadilla": ["Quesadilla.png", "Quesadilla"],
+    "quesabirria": ["Quesabirria.png", "Quesabirria"],
+    "cemita": ["Cemita.png", "Cemita"],
+    "tostada": ["Tostada.png", "Tostada"],
+    "chilaquiles": ["Chilaquiles.png", "Chilaquiles"],
+  };
+  const row = m[slug];
+  if (!row) return null;
+  const [file, alt] = row;
+  return { url: `/menu/menu_final/${encodeURIComponent(file)}`, alt };
+}
+
 export async function countRelationalMenuRows(): Promise<number> {
   const sql = getSql();
   if (!sql) return 0;
@@ -316,6 +336,7 @@ export async function importMenuFromPayload(
       `;
       let itOrd = 0;
       for (const it of cat.items) {
+        const art = menuFinalImageForItemSlug(it.slug);
         await tx`
           INSERT INTO catalog_menu_items (
             slug,
@@ -341,8 +362,8 @@ export async function importMenuFromPayload(
             ${itOrd++},
             true,
             false,
-            null,
-            null,
+            ${art?.url ?? null},
+            ${art?.alt ?? null},
             null
           )
         `;
