@@ -299,18 +299,9 @@ export function WeekendBreakfastSection() {
                                     {englishSub}
                                   </p>
                                 ) : null}
-                                {item.meatChoiceRequired && !item.optionGroups?.length ? (
-                                  <span className="mt-1 inline-block max-w-full rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-editorial text-cream/75">
-                                    Choice of meat
-                                  </span>
-                                ) : null}
                                 {item.optionGroups?.some(
-                                  (g) => g.required && /meat/i.test(g.label),
+                                  (g) => g.required && g.id !== "meat" && !/meat/i.test(g.label),
                                 ) ? (
-                                  <span className="mt-1 inline-block max-w-full rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-editorial text-cream/75">
-                                    Choose meat
-                                  </span>
-                                ) : item.optionGroups?.some((g) => g.required) ? (
                                   <>
                                     <span className="mt-1 hidden max-w-full rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-editorial text-cream/75 md:inline-block">
                                       Choose options
@@ -319,7 +310,9 @@ export function WeekendBreakfastSection() {
                                       Options
                                     </span>
                                   </>
-                                ) : item.optionGroups?.length ? (
+                                ) : item.optionGroups?.some(
+                                    (g) => g.id !== "meat" && !/meat/i.test(g.label),
+                                  ) ? (
                                   <span className="mt-1 inline-block max-w-full rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-editorial text-cream/75">
                                     Customize
                                   </span>

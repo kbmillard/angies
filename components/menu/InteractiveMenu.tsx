@@ -43,6 +43,20 @@ function PriceRow({ name, price }: { name: string; price: number | null }) {
   );
 }
 
+function itemHeroImage(item: MenuItem): { src: string; alt: string } | null {
+  const src = item.imageUrl?.trim();
+  if (!src) return null;
+  return { src, alt: (item.imageAlt?.trim() || item.name).trim() };
+}
+
+function defaultCategoryHero(items: MenuItem[]): { src: string; alt: string } | null {
+  if (!items.length) return null;
+  const featured = items.find((i) => i.featured && i.imageUrl?.trim());
+  const any = items.find((i) => i.imageUrl?.trim());
+  const pick = featured ?? any;
+  return pick ? itemHeroImage(pick) : null;
+}
+
 export function InteractiveMenu() {
   const { data, loading, error } = useMenuCatalog();
   const { addItem, openOrderPanel } = useOrder();
@@ -53,6 +67,8 @@ export function InteractiveMenu() {
   const [activeId, setActiveId] = useState(MENU_CATEGORY_META[0]!.id);
   const [meatItem, setMeatItem] = useState<MenuItem | null>(null);
   const [optionsItem, setOptionsItem] = useState<MenuItem | null>(null);
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [hoverItemId, setHoverItemId] = useState<string | null>(null);
 
   const visibleMeta = useMemo(() => {
     if (!data?.items.length) return MENU_CATEGORY_META;
@@ -80,17 +96,25 @@ export function InteractiveMenu() {
     );
   }, [active, data]);
 
-  const categoryHero = useMemo(() => {
-    if (!items.length) return null;
-    const featured = items.find((i) => i.featured && i.imageUrl?.trim());
-    const any = items.find((i) => i.imageUrl?.trim());
-    const pick = featured ?? any;
-    if (!pick?.imageUrl?.trim()) return null;
-    return {
-      src: pick.imageUrl.trim(),
-      alt: (pick.imageAlt?.trim() || pick.name).trim(),
-    };
-  }, [items]);
+  const categoryHero = useMemo(() => defaultCategoryHero(items), [items]);
+
+  const displayHero = useMemo(() => {
+    const previewId = hoverItemId ?? selectedItemId;
+    if (previewId) {
+      const item = items.find((i) => i.id === previewId);
+      if (item) {
+        const hero = itemHeroImage(item);
+        if (hero) return hero;
+      }
+    }
+    return categoryHero;
+  }, [categoryHero, hoverItemId, items, selectedItemId]);
+
+  useEffect(() => {
+    const firstWithImage = items.find((i) => i.imageUrl?.trim());
+    setSelectedItemId(firstWithImage?.id ?? null);
+    setHoverItemId(null);
+  }, [activeId, items]);
 
   const handleAdd = (item: MenuItem) => {
     if (item.meatChoiceRequired && !item.optionGroups?.length) {
@@ -243,36 +267,72 @@ export function InteractiveMenu() {
                         <div
                           className={cn(
                             "relative mt-8 aspect-[4/3] w-full max-w-full overflow-hidden rounded-2xl border border-white/10",
-                            !categoryHero && cn("bg-gradient-to-br", categoryHeroGradient(active.color)),
+                            !displayHero && cn("bg-gradient-to-br", categoryHeroGradient(active.color)),
                           )}
                         >
-                          {categoryHero ? (
-                            <>
-                              <Image
-                                src={categoryHero.src}
-                                alt={categoryHero.alt}
-                                fill
-                                className="object-cover"
+                          {displayHero ? (
+                            <AnimatePresence initial={false}>
+                              <motion.div
+                                key={displayHero.src}
+                                initial={{ opacity: reduceMotion ? 1 : 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: reduceMotion ? 1 : 0 }}
+                                transition={{ duration: reduceMotion ? 0 : 0.28, ease: "easeOut" }}
+                                className="absolute inset-0"
+                              >
+                                <Image
+                                  src={displayHero.src}
+                                  alt={displayHero.alt}
+                                  fill
+                                  className="object-cover"
                                 sizes="(min-width: 1024px) 480px, 100vw"
                                 priority={false}
-                              />
-                              <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-black/50 via-black/20 to-transparent" />
-                              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.08),transparent_55%)]" />
-                            </>
-                          ) : (
-                            <>
-                              <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-black/45 via-black/15 to-transparent" />
-                              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.12),transparent_55%)]" />
-                            </>
-                          )}
+                                />
+                              </motion.div>
+                            </AnimatePresence>
+                          ) : null}
+                          <div
+                            className={cn(
+                              "pointer-events-none absolute inset-0 bg-gradient-to-br from-black/50 via-black/20 to-transparent",
+                              !displayHero && "from-black/45 via-black/15",
+                            )}
+                          />
+                          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.08),transparent_55%)]" />
                         </div>
                       </div>
 
                       <div className="min-w-0 w-full max-w-full space-y-4">
-                        {items.map((item) => (
+                        {items.map((item) => {
+                          const hasPreviewImage = Boolean(item.imageUrl?.trim());
+                          return (
                           <article
                             key={item.id}
-                            className="w-full min-w-0 max-w-full rounded-2xl border border-white/10 bg-charcoal/50 p-4 sm:p-5"
+                            role={hasPreviewImage ? "button" : undefined}
+                            tabIndex={hasPreviewImage ? 0 : undefined}
+                            aria-pressed={hasPreviewImage ? selectedItemId === item.id : undefined}
+                            className={cn(
+                              "w-full min-w-0 max-w-full rounded-2xl border bg-charcoal/50 p-4 transition-colors sm:p-5",
+                              hasPreviewImage && "cursor-pointer",
+                              selectedItemId === item.id
+                                ? "border-cream/25 ring-1 ring-cream/15"
+                                : "border-white/10",
+                            )}
+                            onClick={() => {
+                              if (hasPreviewImage) setSelectedItemId(item.id);
+                            }}
+                            onKeyDown={(e) => {
+                              if (
+                                hasPreviewImage &&
+                                (e.key === "Enter" || e.key === " ")
+                              ) {
+                                e.preventDefault();
+                                setSelectedItemId(item.id);
+                              }
+                            }}
+                            onMouseEnter={() => {
+                              if (hasPreviewImage) setHoverItemId(item.id);
+                            }}
+                            onMouseLeave={() => setHoverItemId(null)}
                           >
                             <div className="flex w-full min-w-0 flex-col gap-3">
                               <div className="min-w-0 flex-1">
@@ -282,26 +342,27 @@ export function InteractiveMenu() {
                                     With fries
                                   </span>
                                 ) : null}
-                                {item.meatChoiceRequired && !item.optionGroups?.length ? (
-                                  <span className="mt-1 inline-block rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-editorial text-cream/75">
-                                    Choice of meat
-                                  </span>
-                                ) : null}
-                                {item.optionGroups?.some(
-                                  (g) => g.required && /meat/i.test(g.label),
-                                ) ? (
-                                  <span className="mt-1 inline-block rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-editorial text-cream/75">
-                                    Choose meat
-                                  </span>
-                                ) : item.optionGroups?.some((g) => g.required) ? (
-                                  <span className="mt-1 inline-block rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-editorial text-cream/75">
-                                    Choose options
-                                  </span>
-                                ) : item.optionGroups?.length ? (
-                                  <span className="mt-1 inline-block rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-editorial text-cream/75">
-                                    Customize
-                                  </span>
-                                ) : null}
+                                {(() => {
+                                  const nonMeatGroups =
+                                    item.optionGroups?.filter(
+                                      (g) => g.id !== "meat" && !/meat/i.test(g.label),
+                                    ) ?? [];
+                                  if (nonMeatGroups.some((g) => g.required)) {
+                                    return (
+                                      <span className="mt-1 inline-block rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-editorial text-cream/75">
+                                        Choose options
+                                      </span>
+                                    );
+                                  }
+                                  if (nonMeatGroups.length > 0) {
+                                    return (
+                                      <span className="mt-1 inline-block rounded-full border border-white/15 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-editorial text-cream/75">
+                                        Customize
+                                      </span>
+                                    );
+                                  }
+                                  return null;
+                                })()}
                                 {item.description ? (
                                   <p className="mt-2 break-words text-xs leading-relaxed text-cream/60">
                                     {item.description}
@@ -311,14 +372,20 @@ export function InteractiveMenu() {
                                   <button
                                     type="button"
                                     className="min-h-10 rounded-full bg-angie-orange px-3 py-1.5 text-[10px] font-semibold uppercase tracking-editorial text-cream shadow-sm transition hover:bg-angie-orange/90"
-                                    onClick={() => handleAdd(item)}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleAdd(item);
+                                    }}
                                   >
                                     Add
                                   </button>
                                   <button
                                     type="button"
                                     className="min-h-10 rounded-full border border-white/15 px-3 py-1.5 text-[10px] uppercase tracking-editorial text-cream/80 hover:bg-white/5"
-                                    onClick={() => openOrderPanel()}
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      openOrderPanel();
+                                    }}
                                   >
                                     Notes
                                   </button>
@@ -326,7 +393,8 @@ export function InteractiveMenu() {
                               </div>
                             </div>
                           </article>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   </motion.div>

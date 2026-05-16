@@ -26,8 +26,8 @@ export function HomeView() {
         <Hero />
         <Prologue />
         <StorySection />
-        <LocationsSection />
         <InteractiveMenu />
+        <LocationsSection />
         <SocialPromoSection />
         <CateringSection />
         <FinalConversion />
