@@ -2,7 +2,9 @@ import { DEFAULT_SITE_SETTINGS } from "@/lib/site-settings/defaults";
 import type {
   HeroCtaLabels,
   HeroSlideResolved,
+  SectionCopyBlock,
   SiteSettingsResolved,
+  SocialSettings,
   StorySlideResolved,
 } from "@/lib/site-settings/types";
 
@@ -49,6 +51,27 @@ function parseStorySlides(v: unknown): StorySlideResolved[] | null {
   return out.length > 0 ? dedupeStorySlides(out) : null;
 }
 
+function parseSectionCopy(v: unknown): Partial<SectionCopyBlock> | null {
+  if (!isRecord(v)) return null;
+  const out: Partial<SectionCopyBlock> = {};
+  for (const key of ["kicker", "title", "subtitle", "body"] as const) {
+    const val = v[key];
+    if (typeof val === "string") out[key] = val.trim();
+  }
+  return Object.keys(out).length > 0 ? out : null;
+}
+
+function parseSocial(v: unknown): Partial<SocialSettings> | null {
+  const base = parseSectionCopy(v);
+  if (!base && !isRecord(v)) return null;
+  const out: Partial<SocialSettings> = { ...base };
+  if (isRecord(v)) {
+    if (typeof v.instagramHandle === "string") out.instagramHandle = v.instagramHandle.trim();
+    if (typeof v.facebookHandle === "string") out.facebookHandle = v.facebookHandle.trim();
+  }
+  return Object.keys(out).length > 0 ? out : null;
+}
+
 function parseCta(v: unknown): Partial<HeroCtaLabels> | null {
   if (!isRecord(v)) return null;
   const out: Partial<HeroCtaLabels> = {};
@@ -85,6 +108,8 @@ export function coalesceSiteSettings(stored: unknown): SiteSettingsResolved {
   const heroIn = isRecord(stored.hero) ? stored.hero : null;
   const proIn = isRecord(stored.prologue) ? stored.prologue : null;
   const storyIn = isRecord(stored.story) ? stored.story : null;
+  const cateringIn = parseSectionCopy(stored.catering);
+  const socialIn = parseSocial(stored.social);
 
   const heroSlides = heroIn ? parseHeroSlides(heroIn.slides) : null;
   const heroCta = heroIn ? parseCta(heroIn.cta) : null;
@@ -128,5 +153,7 @@ export function coalesceSiteSettings(stored: unknown): SiteSettingsResolved {
           : d.story.quoteFooter,
       slides: storySlides ?? d.story.slides,
     },
+    catering: { ...d.catering, ...(cateringIn ?? {}) },
+    social: { ...d.social, ...(socialIn ?? {}) },
   };
 }

@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { motion } from "framer-motion";
 import { SectionHeading } from "@/components/ui/SectionHeading";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 import { CATERING_REQUEST_EMAILS } from "@/lib/data/catering-requests";
 import { CONTACT } from "@/lib/data/locations";
 import { openCateringInquiry, type CateringRequestLaunch } from "@/lib/utils/catering-inquiry";
@@ -20,6 +21,8 @@ const initial = {
 };
 
 export function CateringSection() {
+  const site = useSiteSettings();
+  const c = site.catering;
   const [form, setForm] = useState(initial);
   const [postSubmit, setPostSubmit] = useState<CateringRequestLaunch | null>(null);
 
@@ -47,11 +50,7 @@ export function CateringSection() {
     >
       <div className="mx-auto max-w-[1100px] px-5 sm:px-8">
         <div id="catering-start" tabIndex={-1} className="outline-none focus:outline-none">
-          <SectionHeading
-            kicker="Catering & private events"
-            title="Bring the truck — bring the party."
-            subtitle="Festivals, office lunches, birthdays, and private parties — Angie’s rolls up with a bright truck, Mexican favorites, aguas frescas, and a crew that keeps the line moving."
-          />
+          <SectionHeading kicker={c.kicker} title={c.title} subtitle={c.subtitle} />
         </div>
 
         <div className="mt-10 grid gap-10 lg:grid-cols-[1fr_1.1fr]">

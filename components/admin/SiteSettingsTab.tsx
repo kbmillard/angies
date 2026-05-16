@@ -2,10 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { SiteSettingsResolved } from "@/lib/site-settings/types";
-
-const inputClass =
-  "mt-1 w-full rounded-xl border border-white/15 bg-black/40 px-3 py-2 text-sm text-cream outline-none focus-visible:ring-2 focus-visible:ring-angie-orange/60";
-const labelClass = "block text-sm text-cream/80";
+import { ImageAttachField } from "@/components/admin/ImageAttachField";
+import {
+  adminInputClass as inputClass,
+  adminLabelClass as labelClass,
+  adminSectionClass,
+} from "@/components/admin/admin-form-styles";
 
 export function SiteSettingsTab() {
   const [settings, setSettings] = useState<SiteSettingsResolved | null>(null);
@@ -71,12 +73,9 @@ export function SiteSettingsTab() {
         </p>
       ) : null}
 
-      <section className="rounded-2xl border border-white/10 bg-charcoal/50 p-6 backdrop-blur-sm">
+      <section id="hero" className={adminSectionClass}>
         <h2 className="font-display text-xl text-cream">Hero</h2>
-        <p className="mt-1 text-sm text-cream/55">
-          Image URLs are usually <code className="rounded bg-white/10 px-1 text-xs">/gallery/…</code> (match photos
-          library or static files).
-        </p>
+        <p className="mt-1 text-sm text-cream/55">Upload or pick images for the homepage slideshow.</p>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <label className={labelClass}>
             Eyebrow
@@ -150,42 +149,31 @@ export function SiteSettingsTab() {
               key={`hero-${idx}`}
               className="grid gap-3 rounded-xl border border-white/10 bg-black/20 p-4 sm:grid-cols-[1fr_1fr_auto]"
             >
-              <label className={labelClass}>
-                Image URL
-                <input
-                  className={inputClass}
-                  value={s.src}
-                  onChange={(e) => {
-                    const slides = [...settings.hero.slides];
-                    slides[idx] = { ...slides[idx]!, src: e.target.value };
-                    setSettings({ ...settings, hero: { ...settings.hero, slides } });
-                  }}
-                />
-              </label>
-              <label className={labelClass}>
-                Alt text
-                <input
-                  className={inputClass}
-                  value={s.alt}
-                  onChange={(e) => {
-                    const slides = [...settings.hero.slides];
-                    slides[idx] = { ...slides[idx]!, alt: e.target.value };
-                    setSettings({ ...settings, hero: { ...settings.hero, slides } });
-                  }}
-                />
-              </label>
-              <div className="flex items-end">
-                <button
-                  type="button"
-                  className="rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-editorial text-cream/85 hover:bg-white/5"
-                  onClick={() => {
-                    const slides = settings.hero.slides.filter((_, i) => i !== idx);
-                    setSettings({ ...settings, hero: { ...settings.hero, slides } });
-                  }}
-                >
-                  Remove
-                </button>
-              </div>
+              <ImageAttachField
+                label={`Slide ${idx + 1}`}
+                value={s.src}
+                alt={s.alt}
+                onChange={(src) => {
+                  const slides = [...settings.hero.slides];
+                  slides[idx] = { ...slides[idx]!, src };
+                  setSettings({ ...settings, hero: { ...settings.hero, slides } });
+                }}
+                onAltChange={(alt) => {
+                  const slides = [...settings.hero.slides];
+                  slides[idx] = { ...slides[idx]!, alt };
+                  setSettings({ ...settings, hero: { ...settings.hero, slides } });
+                }}
+              />
+              <button
+                type="button"
+                className="rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-editorial text-cream/85 hover:bg-white/5"
+                onClick={() => {
+                  const slides = settings.hero.slides.filter((_, i) => i !== idx);
+                  setSettings({ ...settings, hero: { ...settings.hero, slides } });
+                }}
+              >
+                Remove slide
+              </button>
             </div>
           ))}
           <button
@@ -206,7 +194,7 @@ export function SiteSettingsTab() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-white/10 bg-charcoal/50 p-6 backdrop-blur-sm">
+      <section id="prologue" className={adminSectionClass}>
         <h2 className="font-display text-xl text-cream">Prologue</h2>
         <div className="mt-6 space-y-4">
           <label className={labelClass}>
@@ -232,7 +220,7 @@ export function SiteSettingsTab() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-white/10 bg-charcoal/50 p-6 backdrop-blur-sm">
+      <section id="story" className={adminSectionClass}>
         <h2 className="font-display text-xl text-cream">Story</h2>
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <label className={labelClass}>
@@ -287,32 +275,21 @@ export function SiteSettingsTab() {
         <div className="mt-4 space-y-4">
           {settings.story.slides.map((s, idx) => (
             <div key={`story-${idx}`} className="grid gap-3 rounded-xl border border-white/10 bg-black/20 p-4">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label className={labelClass}>
-                  Image URL
-                  <input
-                    className={inputClass}
-                    value={s.src}
-                    onChange={(e) => {
-                      const slides = [...settings.story.slides];
-                      slides[idx] = { ...slides[idx]!, src: e.target.value };
-                      setSettings({ ...settings, story: { ...settings.story, slides } });
-                    }}
-                  />
-                </label>
-                <label className={labelClass}>
-                  Alt text
-                  <input
-                    className={inputClass}
-                    value={s.alt}
-                    onChange={(e) => {
-                      const slides = [...settings.story.slides];
-                      slides[idx] = { ...slides[idx]!, alt: e.target.value };
-                      setSettings({ ...settings, story: { ...settings.story, slides } });
-                    }}
-                  />
-                </label>
-              </div>
+              <ImageAttachField
+                label={`Story slide ${idx + 1}`}
+                value={s.src}
+                alt={s.alt}
+                onChange={(src) => {
+                  const slides = [...settings.story.slides];
+                  slides[idx] = { ...slides[idx]!, src };
+                  setSettings({ ...settings, story: { ...settings.story, slides } });
+                }}
+                onAltChange={(alt) => {
+                  const slides = [...settings.story.slides];
+                  slides[idx] = { ...slides[idx]!, alt };
+                  setSettings({ ...settings, story: { ...settings.story, slides } });
+                }}
+              />
               <label className={labelClass}>
                 Overlay kicker
                 <input
@@ -370,6 +347,100 @@ export function SiteSettingsTab() {
         </div>
       </section>
 
+      <section id="social" className={adminSectionClass}>
+        <h2 className="font-display text-xl text-cream">Social</h2>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          {(["kicker", "title", "subtitle", "body"] as const).map((key) => (
+            <label key={key} className={key === "body" || key === "subtitle" ? `sm:col-span-2 ${labelClass}` : labelClass}>
+              {key}
+              {key === "body" || key === "subtitle" ? (
+                <textarea
+                  className={`${inputClass} min-h-[72px]`}
+                  value={settings.social[key] ?? ""}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      social: { ...settings.social, [key]: e.target.value },
+                    })
+                  }
+                />
+              ) : (
+                <input
+                  className={inputClass}
+                  value={settings.social[key]}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      social: { ...settings.social, [key]: e.target.value },
+                    })
+                  }
+                />
+              )}
+            </label>
+          ))}
+          <label className={labelClass}>
+            Instagram handle
+            <input
+              className={inputClass}
+              value={settings.social.instagramHandle ?? ""}
+              onChange={(e) =>
+                setSettings({
+                  ...settings,
+                  social: { ...settings.social, instagramHandle: e.target.value },
+                })
+              }
+            />
+          </label>
+          <label className={labelClass}>
+            Facebook label
+            <input
+              className={inputClass}
+              value={settings.social.facebookHandle ?? ""}
+              onChange={(e) =>
+                setSettings({
+                  ...settings,
+                  social: { ...settings.social, facebookHandle: e.target.value },
+                })
+              }
+            />
+          </label>
+        </div>
+      </section>
+
+      <section id="catering" className={adminSectionClass}>
+        <h2 className="font-display text-xl text-cream">Catering</h2>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          {(["kicker", "title", "subtitle", "body"] as const).map((key) => (
+            <label key={key} className={key === "body" || key === "subtitle" ? `sm:col-span-2 ${labelClass}` : labelClass}>
+              {key}
+              {key === "body" || key === "subtitle" ? (
+                <textarea
+                  className={`${inputClass} min-h-[72px]`}
+                  value={settings.catering[key] ?? ""}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      catering: { ...settings.catering, [key]: e.target.value },
+                    })
+                  }
+                />
+              ) : (
+                <input
+                  className={inputClass}
+                  value={settings.catering[key]}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      catering: { ...settings.catering, [key]: e.target.value },
+                    })
+                  }
+                />
+              )}
+            </label>
+          ))}
+        </div>
+      </section>
+
       <div className="flex flex-wrap gap-3">
         <button
           type="button"
@@ -377,7 +448,7 @@ export function SiteSettingsTab() {
           onClick={() => void save()}
           className="rounded-full bg-angie-orange px-6 py-3 text-sm font-semibold uppercase tracking-editorial text-cream shadow-sm transition hover:bg-angie-orange/90 disabled:opacity-50"
         >
-          {busy ? "Saving…" : "Save homepage content"}
+          {busy ? "Saving…" : "Save site content"}
         </button>
         <button
           type="button"

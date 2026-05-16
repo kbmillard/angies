@@ -6,9 +6,9 @@ import { revalidatePublicCatalog } from "@/lib/admin/revalidate-public";
 import { importMenuFromJsonString } from "@/lib/catalog-db/menu-relational-db";
 import { getSql } from "@/lib/db/sql";
 
-const MENU_JSON = path.join(process.cwd(), "public/menu/menu_final/menu.json");
+const MENU_JSON = path.join(process.cwd(), "public/menu/menu.json");
 
-/** Replace live catalog with the committed `public/menu/menu_final/menu.json`. */
+/** Replace live catalog with the committed `public/menu/menu.json`. */
 export async function POST() {
   const gate = await requireAdminGate();
   if (gate) return gate;

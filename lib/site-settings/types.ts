@@ -18,6 +18,18 @@ export type HeroCtaLabels = {
   catering: string;
 };
 
+export type SectionCopyBlock = {
+  kicker: string;
+  title: string;
+  subtitle: string;
+  body?: string;
+};
+
+export type SocialSettings = SectionCopyBlock & {
+  instagramHandle?: string;
+  facebookHandle?: string;
+};
+
 export type SiteSettingsResolved = {
   hero: {
     eyebrow: string;
@@ -39,4 +51,6 @@ export type SiteSettingsResolved = {
     quoteFooter: string;
     slides: StorySlideResolved[];
   };
+  catering: SectionCopyBlock;
+  social: SocialSettings;
 };

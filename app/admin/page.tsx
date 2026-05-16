@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { ADMIN_PHOTOS_COOKIE, verifyAdminSession } from "@/lib/admin/session";
 import { getPhotosAdminStatus } from "@/lib/photos/admin-status";
-import { PhotosAdminClient } from "@/components/admin/PhotosAdminClient";
+import { SiteAdminClient } from "@/components/admin/SiteAdminClient";
 
 export const metadata: Metadata = {
   title: "Admin",
@@ -20,6 +20,6 @@ export default async function AdminPage({
   const status = getPhotosAdminStatus();
 
   return (
-    <PhotosAdminClient initialAuthed={authed} status={status} initialTab={tab} />
+    <SiteAdminClient initialAuthed={authed} status={status} initialTab={tab} />
   );
 }

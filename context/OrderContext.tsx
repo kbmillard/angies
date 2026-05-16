@@ -7,6 +7,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
+import { computeLineUnitPriceDollars } from "@/lib/menu/line-price";
 import { priceDollarsToCents } from "@/lib/menu/schema";
 import {
   itemRequiresOptionSelections,
@@ -160,10 +161,11 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
           ? selectedOptions.meat.trim()
           : "";
       const meatKey = normMeat(selectedMeat) || meatFromOptions;
-      const priceUsd =
-        meatKey && item.meatOptionPrices?.[meatKey] != null
-          ? item.meatOptionPrices[meatKey]!
-          : item.price;
+      const priceUsd = computeLineUnitPriceDollars(
+        item,
+        selectedMeat,
+        selectedOptions,
+      );
       const unitPriceCents = priceDollarsToCents(priceUsd);
       const includesFries = item.includesFries;
 

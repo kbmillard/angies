@@ -436,3 +436,185 @@ export async function importMenuFromJsonString(json: string): Promise<ImportMenu
   const root = parseImportedMenuRoot(data);
   return importMenuFromPayload(root);
 }
+
+export type CatalogMenuItemPatch = {
+  name?: string;
+  description?: string;
+  basePrice?: number;
+  requiresMeatSelection?: boolean;
+  imageUrl?: string | null;
+  imageAlt?: string | null;
+  active?: boolean;
+  featured?: boolean;
+  sortOrder?: number;
+  categorySlug?: string;
+};
+
+export type CatalogModifierPatch = {
+  name?: string;
+  amount?: number;
+  sortOrder?: number;
+};
+
+export type CatalogModifierRow = {
+  id: string;
+  kind: string;
+  slug: string;
+  name: string;
+  amount: number;
+  sort_order: number;
+};
+
+export async function dbListCatalogModifiers(): Promise<CatalogModifierRow[]> {
+  const sql = getSql();
+  if (!sql) return [];
+  if (!(await ensureRelationalMenuCatalogTables())) return [];
+  const rows = await sql<
+    { id: string; kind: string; slug: string; name: string; amount: string | number; sort_order: number }[]
+  >`
+    SELECT id::text, kind, slug, name, amount, sort_order
+    FROM catalog_menu_modifiers
+    ORDER BY kind ASC, sort_order ASC, name ASC
+  `;
+  return rows.map((r) => ({
+    id: r.id,
+    kind: r.kind,
+    slug: r.slug,
+    name: r.name,
+    amount: money(r.amount) ?? 0,
+    sort_order: r.sort_order,
+  }));
+}
+
+export async function dbGetItemMeatPrices(
+  itemSlug: string,
+): Promise<{ meatModifierId: string; meatSlug: string; price: number }[]> {
+  const sql = getSql();
+  if (!sql) return [];
+  if (!(await ensureRelationalMenuCatalogTables())) return [];
+  const rows = await sql<
+    { meat_modifier_id: string; meat_slug: string; price: string | number }[]
+  >`
+    SELECT mp.meat_modifier_id::text, m.slug AS meat_slug, mp.price
+    FROM catalog_menu_item_meat_prices mp
+    JOIN catalog_menu_modifiers m ON m.id = mp.meat_modifier_id
+    WHERE mp.item_slug = ${itemSlug}
+  `;
+  return rows.map((r) => ({
+    meatModifierId: r.meat_modifier_id,
+    meatSlug: r.meat_slug,
+    price: money(r.price) ?? 0,
+  }));
+}
+
+export async function dbUpdateCatalogMenuItem(
+  slug: string,
+  patch: CatalogMenuItemPatch,
+): Promise<boolean> {
+  const sql = getSql();
+  if (!sql) return false;
+  if (!(await ensureRelationalMenuCatalogTables())) return false;
+
+  const existing = await sql<
+    {
+      slug: string;
+      category_slug: string;
+      name: string;
+      description: string | null;
+      base_price: string | number;
+      requires_meat_selection: boolean;
+      sort_order: number;
+      active: boolean;
+      featured: boolean;
+      image_url: string | null;
+      image_alt: string | null;
+    }[]
+  >`
+    SELECT slug, category_slug, name, description, base_price, requires_meat_selection,
+           sort_order, active, featured, image_url, image_alt
+    FROM catalog_menu_items WHERE slug = ${slug} LIMIT 1
+  `;
+  const row = existing[0];
+  if (!row) return false;
+
+  const categorySlug = patch.categorySlug ?? row.category_slug;
+  if (patch.categorySlug !== undefined) {
+    const cat = await sql<{ slug: string }[]>`
+      SELECT slug FROM catalog_menu_categories WHERE slug = ${categorySlug} LIMIT 1
+    `;
+    if (!cat[0]) throw new Error("Unknown category slug");
+  }
+
+  const basePrice = patch.basePrice ?? money(row.base_price) ?? 0;
+
+  await sql`
+    UPDATE catalog_menu_items
+    SET
+      category_slug = ${categorySlug},
+      name = ${patch.name ?? row.name},
+      description = ${patch.description ?? row.description ?? ""},
+      base_price = ${basePrice},
+      requires_meat_selection = ${patch.requiresMeatSelection ?? row.requires_meat_selection},
+      image_url = ${patch.imageUrl !== undefined ? patch.imageUrl : row.image_url},
+      image_alt = ${patch.imageAlt !== undefined ? patch.imageAlt : row.image_alt},
+      active = ${patch.active ?? row.active},
+      featured = ${patch.featured ?? row.featured},
+      sort_order = ${patch.sortOrder ?? row.sort_order},
+      updated_at = NOW()
+    WHERE slug = ${slug}
+  `;
+  return true;
+}
+
+export async function dbUpdateCatalogModifier(
+  id: string,
+  patch: CatalogModifierPatch,
+): Promise<boolean> {
+  const sql = getSql();
+  if (!sql) return false;
+  if (!(await ensureRelationalMenuCatalogTables())) return false;
+  const idNum = Number(id);
+  if (!Number.isFinite(idNum)) return false;
+
+  const updated = await sql<{ id: string }[]>`
+    UPDATE catalog_menu_modifiers
+    SET
+      name = COALESCE(${patch.name ?? null}, name),
+      amount = COALESCE(${patch.amount ?? null}, amount),
+      sort_order = COALESCE(${patch.sortOrder ?? null}, sort_order)
+    WHERE id = ${idNum}
+    RETURNING id::text
+  `;
+  return updated.length > 0;
+}
+
+export async function dbSetItemMeatPrices(
+  itemSlug: string,
+  prices: { meatSlug: string; price: number | null }[],
+): Promise<void> {
+  const sql = getSql();
+  if (!sql) throw new Error("DATABASE_URL is not configured");
+  if (!(await ensureRelationalMenuCatalogTables())) {
+    throw new Error("Could not ensure relational menu tables");
+  }
+
+  const meats = await sql<{ id: string; slug: string }[]>`
+    SELECT id::text, slug FROM catalog_menu_modifiers WHERE kind = 'meat'
+  `;
+  const meatIdBySlug = new Map(meats.map((m) => [m.slug, m.id]));
+
+  await sql.begin(async (tx) => {
+    await tx`DELETE FROM catalog_menu_item_meat_prices WHERE item_slug = ${itemSlug}`;
+    for (const row of prices) {
+      if (row.price === null || row.price === undefined) continue;
+      const mid = meatIdBySlug.get(row.meatSlug);
+      if (!mid) continue;
+      const midNum = Number(mid);
+      if (!Number.isFinite(midNum)) continue;
+      await tx`
+        INSERT INTO catalog_menu_item_meat_prices (item_slug, meat_modifier_id, price)
+        VALUES (${itemSlug}, ${midNum}, ${row.price})
+      `;
+    }
+  });
+}

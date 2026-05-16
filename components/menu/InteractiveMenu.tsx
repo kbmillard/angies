@@ -366,7 +366,7 @@ export function InteractiveMenu() {
                                       openOrderPanel();
                                     }}
                                   >
-                                    Notes
+                                    Checkout
                                   </button>
                                 </div>
                               </div>
