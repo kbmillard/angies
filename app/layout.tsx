@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { DM_Sans, Playfair_Display } from "next/font/google";
+import { Caveat, DM_Sans, Fraunces, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import {
   HOME_DESCRIPTION,
@@ -9,15 +9,30 @@ import {
   SITE_NAME,
 } from "@/lib/seo";
 
-const display = Playfair_Display({
+const display = Fraunces({
   subsets: ["latin"],
   variable: "--font-display",
+  axes: ["opsz", "SOFT"],
   display: "swap",
 });
 
 const sans = DM_Sans({
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
+});
+
+const script = Caveat({
+  subsets: ["latin"],
+  weight: ["500", "600"],
+  variable: "--font-script",
+  display: "swap",
+});
+
+const mono = JetBrains_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500"],
+  variable: "--font-mono",
   display: "swap",
 });
 
@@ -73,7 +88,10 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" className={`${display.variable} ${sans.variable}`}>
+    <html
+      lang="en"
+      className={`${display.variable} ${sans.variable} ${script.variable} ${mono.variable}`}
+    >
       <body>
         <script
           type="application/ld+json"

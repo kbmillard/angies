@@ -1,3 +1,4 @@
+import { loadBundledMenuItems, usesLegacyOptionGroups } from "./menu-from-import";
 import { localMenuItems } from "./local-menu";
 import { MENU_CATEGORY_ORDER, type MenuCatalogResponse, type MenuItem } from "./schema";
 import { siteCatalogFromDatabase } from "@/lib/catalog-db/config";
@@ -12,21 +13,27 @@ function localCatalogKey(i: MenuItem): string {
   return `${i.category.trim().toLowerCase()}|${i.name.trim().toLowerCase()}`;
 }
 
-/** When the Sheet row has no `optionGroupsJson`, copy groups from local fallback (same `id`, or same category+name). */
+/** Copy Sides/Toppings/Meat groups from bundled menu.json when DB rows are missing groups or still use legacy Add/Extra/Substitute. */
 function mergeOptionGroupsFromLocalDefaults(items: MenuItem[]): MenuItem[] {
-  const localById = new Map(localMenuItems.map((i) => [i.id, i]));
-  const localByCatName = new Map(localMenuItems.map((i) => [localCatalogKey(i), i]));
+  const bundled = loadBundledMenuItems();
+  const bundledById = new Map(bundled.map((i) => [i.id, i]));
+  const bundledByCatName = new Map(bundled.map((i) => [localCatalogKey(i), i]));
   return items.map((item) => {
-    if (item.optionGroups?.length) return item;
-    const base =
-      localById.get(item.id) ?? localByCatName.get(localCatalogKey(item));
+    const needsGroups =
+      !item.optionGroups?.length || usesLegacyOptionGroups(item.optionGroups);
+    if (!needsGroups) return item;
+    const base = bundledById.get(item.id) ?? bundledByCatName.get(localCatalogKey(item));
     if (!base?.optionGroups?.length) return item;
     return {
       ...item,
+      price: base.price ?? item.price,
+      description: base.description ?? item.description,
+      meatChoiceRequired: base.meatChoiceRequired,
       optionGroups: base.optionGroups.map((g) => ({
         ...g,
         options: [...g.options],
       })),
+      meatOptionPrices: base.meatOptionPrices ?? item.meatOptionPrices,
     };
   });
 }
@@ -94,7 +101,11 @@ export async function getMenuCatalog(): Promise<MenuCatalogResponse> {
       if (await isRelationalMenuCatalogActive()) {
         const relational = await dbGetRelationalMenuAsMenuItems(false);
         if (relational.length > 0) {
-          return buildCatalog(relational, "database", updatedAt);
+          return buildCatalog(
+            mergeOptionGroupsFromLocalDefaults(relational),
+            "database",
+            updatedAt,
+          );
         }
       }
     } catch (e) {

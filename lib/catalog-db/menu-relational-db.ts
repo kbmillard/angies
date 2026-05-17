@@ -179,7 +179,11 @@ export function relationalPayloadToMenuItems(
         /* ignore */
       }
     }
-    if (extra?.length) optionGroups.push(...extra);
+    if (extra?.length) {
+      const legacyIds = new Set(["add", "extra", "substitute"]);
+      const filtered = extra.filter((g) => !legacyIds.has(g.id));
+      if (filtered.length) optionGroups.push(...filtered);
+    }
 
     const item: MenuItem = {
       id: row.slug,

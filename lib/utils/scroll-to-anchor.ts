@@ -51,9 +51,9 @@ export function scrollDocumentToAnchor(
   if (!el) return;
 
   const extra = options?.offset ?? 16;
-  const navPx = readCssLengthAsPx("--nav-h", 68);
+  const headerPx = readCssLengthAsPx("--header-stack-h", 108);
   const rect = el.getBoundingClientRect();
-  const top = rect.top + window.scrollY - navPx - extra;
+  const top = rect.top + window.scrollY - headerPx - extra;
 
   window.scrollTo({
     top: Math.max(0, top),

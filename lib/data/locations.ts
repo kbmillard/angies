@@ -10,6 +10,24 @@ export const PUBLIC_HOURS_LINES = [
   "10:00 AM to 4:00 PM",
 ] as const;
 
+/** Footer / location card hours rows (mockup layout). */
+export const PUBLIC_HOURS_ROWS = [
+  { days: "Mon — Tue", hours: "10:00 AM — 2:00 PM" },
+  { days: "Wed — Fri", hours: "10:00 AM — 8:00 PM" },
+  { days: "Saturday", hours: "10:00 AM — 4:00 PM" },
+  { days: "Sunday", hours: "Closed" },
+] as const;
+
+/** Compact hours for footer (mockup). */
+export const FOOTER_HOURS_LINES = [
+  "Mon — Tue · 10–2",
+  "Wed — Fri · 10–8",
+  "Saturday · 10–4",
+] as const;
+
+export const FOOTER_BRAND_BLURB =
+  "Family-run Mexican food truck rolling through Kansas City since 2019.";
+
 /** Public catering / contact lines (both numbers). */
 export const CONTACT_PHONES = [
   { display: "(913) 433-1732", tel: "+19134331732" },

@@ -11,11 +11,9 @@ import { cn } from "@/lib/utils/cn";
 type NavLink = { label: string; id: string; disabled?: boolean };
 
 const LINKS: NavLink[] = [
+  { label: "Story", id: "story" },
   { label: "Menu", id: "menu" },
   { label: "Location", id: "locations" },
-  /** Schedule lives inside the location card until a dedicated feed ships. */
-  { label: "Schedule", id: "schedule", disabled: true },
-  { label: "Story", id: "story" },
   { label: "Catering", id: "catering" },
   { label: "Contact", id: "contact" },
 ];
@@ -132,7 +130,7 @@ export function EditorialNav() {
               exit={{ opacity: 0 }}
               transition={backdropTransition}
               aria-label="Close menu"
-              className="pointer-events-auto fixed left-0 right-0 top-[var(--nav-h)] bottom-0 z-[58] bg-black/70 backdrop-blur-md"
+              className="pointer-events-auto fixed left-0 right-0 top-[calc(var(--nav-h)+var(--ticker-h,2.5rem))] bottom-0 z-[58] bg-black/70 backdrop-blur-md"
               onClick={close}
             />
             <motion.nav
@@ -146,7 +144,7 @@ export function EditorialNav() {
               animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
               exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -10, scale: 0.98 }}
               transition={panelTransition}
-              className="pointer-events-auto fixed left-4 right-4 top-[calc(var(--nav-h)+6px)] z-[59] flex max-h-[calc(100dvh-120px)] flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#0c121f]/92 shadow-2xl backdrop-blur-xl"
+              className="pointer-events-auto fixed left-4 right-4 top-[calc(var(--nav-h)+var(--ticker-h,2.5rem)+6px)] z-[59] flex max-h-[calc(100dvh-120px)] flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#0c121f]/92 shadow-2xl backdrop-blur-xl"
               onPointerDown={(e) => e.stopPropagation()}
             >
               <span id={titleId} className="sr-only">
@@ -205,7 +203,7 @@ export function EditorialNav() {
   const right = LINKS.slice(3);
 
   return (
-    <header className="fixed top-0 z-50 w-full border-b border-white/10 bg-midnight/85 backdrop-blur-md">
+    <header className="relative w-full border-b border-white/10 bg-midnight/85 backdrop-blur-md">
       <div className="mx-auto flex h-[var(--nav-h)] max-w-[1600px] items-center justify-between gap-3 px-4 sm:px-6">
         <div className="flex flex-1 items-center justify-start gap-2 sm:gap-4">
           <button
@@ -235,7 +233,7 @@ export function EditorialNav() {
                   type="button"
                   onClick={() => go(l)}
                   className={cn(
-                    "text-[10px] uppercase tracking-editorial text-cream/70 transition hover:text-cream sm:text-[11px]",
+                    "t-kicker text-cream/70 transition hover:text-cream",
                     active === l.id && "text-cream",
                   )}
                 >
@@ -254,6 +252,7 @@ export function EditorialNav() {
         >
           <BrandLogo width={44} height={44} priority className="hidden sm:block" />
           <BrandLogo width={40} height={40} priority className="sm:hidden" />
+          <span className="hidden font-display text-xl italic text-cream sm:inline">Angie&apos;s</span>
         </button>
 
         <div className="flex flex-1 items-center justify-end gap-2 sm:gap-3">
@@ -264,7 +263,7 @@ export function EditorialNav() {
                 type="button"
                 onClick={() => go(l)}
                 className={cn(
-                  "text-[10px] uppercase tracking-editorial text-cream/70 transition hover:text-cream sm:text-[11px]",
+                  "t-kicker text-cream/70 transition hover:text-cream",
                   active === l.id && "text-cream",
                 )}
               >

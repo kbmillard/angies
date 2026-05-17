@@ -158,13 +158,13 @@ export function WeekendBreakfastSection() {
   return (
     <div
       id="weekend-breakfast"
-      className="scroll-mt-[calc(var(--nav-h)+16px)] mt-10 w-full max-w-full overflow-x-hidden bg-charcoal py-12 md:py-20"
+      className="scroll-mt-[calc(var(--header-stack-h)+1rem)] mt-10 w-full max-w-full overflow-x-hidden bg-charcoal py-12 md:py-20"
     >
       <div className="mx-auto w-full max-w-full px-4 sm:px-5 md:px-8">
         <div
           id="weekend-breakfast-start"
           tabIndex={-1}
-          className="w-full min-w-0 max-w-full rounded-2xl border border-white/10 bg-black/40 p-4 outline-none focus:outline-none sm:p-5 md:rounded-3xl md:p-10"
+          className="scroll-mt-[calc(var(--header-stack-h)+1rem)] w-full min-w-0 max-w-full rounded-2xl border border-white/10 bg-black/40 p-4 outline-none focus:outline-none sm:p-5 md:rounded-3xl md:p-10"
         >
           <p className={navPrimaryLinkClass}>Weekend Breakfast</p>
           <h2 className="mt-2 font-display text-3xl text-cream sm:text-4xl md:text-5xl">

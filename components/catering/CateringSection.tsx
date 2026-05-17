@@ -8,6 +8,7 @@ import { CATERING_REQUEST_EMAILS } from "@/lib/data/catering-requests";
 import { CONTACT } from "@/lib/data/locations";
 import { openCateringInquiry, type CateringRequestLaunch } from "@/lib/utils/catering-inquiry";
 import { scrollDocumentToAnchor } from "@/lib/utils/scroll-to-anchor";
+import { homeBandClass } from "@/lib/ui/home-band";
 
 const initial = {
   name: "",
@@ -46,10 +47,14 @@ export function CateringSection() {
   return (
     <section
       id="catering"
-      className="relative z-10 scroll-mt-[calc(var(--nav-h)+16px)] bg-charcoal/45 py-24 backdrop-blur-sm"
+      className={homeBandClass}
     >
       <div className="mx-auto max-w-[1100px] px-5 sm:px-8">
-        <div id="catering-start" tabIndex={-1} className="outline-none focus:outline-none">
+        <div
+          id="catering-start"
+          tabIndex={-1}
+          className="scroll-mt-[calc(var(--header-stack-h)+1rem)] outline-none focus:outline-none"
+        >
           <SectionHeading kicker={c.kicker} title={c.title} subtitle={c.subtitle} />
         </div>
 
