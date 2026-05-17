@@ -12,7 +12,7 @@ const CROSSFADE_S = 0.75;
 const CROSSFADE_EASE: [number, number, number, number] = [0.33, 0, 0.2, 1];
 
 export function Hero() {
-  const { focusMenu, scrollToSection, focusCatering } = useOrder();
+  const { scrollToSection, focusCatering } = useOrder();
   const site = useSiteSettings();
   const heroSlides = site.hero.slides;
   const cta = site.hero.cta;
@@ -97,7 +97,6 @@ export function Hero() {
         </div>
 
         <div className="grid w-full max-w-md grid-cols-2 gap-3 sm:grid-cols-2 lg:w-auto">
-          <Cta primary label={cta.viewMenu} onClick={focusMenu} />
           <Cta label={cta.findTruck} onClick={() => scrollToSection("locations")} />
           <Cta label={cta.catering} onClick={focusCatering} className="col-span-2 sm:col-span-1" />
         </div>
