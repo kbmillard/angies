@@ -1,4 +1,4 @@
-import { HomeView } from "@/components/home/HomeView";
+import { RedesignHomeView } from "@/components/redesign/RedesignHomeView";
 import { LocationsCatalogProvider } from "@/context/LocationsCatalogContext";
 import { MenuCatalogProvider } from "@/context/MenuCatalogContext";
 import { OrderProvider } from "@/context/OrderContext";
@@ -6,7 +6,7 @@ import { ScheduleCatalogProvider } from "@/context/ScheduleCatalogContext";
 import { SiteSettingsProvider } from "@/context/SiteSettingsContext";
 import { loadSiteSettingsResolved } from "@/lib/site-settings/load";
 
-export default async function Page() {
+export async function RedesignHomePage() {
   const siteSettings = await loadSiteSettingsResolved();
 
   return (
@@ -15,7 +15,7 @@ export default async function Page() {
         <LocationsCatalogProvider>
           <ScheduleCatalogProvider>
             <OrderProvider>
-              <HomeView />
+              <RedesignHomeView />
             </OrderProvider>
           </ScheduleCatalogProvider>
         </LocationsCatalogProvider>

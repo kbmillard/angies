@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { HomePage } from "@/components/home/HomePage";
+import { RedesignHomePage } from "@/components/redesign/RedesignHomePage";
 import { HOME_DESCRIPTION, HOME_TITLE } from "@/lib/seo";
 
 export const metadata: Metadata = {
@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-/** Full homepage preview — same as `/`, shareable before promoting to root. */
+/** Redesign preview only — production homepage stays at `/`. */
 export default function RedesignPreviewPage() {
-  return <HomePage />;
+  return <RedesignHomePage />;
 }

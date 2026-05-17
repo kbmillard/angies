@@ -6,20 +6,21 @@ const config: Config = {
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./context/**/*.{js,ts,jsx,tsx,mdx}",
   ],
+  // Redesign preview uses extra utilities; harmless on production `/`.
   theme: {
     extend: {
       colors: {
-        charcoal: "#101114",
-        cream: "#fff7ec",
-        tortilla: "#eadcc4",
-        salsa: "#b92b19",
-        /** Primary CTAs — brand orange-red (truck / logo / MENU). */
-        "angie-orange": "#f7542d",
-        ember: "#f7542d",
+        charcoal: "#0f1114",
+        cream: "#f7f0e4",
+        tortilla: "#e8dcc4",
+        salsa: "#c41e1c",
+        /** Primary CTAs — Angie’s brand orange (replaces red on buttons). */
+        "angie-orange": "#ea580c",
+        ember: "#ea580c",
         cilantro: "#16a34a",
-        navy: "#0b1726",
+        navy: "#0B1426",
         midnight: "#060b14",
-        gold: "#f6a21a",
+        gold: "#f59e0b",
         sand: "#d4c4a8",
         teal: "#0d9488",
         agave: "#0f766e",
@@ -27,10 +28,10 @@ const config: Config = {
         plum: "#1a1520",
         "menu-plum": "#121a28",
         "accent-cyan": "#22d3ee",
-        "accent-green": "#45b82e",
+        "accent-green": "#4ade80",
         "accent-yellow": "#facc15",
         "accent-pink": "#fb7185",
-        "accent-orange": "#ff8a3d",
+        "accent-orange": "#fb923c",
         "accent-red": "#f87171",
       },
       fontFamily: {
@@ -67,21 +68,6 @@ const config: Config = {
           "0%": { width: "0px", height: "0px", opacity: "0.6" },
           "100%": { width: "220px", height: "220px", opacity: "0" },
         },
-        drift: {
-          "0%": {
-            bottom: "-10%",
-            transform: "translateX(0) rotate(0deg)",
-            opacity: "0",
-          },
-          "10%": { opacity: "0.3" },
-          "50%": { transform: "translateX(30px) rotate(180deg)" },
-          "90%": { opacity: "0.3" },
-          "100%": {
-            bottom: "110%",
-            transform: "translateX(-30px) rotate(360deg)",
-            opacity: "0",
-          },
-        },
         rise: {
           from: { opacity: "0", transform: "translateY(28px)" },
           to: { opacity: "1", transform: "translateY(0)" },
@@ -94,7 +80,6 @@ const config: Config = {
         bob: "bob 6s ease-in-out infinite",
         "ring-pulse": "ringPulse 2s ease-out infinite",
         "radar-ping": "radarPing 3s ease-out infinite",
-        drift: "drift 14s linear infinite",
         rise: "rise 1s cubic-bezier(0.16, 1, 0.3, 1) forwards",
       },
     },

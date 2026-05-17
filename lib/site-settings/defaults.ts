@@ -11,8 +11,8 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsResolved = {
     slides: HERO_SLIDES.map((s) => ({ src: s.src, alt: s.alt })),
     cta: {
       order: "Order",
-      viewMenu: "See the menu",
-      findTruck: "Where's the truck?",
+      viewMenu: "Menu",
+      findTruck: "Find the truck",
       schedule: "Upcoming schedule",
       catering: "Book catering / event",
     },

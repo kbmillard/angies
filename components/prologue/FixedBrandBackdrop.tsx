@@ -12,7 +12,7 @@ const LOGO = "/images/brand/site-logo.webp";
 export function FixedBrandBackdrop() {
   return (
     <div
-      className="pointer-events-none fixed inset-x-0 bottom-0 top-[var(--header-stack-h)] z-0 bg-charcoal"
+      className="pointer-events-none fixed inset-x-0 bottom-0 top-[var(--nav-h)] z-0 bg-charcoal"
       aria-hidden
     >
       <div className="flex h-full w-full items-center justify-center pb-20 pt-8 sm:pb-24 sm:pt-10">

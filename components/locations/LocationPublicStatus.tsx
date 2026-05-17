@@ -68,19 +68,7 @@ export function LocationPublicStatus({
           <p className="font-display text-3xl text-cream/50">Checking hours…</p>
         ) : (
           <>
-            <p
-              className={clsx(
-                "inline-flex items-center gap-2.5 font-display text-3xl",
-                labelColorClass(publicStatus.isOpen),
-              )}
-            >
-              <span
-                className={clsx(
-                  "block h-2 w-2 shrink-0 rounded-full",
-                  publicStatus.isOpen ? "bg-accent-green animate-ring-pulse" : "bg-salsa",
-                )}
-                aria-hidden
-              />
+            <p className={clsx("font-display text-3xl", labelColorClass(publicStatus.isOpen))}>
               {publicStatus.label}
             </p>
             {publicStatus.detail ? (
@@ -127,7 +115,7 @@ export function LocationPublicStatus({
             <span
               className={clsx(
                 "h-2 w-2 shrink-0 rounded-full",
-                publicStatus.isOpen ? "bg-accent-green animate-ring-pulse" : "bg-salsa",
+                publicStatus.isOpen ? "bg-accent-green" : "bg-salsa",
               )}
               aria-hidden
             />

@@ -7,7 +7,6 @@ import { SiteFooter } from "@/components/footer/SiteFooter";
 import { Hero } from "@/components/hero/Hero";
 import { InteractiveMenu } from "@/components/menu/InteractiveMenu";
 import { LocationsSection } from "@/components/locations/LocationsSection";
-import BrandTicker from "@/components/marquee/BrandTicker";
 import { EditorialNav } from "@/components/nav/EditorialNav";
 import { OrderDrawer } from "@/components/order/OrderDrawer";
 import { FixedBrandBackdrop } from "@/components/prologue/FixedBrandBackdrop";
@@ -21,10 +20,7 @@ export function HomeView() {
 
   return (
     <>
-      <div className="fixed top-0 left-0 right-0 z-50">
-        <BrandTicker />
-        <EditorialNav />
-      </div>
+      <EditorialNav />
       <main className="relative">
         <FixedBrandBackdrop />
         <Hero />

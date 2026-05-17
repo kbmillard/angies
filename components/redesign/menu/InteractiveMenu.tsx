@@ -8,7 +8,9 @@ import { MENU_CATEGORY_META } from "@/lib/menu/category-meta";
 import type { MenuItem } from "@/lib/menu/schema";
 import { useMenuCatalog } from "@/context/MenuCatalogContext";
 import { useOrder } from "@/context/OrderContext";
-import { SectionHeading } from "@/components/ui/SectionHeading";
+import Reveal from "@/components/ui/Reveal";
+import { SectionHeading } from "@/components/redesign/ui/SectionHeading";
+import { homeBandClass } from "@/lib/ui/home-band";
 import { cn } from "@/lib/utils/cn";
 import { MeatChoiceModal } from "@/components/menu/MeatChoiceModal";
 import { MenuOptionGroupsModal } from "@/components/menu/MenuOptionGroupsModal";
@@ -38,7 +40,7 @@ function PriceRow({ name, price }: { name: string; price: number | null }) {
   return (
     <div className="flex min-w-0 flex-col gap-1.5 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
       <p className="min-w-0 break-words font-medium leading-snug text-cream">{name}</p>
-      <p className="shrink-0 text-sm leading-snug text-cream/85 sm:pt-0.5">{priceLabel}</p>
+      <p className="t-price-mono shrink-0 sm:pt-0.5">{priceLabel}</p>
     </div>
   );
 }
@@ -160,19 +162,28 @@ export function InteractiveMenu() {
   return (
     <section
       id="menu"
-      className="relative z-10 w-full min-w-0 max-w-full overflow-x-hidden scroll-mt-[calc(var(--nav-h)+16px)] bg-charcoal/45 py-24 backdrop-blur-sm"
+      className={cn(
+        homeBandClass,
+        "w-full min-w-0 max-w-full overflow-x-hidden",
+      )}
     >
       <div className="mx-auto w-full min-w-0 max-w-[1400px] overflow-x-hidden px-5 sm:px-8">
         <div
           id="menu-start"
           tabIndex={-1}
-          className="w-full min-w-0 max-w-full outline-none focus:outline-none"
+          className="scroll-mt-[calc(var(--header-stack-h)+1rem)] w-full min-w-0 max-w-full outline-none focus:outline-none"
         >
-          <SectionHeading
-            kicker="Menu"
-            title="Fresh Tex-Mex plates, drinks, and daily specials."
-            subtitle="Everything is built at the window — see each item for price when set in admin."
-          />
+          <Reveal>
+            <SectionHeading
+              kicker="Menu"
+              title={
+                <>
+                  Fresh Tex-Mex plates, <em>drinks,</em> and daily specials.
+                </>
+              }
+              subtitle="Everything is built at the window. Tap a category — prices flex with daily ingredients and weekend specials."
+            />
+          </Reveal>
         </div>
 
         {error ? (
@@ -311,7 +322,7 @@ export function InteractiveMenu() {
                             tabIndex={hasPreviewImage ? 0 : undefined}
                             aria-pressed={hasPreviewImage ? selectedItemId === item.id : undefined}
                             className={cn(
-                              "w-full min-w-0 max-w-full rounded-2xl border bg-charcoal/50 p-4 transition-colors sm:p-5",
+                              "group relative w-full min-w-0 max-w-full overflow-hidden rounded-2xl border bg-charcoal/50 p-4 transition-all duration-[400ms] ease-out hover:-translate-y-1 hover:-rotate-[0.4deg] hover:border-white/20 hover:bg-charcoal/70 sm:p-5",
                               hasPreviewImage && "cursor-pointer",
                               selectedItemId === item.id
                                 ? "border-cream/25 ring-1 ring-cream/15"
