@@ -3,7 +3,6 @@
 import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { useOrder } from "@/context/OrderContext";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
 
 const SLIDE_MS = 5500;
@@ -12,10 +11,8 @@ const CROSSFADE_S = 0.75;
 const CROSSFADE_EASE: [number, number, number, number] = [0.33, 0, 0.2, 1];
 
 export function Hero() {
-  const { scrollToSection, focusCatering } = useOrder();
   const site = useSiteSettings();
   const heroSlides = site.hero.slides;
-  const cta = site.hero.cta;
   const reduceMotion = useReducedMotion();
   const [i, setI] = useState(0);
 
@@ -70,7 +67,7 @@ export function Hero() {
       <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-charcoal via-charcoal/80 to-navy/40" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[28%] bg-gradient-to-t from-angie-orange/18 to-transparent sm:h-[30%]" />
 
-      <div className="relative z-[2] mx-auto flex w-full max-w-[1400px] flex-col gap-10 px-5 pb-14 pt-20 sm:px-8 sm:pb-16 sm:pt-24 lg:flex-row lg:items-end lg:justify-between">
+      <div className="relative z-[2] mx-auto w-full max-w-[1400px] px-5 pb-14 pt-20 sm:px-8 sm:pb-16 sm:pt-24">
         <div className="max-w-3xl [text-shadow:0_2px_28px_rgba(0,0,0,0.55)]">
           <p className="text-xs uppercase tracking-editorial text-cream/75">{site.hero.eyebrow}</p>
           <h1 className="mt-4 font-display text-5xl leading-[0.95] text-cream sm:text-6xl lg:text-7xl">
@@ -95,38 +92,7 @@ export function Hero() {
             ))}
           </div>
         </div>
-
-        <div className="grid w-full max-w-md grid-cols-2 gap-3 sm:grid-cols-2 lg:w-auto">
-          <Cta label={cta.findTruck} onClick={() => scrollToSection("locations")} />
-          <Cta label={cta.catering} onClick={focusCatering} className="col-span-2 sm:col-span-1" />
-        </div>
       </div>
     </section>
-  );
-}
-
-function Cta({
-  label,
-  onClick,
-  primary,
-  className,
-}: {
-  label: string;
-  onClick: () => void;
-  primary?: boolean;
-  className?: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={
-        primary
-          ? `rounded-full bg-angie-orange px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-angie-orange/90 sm:text-[11px] ${className ?? ""}`
-          : `rounded-full border border-white/20 bg-black/35 px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-editorial text-cream backdrop-blur-sm transition hover:bg-black/45 sm:text-[11px] ${className ?? ""}`
-      }
-    >
-      {label}
-    </button>
   );
 }
