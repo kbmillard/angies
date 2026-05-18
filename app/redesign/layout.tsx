@@ -1,6 +1,12 @@
 import type { ReactNode } from "react";
-import { Caveat, Fraunces, JetBrains_Mono } from "next/font/google";
+import { Caveat, DM_Sans, Fraunces, JetBrains_Mono } from "next/font/google";
 import "./redesign-globals.css";
+
+const sans = DM_Sans({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
 
 const display = Fraunces({
   subsets: ["latin"],
@@ -26,7 +32,10 @@ const mono = JetBrains_Mono({
 /** Fraunces + redesign type/motion tokens — scoped to `/redesign` only. */
 export default function RedesignLayout({ children }: { children: ReactNode }) {
   return (
-    <div className={`${display.variable} ${script.variable} ${mono.variable} min-h-screen`}>
+    <div
+      data-redesign="preview"
+      className={`${display.variable} ${sans.variable} ${script.variable} ${mono.variable} min-h-screen font-sans`}
+    >
       {children}
     </div>
   );

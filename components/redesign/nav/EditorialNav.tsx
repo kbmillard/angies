@@ -1,56 +1,38 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Menu, X } from "lucide-react";
-import { BrandLogo } from "@/components/ui/BrandLogo";
 import { useOrder } from "@/context/OrderContext";
 import { cn } from "@/lib/utils/cn";
 
-type NavLink = { label: string; id: string; disabled?: boolean };
-
-const LINKS: NavLink[] = [
+const NAV_LINKS = [
   { label: "Story", id: "story" },
   { label: "Menu", id: "menu" },
   { label: "Location", id: "locations" },
   { label: "Catering", id: "catering" },
   { label: "Contact", id: "contact" },
-];
+] as const;
 
 export function EditorialNav() {
   const { scrollToSection } = useOrder();
   const [open, setOpen] = useState(false);
-  const [active, setActive] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const reduceMotion = useReducedMotion();
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    const ids = LINKS.map((l) => l.id);
-    const obs = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (visible?.target?.id) setActive(visible.target.id);
-      },
-      { rootMargin: "-45% 0px -45% 0px", threshold: [0.15, 0.35, 0.55] },
-    );
-    ids.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) obs.observe(el);
-    });
-    return () => obs.disconnect();
-  }, []);
+  useEffect(() => setMounted(true), []);
 
   const close = useCallback(() => setOpen(false), []);
+
+  const go = (id: string) => {
+    close();
+    requestAnimationFrame(() => scrollToSection(id));
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -59,17 +41,6 @@ export function EditorialNav() {
     return () => {
       document.body.style.overflow = prev;
     };
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const mq = window.matchMedia("(min-width: 1024px)");
-    const onChange = () => {
-      if (mq.matches) setOpen(false);
-    };
-    mq.addEventListener("change", onChange);
-    onChange();
-    return () => mq.removeEventListener("change", onChange);
   }, [open]);
 
   useEffect(() => {
@@ -84,204 +55,127 @@ export function EditorialNav() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, close]);
 
-  useEffect(() => {
-    if (!open) {
-      menuButtonRef.current?.focus();
-      return;
-    }
-    const t = window.requestAnimationFrame(() => {
-      const first = panelRef.current?.querySelector<HTMLElement>(
-        "button[data-mobile-nav-link]",
-      );
-      first?.focus();
-    });
-    return () => window.cancelAnimationFrame(t);
-  }, [open]);
-
-  const go = (link: NavLink) => {
-    if (link.disabled) return;
-    setOpen(false);
-    window.requestAnimationFrame(() => {
-      window.requestAnimationFrame(() => {
-        scrollToSection(link.id);
-      });
-    });
-  };
-
-  const backdropTransition = reduceMotion ? { duration: 0.15 } : { duration: 0.22, ease: [0.22, 1, 0.36, 1] as const };
-  const panelTransition = reduceMotion
-    ? { duration: 0.15 }
-    : { type: "spring" as const, stiffness: 420, damping: 34, mass: 0.85 };
+  const backdropTransition = reduceMotion ? { duration: 0.15 } : { duration: 0.22 };
+  const panelTransition = reduceMotion ? { duration: 0.15 } : { type: "spring" as const, stiffness: 420, damping: 34 };
 
   const mobileOverlay =
     mounted &&
     createPortal(
       <AnimatePresence>
         {open ? (
-          <div
-            className="pointer-events-none fixed inset-0 z-[58] max-w-[100vw] overflow-hidden lg:hidden"
-            aria-hidden={!open}
+          <motion.div
+            key="mobile-nav"
+            className="fixed inset-0 z-[58] lg:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={backdropTransition}
           >
-            <motion.button
-              key="mobile-nav-backdrop"
+            <button
               type="button"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={backdropTransition}
+              className="absolute inset-0 bg-black/70 backdrop-blur-md"
               aria-label="Close menu"
-              className="pointer-events-auto fixed left-0 right-0 top-[calc(var(--nav-h)+var(--ticker-h,2.5rem))] bottom-0 z-[58] bg-black/70 backdrop-blur-md"
               onClick={close}
             />
             <motion.nav
-              id="mobile-nav-panel"
-              key="mobile-nav-panel"
               ref={panelRef}
               role="dialog"
               aria-modal="true"
               aria-labelledby={titleId}
-              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -10, scale: 0.98 }}
-              animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -10, scale: 0.98 }}
+              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
+              animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0 }}
+              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
               transition={panelTransition}
-              className="pointer-events-auto fixed left-4 right-4 top-[calc(var(--nav-h)+var(--ticker-h,2.5rem)+6px)] z-[59] flex max-h-[calc(100dvh-120px)] flex-col overflow-hidden rounded-3xl border border-white/10 bg-[#0c121f]/92 shadow-2xl backdrop-blur-xl"
+              className="absolute left-4 right-4 top-[calc(var(--nav-h)+var(--ticker-h,2.5rem)+8px)] rounded-3xl border border-white/10 bg-[#0c121f]/95 p-6 shadow-2xl backdrop-blur-xl"
               onPointerDown={(e) => e.stopPropagation()}
             >
               <span id={titleId} className="sr-only">
                 Site navigation
               </span>
-              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-6">
-                <ul className="flex flex-col">
-                  {LINKS.map((l, i) => (
-                    <motion.li
-                      key={l.id}
-                      initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={
-                        reduceMotion ? { duration: 0 } : { delay: 0.03 + i * 0.025, duration: 0.2 }
-                      }
+              <ul className="flex flex-col gap-1">
+                {NAV_LINKS.map((l) => (
+                  <li key={l.id}>
+                    <button
+                      type="button"
+                      className="w-full border-b border-white/10 py-3 text-left text-sm font-medium uppercase tracking-editorial text-cream hover:text-gold"
+                      onClick={() => go(l.id)}
                     >
-                      <button
-                        type="button"
-                        data-mobile-nav-link
-                        disabled={l.disabled}
-                        className={cn(
-                          "flex w-full items-center border-b border-white/10 py-4 text-left text-sm font-medium uppercase tracking-editorial transition",
-                          l.disabled
-                            ? "cursor-not-allowed text-cream/35"
-                            : "text-cream hover:bg-white/5 active:bg-white/10",
-                        )}
-                        onClick={() => go(l)}
-                      >
-                        {l.label}
-                        {l.disabled ? (
-                          <span className="ml-2 text-[10px] normal-case tracking-normal text-cream/40">
-                            (coming soon)
-                          </span>
-                        ) : null}
-                      </button>
-                    </motion.li>
-                  ))}
-                </ul>
-                <button
-                  type="button"
-                  data-mobile-nav-link
-                  className="mt-4 w-full rounded-full bg-angie-orange py-4 text-center text-xs font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-angie-orange/90"
-                  onClick={() => go({ label: "Menu", id: "menu" })}
-                >
-                  Menu
-                </button>
-              </div>
+                      {l.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </motion.nav>
-          </div>
+          </motion.div>
         ) : null}
       </AnimatePresence>,
       document.body,
     );
 
-  const left = LINKS.slice(0, 3);
-  const right = LINKS.slice(3);
-
   return (
-    <header className="relative w-full border-b border-white/10 bg-midnight/85 backdrop-blur-md">
-      <div className="mx-auto flex h-[var(--nav-h)] max-w-[1600px] items-center justify-between gap-3 px-4 sm:px-6">
-        <div className="flex flex-1 items-center justify-start gap-2 sm:gap-4">
+    <header className="sticky top-0 z-50 w-full border-b border-white/[0.07] bg-midnight/[0.88] backdrop-blur-[14px]">
+      <div className="mx-auto flex h-[var(--nav-h)] max-w-[1400px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-9">
+        <div className="flex min-w-0 items-center gap-3">
           <button
             ref={menuButtonRef}
             type="button"
-            className="inline-flex items-center justify-center rounded-full border border-white/10 p-2 text-cream transition hover:bg-white/5 lg:hidden"
+            className="inline-flex shrink-0 rounded-full border border-white/10 p-2 text-cream hover:bg-white/5 min-[880px]:hidden"
             onClick={() => setOpen((v) => !v)}
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
-            aria-controls={open ? "mobile-nav-panel" : undefined}
           >
-            {open ? <X className="h-5 w-5" aria-hidden /> : <Menu className="h-5 w-5" aria-hidden />}
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
-          <nav className="hidden flex-wrap items-center gap-x-3 gap-y-2 lg:flex" aria-label="Primary">
-            {left.map((l) =>
-              l.disabled ? (
-                <span
-                  key={l.id}
-                  className="cursor-not-allowed text-[10px] uppercase tracking-editorial text-cream/35 sm:text-[11px]"
-                  title="Schedule coming soon"
-                >
-                  {l.label}
-                </span>
-              ) : (
-                <button
-                  key={l.id}
-                  type="button"
-                  onClick={() => go(l)}
-                  className={cn(
-                    "t-kicker text-cream/70 transition hover:text-cream",
-                    active === l.id && "text-cream",
-                  )}
-                >
-                  {l.label}
-                </button>
-              ),
-            )}
-          </nav>
+
+          <button
+            type="button"
+            onClick={() => scrollToSection("hero")}
+            className="nav__brand inline-flex min-w-0 items-center gap-3"
+            aria-label="Scroll to top"
+          >
+            <Image
+              src="/images/brand/site-logo.webp"
+              alt=""
+              width={40}
+              height={40}
+              priority
+              className="h-10 w-auto shrink-0"
+              style={{ filter: "drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4))" }}
+            />
+            <span
+              className="hidden font-display text-lg italic text-cream sm:inline"
+              style={{ fontVariationSettings: '"SOFT" 100', fontWeight: 500 }}
+            >
+              Angie&apos;s
+            </span>
+          </button>
         </div>
+
+        <nav className="hidden min-[880px]:flex flex-1 items-center justify-center gap-9" aria-label="Primary">
+          {NAV_LINKS.map((l) => (
+            <button
+              key={l.id}
+              type="button"
+              onClick={() => go(l.id)}
+              className="group relative py-2 font-sans text-[11px] font-medium uppercase tracking-[0.32em] text-cream/70 transition-colors hover:text-cream"
+            >
+              {l.label}
+              <span
+                aria-hidden
+                className="absolute inset-x-0 bottom-0 h-px origin-left scale-x-0 bg-gold transition-transform duration-300 ease-out group-hover:scale-x-100"
+              />
+            </button>
+          ))}
+        </nav>
 
         <button
           type="button"
-          onClick={() => scrollToSection("hero")}
-          className="absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-2"
-          aria-label="Scroll to top"
+          onClick={() => go("menu")}
+          className="inline-flex shrink-0 items-center gap-2 rounded-full bg-angie-orange px-5 py-2.5 font-sans text-[11px] font-semibold uppercase tracking-[0.28em] text-cream shadow-[0_8px_20px_-8px_rgba(247,84,45,0.55)] transition-all duration-300 hover:-translate-y-0.5 hover:scale-[1.03] hover:shadow-[0_14px_28px_-8px_rgba(247,84,45,0.7)]"
         >
-          <BrandLogo width={44} height={44} priority className="hidden sm:block" />
-          <BrandLogo width={40} height={40} priority className="sm:hidden" />
-          <span className="hidden font-display text-xl italic text-cream sm:inline">Angie&apos;s</span>
+          <span className="h-1.5 w-1.5 rounded-full bg-cream animate-ring-pulse" aria-hidden />
+          Order menu
         </button>
-
-        <div className="flex flex-1 items-center justify-end gap-2 sm:gap-3">
-          <nav className="hidden flex-wrap items-center justify-end gap-x-3 lg:flex" aria-label="Secondary">
-            {right.map((l) => (
-              <button
-                key={l.id}
-                type="button"
-                onClick={() => go(l)}
-                className={cn(
-                  "t-kicker text-cream/70 transition hover:text-cream",
-                  active === l.id && "text-cream",
-                )}
-              >
-                {l.label}
-              </button>
-            ))}
-          </nav>
-          <button
-            type="button"
-            onClick={() => go({ label: "Menu", id: "menu" })}
-            className={cn(
-              "rounded-full bg-angie-orange px-4 py-2 text-[10px] font-semibold uppercase tracking-editorial text-cream shadow-md transition hover:bg-angie-orange/90 sm:text-[11px]",
-              open && "max-lg:hidden",
-            )}
-          >
-            Menu
-          </button>
-        </div>
       </div>
 
       {mobileOverlay}

@@ -15,8 +15,8 @@ const config: Config = {
         tortilla: "#e8dcc4",
         salsa: "#c41e1c",
         /** Primary CTAs — Angie’s brand orange (replaces red on buttons). */
-        "angie-orange": "#ea580c",
-        ember: "#ea580c",
+        "angie-orange": "#f7542d",
+        ember: "#f7542d",
         cilantro: "#16a34a",
         navy: "#0B1426",
         midnight: "#060b14",

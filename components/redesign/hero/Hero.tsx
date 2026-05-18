@@ -4,8 +4,6 @@ import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 import HeroBadge from "@/components/redesign/hero/HeroBadge";
-import HeroLeaves from "@/components/redesign/hero/HeroLeaves";
-import { glassCtaBase } from "@/components/ui/glass-cta";
 import { useOrder } from "@/context/OrderContext";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
 import { cn } from "@/lib/utils/cn";
@@ -51,7 +49,7 @@ export function Hero() {
   return (
     <section
       id="hero"
-      className="relative z-10 isolate flex min-h-[min(78svh,820px)] items-end overflow-hidden bg-charcoal pt-[calc(var(--nav-h)+var(--ticker-h,2.5rem))] sm:min-h-[min(80svh,860px)]"
+      className="relative z-10 isolate flex min-h-[calc(100svh-var(--nav-h))] items-end overflow-hidden bg-charcoal sm:min-h-[calc(100svh-var(--nav-h))]"
     >
       <div className="absolute inset-0 z-0 overflow-hidden">
         <div className="absolute inset-0 bg-charcoal" aria-hidden />
@@ -61,7 +59,7 @@ export function Hero() {
             className={cn("absolute inset-0 overflow-hidden", idx !== i && "pointer-events-none")}
             initial={false}
             aria-hidden={idx !== i}
-            animate={{ opacity: idx === i ? 1 : 0 }}
+            animate={{ opacity: idx === i ? 0.55 : 0 }}
             transition={{
               duration: reduceMotion ? 0 : CROSSFADE_S,
               ease: CROSSFADE_EASE,
@@ -87,54 +85,48 @@ export function Hero() {
           </motion.div>
         ))}
       </div>
+
       <div
         className="pointer-events-none absolute inset-0 z-[1]"
         style={{
           background:
-            "radial-gradient(80% 60% at 20% 30%, rgba(247, 84, 45, 0.18), transparent 60%), radial-gradient(60% 50% at 85% 80%, rgba(246, 162, 26, 0.15), transparent 60%), linear-gradient(180deg, rgba(16, 17, 20, 0.72) 0%, rgba(16, 17, 20, 0.88) 55%, rgba(16, 17, 20, 0.96) 100%)",
+            "radial-gradient(80% 60% at 20% 30%, rgba(247, 84, 45, 0.18), transparent 60%), radial-gradient(60% 50% at 85% 80%, rgba(246, 162, 26, 0.15), transparent 60%), linear-gradient(180deg, rgba(16, 17, 20, 0.55) 0%, rgba(16, 17, 20, 0.85) 60%, rgba(16, 17, 20, 0.95) 100%)",
         }}
         aria-hidden
       />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[1] h-[28%] bg-gradient-to-t from-angie-orange/18 to-transparent sm:h-[30%]" />
-
-      <HeroLeaves />
 
       <motion.div
         initial="hidden"
         animate="show"
         variants={heroContainer}
-        className="relative z-[2] mx-auto w-full max-w-7xl px-5 pb-14 pt-12 sm:px-8 sm:pb-16 sm:pt-16 grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-10 lg:gap-16 items-end"
+        className="relative z-[3] mx-auto grid w-full max-w-[1400px] grid-cols-1 items-end gap-10 px-5 pb-16 pt-12 sm:px-8 sm:pb-20 sm:pt-16 min-[980px]:grid-cols-[1.6fr_1fr] min-[980px]:gap-16"
       >
-        <div className="max-w-2xl [text-shadow:0_2px_28px_rgba(0,0,0,0.55)]">
-          <motion.div variants={heroItem} className="inline-flex items-center gap-3 mb-7">
-            <span className="block h-2 w-2 rounded-full bg-accent-green animate-ring-pulse" />
-            <span className="t-kicker">{site.hero.eyebrow}</span>
+        <div className="max-w-[760px] [text-shadow:0_2px_28px_rgba(0,0,0,0.55)]">
+          <motion.div variants={heroItem} className="mb-7 inline-flex items-center gap-3.5">
+            <span className="h-2 w-2 rounded-full bg-accent-green animate-ring-pulse" aria-hidden />
+            <span className="t-kicker">Mexican food truck · Kansas City</span>
           </motion.div>
 
           <motion.h1 variants={heroItem} className="t-hero mb-6">
-            {site.hero.headlineLine1}
+            Bold Tex-Mex flavor,
             <br />
-            {site.hero.headlineLine2.includes("served fresh") ? (
-              <>
-                <em>served fresh</em>
-                {site.hero.headlineLine2.replace("served fresh", "")}
-              </>
-            ) : (
-              site.hero.headlineLine2
-            )}
+            <em>served fresh</em> across
+            <br />
+            Kansas City.
           </motion.h1>
 
-          <motion.p variants={heroItem} className="t-body-lg max-w-lg mb-9">
-            {site.hero.body}
+          <motion.p variants={heroItem} className="t-body-lg mb-9 max-w-[540px] text-cream/[0.82]">
+            Find Angie&apos;s near Linwood and all around KC. Follow today&apos;s pin, order from the
+            window, or book the truck for your next event.
           </motion.p>
 
-          <motion.div variants={heroItem} className="flex flex-wrap gap-3">
+          <motion.div variants={heroItem} className="flex flex-wrap gap-3.5">
             <button
               type="button"
               onClick={() => scrollToSection("menu")}
-              className="group inline-flex items-center gap-2 rounded-full bg-angie-orange px-7 py-3.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-cream shadow-lg shadow-angie-orange/40 transition-all duration-300 hover:-translate-y-0.5 hover:bg-angie-orange/90 hover:shadow-xl hover:shadow-angie-orange/55"
+              className="group inline-flex items-center gap-2.5 rounded-full bg-angie-orange px-7 py-3.5 font-sans text-[11px] font-semibold uppercase tracking-[0.28em] text-cream shadow-[0_12px_24px_-10px_rgba(247,84,45,0.65)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#ff6a47] hover:shadow-[0_18px_32px_-10px_rgba(247,84,45,0.75)]"
             >
-              {site.hero.cta.viewMenu}
+              See the menu
               <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
                 →
               </span>
@@ -142,25 +134,23 @@ export function Hero() {
             <button
               type="button"
               onClick={() => scrollToSection("locations")}
-              className={cn(glassCtaBase, "group")}
+              className="inline-flex items-center gap-2.5 rounded-full border border-white/20 bg-white/5 px-7 py-3.5 font-sans text-[11px] font-semibold uppercase tracking-[0.28em] text-cream backdrop-blur-sm transition-all duration-300 hover:border-white/40 hover:bg-white/10"
             >
-              {site.hero.cta.findTruck}
-              <span className="btn-arrow inline-block">→</span>
+              Where&apos;s the truck?
             </button>
           </motion.div>
-
         </div>
 
         <motion.div
           variants={heroItem}
-          className="relative z-20 hidden justify-self-end self-end lg:block"
+          className="relative z-20 flex w-full justify-center min-[980px]:justify-end"
         >
           <HeroBadge />
         </motion.div>
       </motion.div>
 
       <div
-        className="absolute inset-x-0 bottom-6 z-[3] flex justify-center gap-1.5 sm:bottom-8"
+        className="absolute inset-x-0 bottom-6 z-[4] flex justify-center gap-2 sm:bottom-8"
         role="tablist"
         aria-label="Hero slideshow"
       >
@@ -170,8 +160,8 @@ export function Hero() {
             type="button"
             onClick={() => setI(idx)}
             className={cn(
-              "h-1.5 rounded-full transition-[width,opacity]",
-              idx === i ? "w-8 bg-gold" : "w-2 bg-cream/35 hover:bg-cream/55",
+              "h-2 rounded-full transition-all duration-400",
+              idx === i ? "w-8 bg-gold" : "w-2 bg-cream/30 hover:bg-cream/55",
             )}
             aria-label={`Show slide ${idx + 1}`}
             aria-current={idx === i ? "true" : undefined}

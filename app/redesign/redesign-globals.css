@@ -2,8 +2,12 @@
 @tailwind components;
 
 :root {
+  --nav-h: 4.5rem;
   --ticker-h: 2.5rem;
   --header-stack-h: calc(var(--nav-h) + var(--ticker-h));
+  --angie-orange: #f7542d;
+  --gold: #f6a21a;
+  --cream: #fff7ec;
 }
 
 @layer components {
