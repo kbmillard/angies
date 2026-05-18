@@ -48,15 +48,17 @@ export function CateringSection() {
             <h2 id="catering-heading" className="t-section mb-6">
               {c.title}
             </h2>
-            <p className="t-body-lg mb-5">{c.subtitle}</p>
-            <p className="t-body mb-5">
-              When you book Angie&apos;s, you are booking bold Tex-Mex on wheels — tacos,
-              birria, burritos, fresh waters, and hospitality tuned for Kansas City crowds.
-            </p>
-            <p className="t-body mb-8">
-              Tell us your crowd size, date, time, and address. We&apos;ll confirm menu pacing,
-              service window, and add-ons so guests get hot food and cold drinks.
-            </p>
+            <div className="prose-stack mb-8">
+              <p className="t-body-lg">{c.subtitle}</p>
+              <p className="t-body">
+                When you book Angie&apos;s, you are booking bold Tex-Mex on wheels — tacos,
+                birria, burritos, fresh waters, and hospitality tuned for Kansas City crowds.
+              </p>
+              <p className="t-body">
+                Tell us your crowd size, date, time, and address. We&apos;ll confirm menu pacing,
+                service window, and add-ons so guests get hot food and cold drinks.
+              </p>
+            </div>
 
             <div className="space-y-2.5 border-t border-white/10 pt-6">
               <div className="t-kicker mb-3">Call or text</div>

@@ -43,6 +43,11 @@ const config: Config = {
       letterSpacing: {
         editorial: "0.35em",
       },
+      lineHeight: {
+        body: "1.6",
+        "body-relaxed": "1.7",
+        "body-tight": "1.5",
+      },
       keyframes: {
         marquee: {
           from: { transform: "translateX(0)" },

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 import HeroBadge from "@/components/redesign/hero/HeroBadge";
+import HeroLeaves from "@/components/redesign/hero/HeroLeaves";
 import { useOrder } from "@/context/OrderContext";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
 import { cn } from "@/lib/utils/cn";
@@ -94,6 +95,8 @@ export function Hero() {
         }}
         aria-hidden
       />
+
+      <HeroLeaves />
 
       <motion.div
         initial="hidden"

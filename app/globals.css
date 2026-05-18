@@ -8,7 +8,7 @@
   --charcoal: #0f1114;
   --navy: #0b1426;
   --salsa: #c41e1c;
-  --angie-orange: #ea580c;
+  --angie-orange: #f7542d;
   --cilantro: #16a34a;
   --gold: #f59e0b;
 }
@@ -39,4 +39,22 @@ body {
 /* focus rings */
 :focus-visible {
   @apply outline outline-2 outline-offset-2 outline-gold;
+}
+
+/* Typography spacing — whole site */
+p {
+  line-height: 1.6;
+}
+
+p + p {
+  margin-top: 1.25em;
+}
+
+.prose-stack > * + * {
+  margin-top: 1.25rem;
+}
+
+h2 + p,
+h3 + p {
+  margin-top: 0.75rem;
 }

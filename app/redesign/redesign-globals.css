@@ -61,11 +61,11 @@
 
   .t-body {
     @apply font-sans text-base text-cream/80;
-    line-height: 1.65;
+    line-height: 1.6;
   }
   .t-body-lg {
     @apply font-sans text-lg text-cream/80;
-    line-height: 1.65;
+    line-height: 1.55;
   }
 
   .t-micro {
@@ -130,4 +130,24 @@
 }
 [data-stagger].reveal-in > *:nth-child(8) {
   transition-delay: 0.56s;
+}
+
+/* Typography spacing — line-height + paragraph stacking */
+.t-body + .t-body,
+.t-body-lg + .t-body-lg,
+.t-body + .t-body-lg,
+.t-body-lg + .t-body,
+p + p {
+  margin-top: 1.25em;
+}
+
+.prose-stack > * + * {
+  margin-top: 1.25rem;
+}
+
+.t-section + .t-body,
+.t-section + .t-body-lg,
+h2 + p,
+h3 + p {
+  margin-top: 0.75rem;
 }
