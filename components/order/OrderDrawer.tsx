@@ -82,7 +82,7 @@ export function OrderDrawer() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             aria-label="Close cart"
-            className="fixed inset-0 z-[60] touch-none bg-black/60 backdrop-blur-sm sm:bg-black/50"
+            className="fixed inset-0 z-[100] touch-none bg-black/60 backdrop-blur-sm sm:bg-black/50"
             onClick={() => setOrderDrawerOpen(false)}
           />
           <motion.aside
@@ -92,7 +92,7 @@ export function OrderDrawer() {
             exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 260, damping: 30 }}
             className={cn(
-              "fixed inset-x-0 bottom-0 z-[70] flex min-h-0 flex-col rounded-t-3xl border border-white/10 bg-charcoal shadow-2xl",
+              "fixed inset-x-0 bottom-0 z-[100] flex min-h-0 flex-col rounded-t-3xl border border-white/10 bg-charcoal shadow-2xl",
               "h-[min(92dvh,calc(100dvh-0.5rem))] max-h-[min(92dvh,calc(100dvh-0.5rem))] pb-[env(safe-area-inset-bottom,0px)]",
               "sm:inset-y-0 sm:right-0 sm:left-auto sm:h-full sm:max-h-none sm:w-[min(440px,100%)] sm:rounded-none sm:rounded-l-3xl sm:pb-0",
             )}

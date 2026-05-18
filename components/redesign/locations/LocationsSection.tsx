@@ -13,6 +13,7 @@ import type { LocationItem } from "@/lib/locations/schema";
 import { LocationPublicStatus } from "@/components/locations/LocationPublicStatus";
 import {
   formatAddressLine,
+  resolvedAppleMapsUrl,
   resolvedEmbedSrc,
   resolvedMapsUrl,
   telHrefFromDisplay,
@@ -20,7 +21,6 @@ import {
 import { DEFAULT_MAP_PIN_LAT, DEFAULT_MAP_PIN_LNG } from "@/lib/maps/default-map-pin";
 import { GoogleMapClientResolved } from "@/components/locations/GoogleMapClientResolved";
 import { GoogleMapGreedy } from "@/components/locations/GoogleMapGreedy";
-import MapPinRadar from "@/components/locations/MapPinRadar";
 import { ScheduleListBlock } from "@/components/schedule/ScheduleListBlock";
 
 const MAP_FRAME_CLASS =
@@ -93,7 +93,14 @@ function MapEmbedBlock({ loc }: { loc: LocationItem }) {
           />
         </MapFrame>
       ) : (
-        <MapPinRadar />
+        <MapFrame>
+          <div className="flex min-h-[240px] items-center justify-center bg-charcoal/60 p-6 text-sm text-cream/75 sm:min-h-[280px]">
+            <div className="text-center">
+              <p className="font-medium text-cream">Map</p>
+              <p className="mt-2 text-cream/70">TBD</p>
+            </div>
+          </div>
+        </MapFrame>
       )}
     </>
   );
@@ -194,6 +201,7 @@ export function LocationsSection() {
                   </ul>
                   <div className="mt-7 flex flex-wrap gap-3">
                     <MapButton label="Google Maps" href={resolvedMapsUrl(primaryTruck)} />
+                    <MapButton label="Apple Maps" href={resolvedAppleMapsUrl(primaryTruck)} />
                     <a href={phoneTel} className={cn(glassCtaBase, "gap-2")}>
                       <Phone className="h-4 w-4 shrink-0" aria-hidden />
                       Call / text
