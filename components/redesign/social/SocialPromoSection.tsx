@@ -15,6 +15,19 @@ export function SocialPromoSection() {
       <div className="mx-auto max-w-[1240px] px-5 sm:px-8">
         <Reveal>
           <div className="relative overflow-hidden rounded-3xl border border-gold/25 bg-gradient-to-br from-navy/70 to-charcoal p-8 sm:p-12 md:p-14">
+            {/* Decorative @ symbol */}
+            <span
+              aria-hidden
+              className="pointer-events-none absolute -top-8 right-8 font-display italic leading-none select-none"
+              style={{
+                fontSize: "14rem",
+                color: "rgba(246, 162, 26, 0.08)",
+                fontVariationSettings: '"SOFT" 100',
+              }}
+            >
+              @
+            </span>
+
             <div
               className="pointer-events-none absolute inset-0"
               style={{

@@ -1,0 +1,456 @@
+================================================================================
+ANGIE'S FOOD TRUCK KC — PRODUCTION HOMEPAGE VISUAL SPEC
+================================================================================
+Purpose: Paste this file into Claude (or another model) to redesign colors.
+Return your answer using SECTION 12 format so changes plug into the repo cleanly.
+
+Site:     https://angieskc.com
+Route:    / only (app/page.tsx -> components/home/HomeView.tsx)
+Stack:    Next.js 15, React 19, Tailwind 3, Framer Motion
+Generated from source — not a live screenshot.
+
+EXCLUDED (do not treat as production customer UI):
+  - /admin/* (including /admin/truck-button truck CTA preview)
+  - /site-stack
+  - /admin/photos
+
+================================================================================
+SECTION 1 — GOAL FOR COLOR REDO
+================================================================================
+
+Propose a revised hex palette and say WHERE each token applies.
+
+MUST PRESERVE (behavior, not exact hex):
+  - Fixed brand watermark visible through translucent sections
+  - Hero is opaque charcoal so slideshow covers watermark at top
+  - Scroll sections use charcoal GLASS (45% opacity + backdrop-blur), not solid slabs
+  - Footer slightly stronger glass (70% + blur)
+  - Prologue welcome card stays MORE opaque (92%) with NO backdrop-blur on card
+  - Focus rings stay visible (currently gold outline)
+
+You MAY change: hex values, orange-vs-red balance, navy usage in social card, menu accent colors.
+
+================================================================================
+SECTION 2 — GLOBAL COLOR TOKENS (SOURCE OF TRUTH)
+================================================================================
+
+Edit these two files to change site-wide tokens:
+  - tailwind.config.ts  (theme.extend.colors)
+  - app/globals.css     (:root CSS variables)
+
+TOKEN NAME          HEX         PRIMARY ROLE
+--------------------------------------------------------------------------------
+charcoal            #101114     body bg, hero base, map fallback, drawer bg
+cream               #fff7ec     primary text on dark
+tortilla            #eadcc4     defined; minimal use on homepage
+salsa               #b92b19     closed status label/dot context; hover destructive
+angie-orange        #f7542d     primary CTAs (nav MENU, checkout, catering submit)
+ember               #f7542d     alias of angie-orange (legacy, same hex)
+gold                #f6a21a     kickers, map pin, quote borders, focus ring, slide dot active
+navy                #0b1726     hero gradient tint; social promo card gradient
+midnight            #060b14     nav bar background
+cilantro            #16a34a     defined; not primary on homepage
+accent-green        #45b82e     OPEN truck status dot + label (logo leaf green)
+accent-cyan         #22d3ee     menu category accent (if used)
+accent-yellow       #facc15     menu category accent (Burritos tab)
+accent-pink         #fb7185     menu category accent (Classics tab)
+accent-orange       #ff8a3d     menu category accent (Quesadillas tab)
+accent-red          #f87171     menu category accent (Tacos tab)
+agave               #0f766e     catering form success panel
+teal                #0d9488     defined; light use
+sand                #d4c4a8     defined; light use
+cocoa               #3d2a1f     defined; light use
+plum                #1a1520     defined; light use
+menu-plum           #121a28     defined; light use
+
+CSS VARIABLES (app/globals.css :root):
+  --nav-h: 4.25rem
+  --cream, --charcoal, --navy, --salsa, --angie-orange, --cilantro, --gold
+
+NEUTRAL OVERLAYS (Tailwind opacity on cream/white/charcoal/black):
+  border-white/10, /15, /20, /25, /35  — borders, cards, inputs
+  bg-white/5, /10                     — glass fills, cart lines
+  bg-black/25, /30, /35, /40, /60     — menu panel, overlays, drawer scrim
+  bg-charcoal/35, /45, /50, /70, /92  — section glass + footer + prologue card
+  text-cream/35 .. /90                — hierarchy (higher number = more visible)
+
+================================================================================
+SECTION 3 — TYPOGRAPHY
+================================================================================
+
+FONTS (app/layout.tsx — next/font/google):
+  Display: Playfair Display  -> CSS var --font-display -> class font-display
+  Body:    DM Sans           -> CSS var --font-sans     -> class font-sans
+
+BODY DEFAULT (globals.css):
+  bg-charcoal text-cream antialiased font-sans
+
+EDITORIAL PATTERN (nav, kickers, CTAs):
+  text-xs uppercase tracking-editorial
+  letter-spacing: 0.35em (tailwind theme.extend.letterSpacing.editorial)
+
+TYPE SCALE ON HOMEPAGE:
+  Hero H1:     font-display text-5xl .. lg:text-7xl text-cream
+  Section H2:  font-display text-4xl sm:text-5xl text-cream (SectionHeading)
+  Final CTA:   font-display text-5xl sm:text-6xl
+  Truck name:  font-display text-3xl sm:text-4xl (locations card)
+  Body:        text-sm .. text-lg text-cream/75 .. /85
+
+FOCUS:
+  :focus-visible -> outline-gold (2px, offset 2px)
+
+================================================================================
+SECTION 4 — CRITICAL LAYOUT / BACKDROP (DO NOT BREAK)
+================================================================================
+
+Rule file: .cursor/rules/gringos-backdrop.mdc
+
+Z-ORDER (HomeView scroll order):
+  z-0  FixedBrandBackdrop (fixed, below nav)
+  z-10 Hero + all sections + footer (relative)
+  z-50 Nav
+  z-60+ Order drawer / mobile nav overlay
+
+FixedBrandBackdrop (components/prologue/FixedBrandBackdrop.tsx):
+  fixed inset-x-0 bottom-0 top-[var(--nav-h)] z-0 bg-charcoal
+  Image: /images/brand/site-logo.webp
+  Image classes: opacity 50-58%, brightness 1.06, saturate 1.08, contrast 1.03
+  Size: ~68-72vmin square, centered, shifted up slightly
+
+Hero (components/hero/Hero.tsx):
+  MUST stay opaque: bg-charcoal (covers watermark at top)
+  Slideshow + gradients on top of charcoal base
+
+Standard section wash (most bands):
+  relative z-10 bg-charcoal/45 backdrop-blur-sm
+
+Footer (components/footer/SiteFooter.tsx):
+  relative z-10 bg-charcoal/70 backdrop-blur-md border-t border-white/10
+
+Prologue card ONLY (components/prologue/Prologue.tsx):
+  bg-charcoal/92 border-white/10 — solid-tint card, NO backdrop-blur on card
+  Section wrapper has NO extra bg (watermark shows around card)
+
+================================================================================
+SECTION 5 — HOMEPAGE SCROLL ORDER & FILES
+================================================================================
+
+HomeView.tsx renders in this order:
+  1. EditorialNav          components/nav/EditorialNav.tsx
+  2. FixedBrandBackdrop    components/prologue/FixedBrandBackdrop.tsx
+  3. Hero                  components/hero/Hero.tsx
+  4. Prologue              components/prologue/Prologue.tsx
+  5. StorySection          components/story/StorySection.tsx
+  6. InteractiveMenu       components/menu/InteractiveMenu.tsx
+  7. LocationsSection      components/locations/LocationsSection.tsx
+  8. SocialPromoSection    components/social/SocialPromoSection.tsx
+  9. CateringSection       components/catering/CateringSection.tsx
+  10. FinalConversion      components/cta/FinalConversion.tsx
+  11. SiteFooter           components/footer/SiteFooter.tsx
+
+Overlays (not in main scroll):
+  OrderDrawer              components/order/OrderDrawer.tsx
+  CloverPaymentModal       components/clover/CloverPaymentModal.tsx
+
+================================================================================
+SECTION 6 — SECTION-BY-SECTION VISUAL DETAIL
+================================================================================
+
+--- NAV (EditorialNav.tsx) ---
+Shell: fixed z-50 w-full border-b border-white/10 bg-midnight/85 backdrop-blur-md
+Nav links: text-[10-11px] uppercase tracking-editorial text-cream/70 hover:text-cream
+Active link: text-cream
+Disabled (Schedule): text-cream/35 cursor-not-allowed
+MENU pill (primary CTA): rounded-full bg-angie-orange text-cream shadow-md hover:bg-angie-orange/90
+Mobile menu button: border-white/10 text-cream hover:bg-white/5
+Mobile drawer scrim: bg-black/70 backdrop-blur-md
+Mobile drawer panel: bg-[#0c121f]/92 border-white/10 backdrop-blur-xl shadow-2xl
+Mobile drawer MENU CTA: same as desktop angie-orange pill
+
+--- HERO (Hero.tsx) ---
+Section: relative z-10 bg-charcoal min-h ~78-80svh pt-[var(--nav-h)]
+Base layer: absolute bg-charcoal under slides
+Gradient overlay: bg-gradient-to-t from-charcoal via-charcoal/80 to-navy/40
+Bottom wash: bg-gradient-to-t from-angie-orange/18 to-transparent (height ~28-30%)
+Eyebrow: text-xs uppercase tracking-editorial text-cream/75
+Headline: font-display text-cream text-5xl-7xl
+Body: text-cream/85
+Slide indicators: active w-8 bg-gold | inactive w-2 bg-cream/35 hover:bg-cream/55
+Hero images: from site settings / lib/data/hero-slides.ts (gallery truck photos)
+
+Default hero slide paths (gallery/):
+  truck.png, truck1.jpg, truck2.png, truck3.jpg, truck4.jpg
+
+--- PROLOGUE (Prologue.tsx) ---
+Section: relative z-10 (transparent — watermark visible beside card)
+Card: rounded-3xl border-white/10 bg-charcoal/92 shadow dark
+Uses SectionHeading: kicker cream/60, title display cream, subtitle cream/75
+
+--- STORY (StorySection.tsx) ---
+Section: bg-charcoal/45 backdrop-blur-sm py-24
+Blockquote: border-l-2 border-gold/55 text-cream/85 italic
+Image frame: rounded-3xl border-white/10 shadow heavy
+Image overlay: gradient from-charcoal/85 via-charcoal/20 to-transparent
+Caption chip: border-white/15 bg-black/40 backdrop-blur text-gold kicker
+
+--- MENU (InteractiveMenu.tsx) ---
+Section: bg-charcoal/45 backdrop-blur-sm py-24
+Error banner: border-angie-orange/35 bg-angie-orange/10 text-cream
+Category tab (inactive): border-white/10 bg-black/25 text-cream hover:border-white/25
+Category tab (active): bg-cream/95 text-charcoal ring-2 ring-cream/50
+Category number: font-display text-3xl
+Menu panel: border-2 bg-black/35 (border color per category — see Section 8)
+Panel title: font-display text-4xl text-cream
+Panel body: text-cream/75
+Item card: border-white/10 bg-charcoal/50 | selected: border-cream/25 ring-cream/15
+Item price: text-cream/85
+Badges: border-white/15 bg-white/5 text-cream/75 uppercase micro
+
+--- LOCATION (LocationsSection.tsx) ---
+Section: bg-charcoal/45 backdrop-blur-sm
+Main card: border-white/10 bg-charcoal/35 backdrop-blur-md rounded-3xl
+Kickers: text-gold/90 uppercase tracking-editorial
+Truck title: font-display text-3xl-4xl text-cream
+Status OPEN: dot bg-accent-green, label text-accent-green
+Status CLOSED: dot bg-salsa, label text-salsa, detail text-cream/80
+Address: text-cream/90, MapPin icon text-gold
+Schedule subtitle: text-cream/65
+Map frame: border-white/10 bg-charcoal
+Map placeholder: border-dashed border-white/20 bg-charcoal/60
+Bottom CTAs: glass-cta (see Section 7) — Google Maps, Apple Maps, Call/text
+
+--- SOCIAL (SocialPromoSection.tsx) ---
+Section: bg-charcoal/45 backdrop-blur-sm
+EXCEPTION CARD (only navy slab on page besides hero):
+  rounded-3xl border-gold/25 bg-gradient-to-br from-navy/60 to-charcoal
+Social link pills: border-white/15 text-cream hover:bg-white/10
+
+--- CATERING (CateringSection.tsx) ---
+Section: bg-charcoal/45 backdrop-blur-sm
+Form panel: border-white/10 bg-black/30 rounded-3xl
+Success panel: border-agave/40 bg-agave/10 text-cream
+Primary submit: rounded-full bg-angie-orange text-cream hover:bg-angie-orange/90
+Secondary buttons: border-white/20 or /25 text-cream hover:bg-white/5 or /10
+Inputs: border-white/15 bg-black/30 text-cream/90
+
+--- FINAL CONVERSION (FinalConversion.tsx) ---
+Section: border-t border-white/10 bg-charcoal/50 backdrop-blur-sm
+Kicker: text-cream/70 uppercase
+Title: font-display text-5xl-6xl text-cream
+Buttons: glassCtaAccent (Menu) | glassCtaBase (Checkout, Catering) — Section 7
+
+--- FOOTER (SiteFooter.tsx) ---
+Section: border-t border-white/10 bg-charcoal/70 backdrop-blur-md
+Labels: text-cream/50 uppercase tracking-editorial
+Body: text-cream/80 .. /85
+
+================================================================================
+SECTION 7 — SHARED UI PATTERNS (CLASS STRINGS)
+================================================================================
+
+SectionHeading (components/ui/SectionHeading.tsx):
+  Kicker: text-xs uppercase tracking-editorial text-cream/60
+  Title:  font-display text-4xl sm:text-5xl text-cream
+  Subtitle: text-cream/75 sm:text-lg
+
+glassCtaBase (components/ui/glass-cta.ts):
+  inline-flex rounded-full border border-white/20 bg-white/5 px-6 py-3
+  text-xs font-semibold uppercase tracking-editorial text-cream backdrop-blur-sm
+  hover:border-white/35 hover:bg-white/10
+
+glassCtaAccent (components/ui/glass-cta.ts):
+  Same as base but:
+  border-angie-orange/45 bg-angie-orange/15
+  hover:border-angie-orange/60 hover:bg-angie-orange/25
+
+LocationPublicStatus (components/locations/LocationPublicStatus.tsx):
+  Open label:  text-accent-green
+  Closed label: text-salsa
+  Dot open:    bg-accent-green
+  Dot closed:  bg-salsa
+
+OrderDrawer (components/order/OrderDrawer.tsx):
+  Backdrop: bg-black/60 backdrop-blur-sm (sm: /50)
+  Panel: bg-charcoal border-white/10 rounded-t-3xl (desktop: rounded-l-3xl)
+  Header kicker: text-cream/60
+  Line items: border-white/10 bg-white/5
+  Error: border-angie-orange/35 bg-angie-orange/10
+  Success: border-agave/40 bg-agave/10
+  Checkout buttons: bg-angie-orange (same as nav MENU)
+  Remove line hover: text-salsa
+
+================================================================================
+SECTION 8 — MENU CATEGORY ACCENT COLORS
+================================================================================
+
+Mapping (lib/menu/category-meta.ts -> lib/menu/category-styles.ts):
+
+Category      color key   Panel border class          Hero gradient tint
+--------------------------------------------------------------------------------
+Tacos         red         border-accent-red/55        from-accent-red/12
+Burritos      yellow      border-accent-yellow/65     from-accent-yellow/12
+Quesadillas   orange      border-accent-orange/60     from-accent-orange/12
+Classics      pink        border-accent-pink/55       from-accent-pink/12
+
+Active tab ring (all categories): ring-cream/50 on bg-cream/95
+
+Accent hex from tailwind.config.ts:
+  accent-cyan:   #22d3ee  (defined, not assigned to current 4 categories)
+  accent-green:  #4ade80  (also used for OPEN status)
+  accent-yellow: #facc15
+  accent-pink:   #fb7185
+  accent-orange: #fb923c
+  accent-red:    #f87171
+
+To change menu accents only: edit lib/menu/category-styles.ts
+To change which color a category uses: edit lib/menu/category-meta.ts
+
+================================================================================
+SECTION 9 — KEY IMAGE ASSETS
+================================================================================
+
+/images/brand/site-logo.webp     Fixed watermark (through glass sections)
+/gallery/truck*.png|jpg          Hero slideshow defaults
+/menu/menu_final/*.png           Menu category hero images when set
+/icons/*                         Favicons / PWA (not homepage layout)
+
+================================================================================
+SECTION 10 — KNOWN COLOR TENSIONS
+================================================================================
+
+1. angie-orange (#ea580c) vs salsa (#c41e1c)
+   - Orange: nav MENU, cart checkout, catering submit, glass accent pills, hero bottom wash
+   - Salsa: closed truck status, cart remove hover
+   - Preview-only truck CTA (NOT LIVE) uses salsa tone — do not confuse with production
+
+2. Social section uses navy/60 gradient — only non-hero navy block
+
+3. ember token duplicates angie-orange — prefer angie-orange in new work
+
+4. Menu accent-orange (#fb923c) is NOT the same as angie-orange (#ea580c)
+
+5. Open status uses accent-green (#4ade80), not cilantro (#16a34a)
+
+================================================================================
+SECTION 11 — PLUG-IN MAP (WHERE TO APPLY PALETTE CHANGES)
+================================================================================
+
+After you receive new colors from Claude, apply in this order:
+
+STEP 1 — Core tokens (global)
+  FILE: tailwind.config.ts
+    theme.extend.colors -> update hex for each token name
+  FILE: app/globals.css
+    :root -> mirror same hex on --charcoal, --cream, --salsa, --angie-orange, --gold, --navy
+
+STEP 2 — Shared CTAs
+  FILE: components/ui/glass-cta.ts
+    glassCtaAccent -> angie-orange border/bg classes (or new token names)
+
+STEP 3 — Nav + primary buttons (grep angie-orange)
+  FILE: components/nav/EditorialNav.tsx
+  FILE: components/order/OrderDrawer.tsx
+  FILE: components/catering/CateringSection.tsx
+
+STEP 4 — Status colors (grep salsa, accent-green)
+  FILE: components/locations/LocationPublicStatus.tsx
+
+STEP 5 — Hero gradients (grep navy, angie-orange, charcoal)
+  FILE: components/hero/Hero.tsx
+
+STEP 6 — Social exception (grep navy, gold)
+  FILE: components/social/SocialPromoSection.tsx
+
+STEP 7 — Menu accents (optional)
+  FILE: lib/menu/category-styles.ts
+  FILE: lib/menu/category-meta.ts
+
+STEP 8 — Section washes (usually KEEP opacity, change base token only)
+  Grep: bg-charcoal/45, bg-charcoal/70, bg-charcoal/92, bg-charcoal/35
+  Files: Story, Menu, Locations, Social, Catering, FinalConversion, Footer, Prologue card
+
+DO NOT change without explicit approval:
+  - Opacity/blur pattern on sections (breaks watermark design)
+  - Hero opaque bg-charcoal
+  - FixedBrandBackdrop structure
+
+================================================================================
+SECTION 12 — RESPONSE FORMAT (FOR CLAUDE / AI — REQUIRED FOR ROUND-TRIP)
+================================================================================
+
+When returning a redesigned palette, include ALL of the following blocks so a
+developer (or Cursor agent) can apply changes without guessing.
+
+--- BLOCK A: PALETTE_YAML ---
+Copy this block and fill in NEW hex values. Keep token names unchanged unless
+you propose renames (list renames separately).
+
+```yaml
+palette:
+  charcoal: "#101114"
+  cream: "#fff7ec"
+  tortilla: "#eadcc4"
+  salsa: "#b92b19"
+  angie-orange: "#f7542d"
+  gold: "#f6a21a"
+  navy: "#0b1726"
+  midnight: "#060b14"
+  accent-green: "#45b82e"
+  accent-cyan: "#22d3ee"
+  accent-yellow: "#facc15"
+  accent-pink: "#fb7185"
+  accent-orange: "#ff8a3d"
+  accent-red: "#f87171"
+  agave: "#0f766e"
+```
+
+APPLIED 2026-05 — truck CTA pill uses --angies-truck-gradient in app/globals.css
+```
+
+--- BLOCK B: TOKEN_RATIONALE ---
+For each changed token, one line:
+  token_name: old_hex -> new_hex | role | files affected
+
+--- BLOCK C: ORANGE_VS_RED_DECISION ---
+State explicitly:
+  primary_cta_token: angie-orange OR salsa OR new name
+  closed_status_token: salsa OR other
+  Should hero bottom wash match primary CTA? yes/no
+
+--- BLOCK D: OPACITY_RULES (confirm unchanged or specify) ---
+  section_glass: charcoal at __% + backdrop-blur-sm  (default 45)
+  footer_glass: charcoal at __% + backdrop-blur-md     (default 70)
+  prologue_card: charcoal at __% solid, no blur       (default 92)
+
+--- BLOCK E: COMPONENT_OVERRIDES (optional) ---
+Only if a specific component needs a non-token color:
+  file_path | element | tailwind class change
+
+Example:
+  components/social/SocialPromoSection.tsx | promo card | from-navy/60 -> from-[#xxx]/60
+
+--- BLOCK F: MENU_CATEGORY_ACCENTS (optional) ---
+If changing menu tab colors:
+  Tacos: red -> hex or keep accent-red
+  Burritos: yellow -> ...
+  (etc.)
+
+--- BLOCK G: CONTRAST_NOTES ---
+List any WCAG concerns (cream on charcoal, orange on charcoal, etc.)
+
+================================================================================
+SECTION 13 — QUICK APPLY CHECKLIST (DEVELOPER)
+================================================================================
+
+[ ] Parse BLOCK A PALETTE_YAML from AI response
+[ ] Update tailwind.config.ts colors
+[ ] Update app/globals.css :root variables
+[ ] Grep angie-orange, salsa, gold, navy, accent- across components/
+[ ] Run npm run build
+[ ] Visual check: / (homepage) — watermark visible mid-page, hero opaque top
+[ ] Visual check: nav MENU, cart, location status dots, social card
+[ ] Do NOT merge truck-button preview (/admin/truck-button) unless requested
+
+================================================================================
+END OF SPEC
+================================================================================
