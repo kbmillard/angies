@@ -1,5 +1,3 @@
-// Spinning circular-text stamp: logo centered, gold orbit text on a 28s loop.
-
 import Image from "next/image";
 import { cn } from "@/lib/utils/cn";
 
@@ -25,7 +23,30 @@ export default function HeroBadge({
       style={{ animationDelay: "0.7s", animationFillMode: "forwards" }}
       aria-hidden
     >
-      {/* Orbiting text — spins; sits behind the logo */}
+      <div
+        className="pointer-events-none absolute inset-[15%] rounded-full"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(246, 162, 26, 0.10) 0%, rgba(247, 84, 45, 0.05) 40%, transparent 70%)",
+        }}
+      />
+
+      <svg
+        viewBox="0 0 200 200"
+        className="pointer-events-none absolute inset-0"
+        aria-hidden
+      >
+        <circle
+          cx="100"
+          cy="100"
+          r="74"
+          fill="none"
+          stroke="rgba(246, 162, 26, 0.22)"
+          strokeWidth="1"
+          strokeDasharray="2 5"
+        />
+      </svg>
+
       <svg
         viewBox="0 0 200 200"
         className="absolute inset-0 z-0 animate-spin28"
@@ -43,7 +64,7 @@ export default function HeroBadge({
             fontFamily: "var(--font-sans)",
             fontSize: 9,
             fontWeight: 600,
-            letterSpacing: "0.4em",
+            letterSpacing: "0.32em",
             textTransform: "uppercase",
           }}
         >
@@ -53,18 +74,17 @@ export default function HeroBadge({
         </text>
       </svg>
 
-      {/* Logo disc — opaque so the fixed watermark does not bleed through */}
-      <div className="absolute inset-[18%] z-10 flex items-center justify-center">
-        <div
-          className="relative h-full w-full animate-bob overflow-hidden rounded-full bg-charcoal shadow-[0_0_32px_rgba(247,84,45,0.35)] ring-1 ring-white/10"
-          style={{ filter: "drop-shadow(0 0 24px rgba(247, 84, 45, 0.35))" }}
-        >
+      <div
+        className="absolute inset-[20%] z-10 animate-bob"
+        style={{ filter: "drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45))" }}
+      >
+        <div className="relative h-full w-full overflow-hidden rounded-full bg-charcoal">
           <Image
             src={logoSrc}
             alt=""
             fill
             priority
-            sizes="(min-width: 1024px) 220px, 180px"
+            sizes="(min-width: 1024px) 320px, 220px"
             className="object-contain p-[8%]"
           />
         </div>

@@ -5,7 +5,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 import HeroBadge from "@/components/redesign/hero/HeroBadge";
 import HeroLeaves from "@/components/redesign/hero/HeroLeaves";
-import { glassCtaAccent, glassCtaBase } from "@/components/ui/glass-cta";
+import { glassCtaBase } from "@/components/ui/glass-cta";
 import { useOrder } from "@/context/OrderContext";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
 import { cn } from "@/lib/utils/cn";
@@ -132,10 +132,12 @@ export function Hero() {
             <button
               type="button"
               onClick={() => scrollToSection("menu")}
-              className={cn(glassCtaAccent, "group")}
+              className="group inline-flex items-center gap-2 rounded-full bg-angie-orange px-7 py-3.5 text-[11px] font-semibold uppercase tracking-[0.28em] text-cream shadow-lg shadow-angie-orange/40 transition-all duration-300 hover:-translate-y-0.5 hover:bg-angie-orange/90 hover:shadow-xl hover:shadow-angie-orange/55"
             >
               {site.hero.cta.viewMenu}
-              <span className="btn-arrow inline-block">→</span>
+              <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
+                →
+              </span>
             </button>
             <button
               type="button"

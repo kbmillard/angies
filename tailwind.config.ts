@@ -72,6 +72,22 @@ const config: Config = {
           from: { opacity: "0", transform: "translateY(28px)" },
           to: { opacity: "1", transform: "translateY(0)" },
         },
+        drift: {
+          "0%": {
+            transform: "translate3d(0, 100%, 0) rotate(0deg)",
+            opacity: "0",
+          },
+          "8%": { opacity: "var(--leaf-opacity, 0.2)" },
+          "50%": {
+            transform: "translate3d(30px, -50vh, 0) rotate(180deg)",
+            opacity: "var(--leaf-opacity, 0.2)",
+          },
+          "92%": { opacity: "var(--leaf-opacity, 0.2)" },
+          "100%": {
+            transform: "translate3d(-30px, calc(-100vh - 100%), 0) rotate(360deg)",
+            opacity: "0",
+          },
+        },
       },
       animation: {
         marquee: "marquee 38s linear infinite",
@@ -81,6 +97,7 @@ const config: Config = {
         "ring-pulse": "ringPulse 2s ease-out infinite",
         "radar-ping": "radarPing 3s ease-out infinite",
         rise: "rise 1s cubic-bezier(0.16, 1, 0.3, 1) forwards",
+        drift: "drift 22s linear infinite",
       },
     },
   },
