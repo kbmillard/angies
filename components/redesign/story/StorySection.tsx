@@ -53,17 +53,17 @@ export function StorySection() {
 
   return (
     <section id="story" className={homeBandClass}>
-      <div className="mx-auto grid max-w-[1200px] items-center gap-12 px-5 sm:px-8 lg:grid-cols-2 lg:gap-20">
+      <div className="mx-auto grid max-w-[1240px] items-center gap-12 px-5 sm:px-8 min-[880px]:grid-cols-2 min-[880px]:gap-20">
         <Reveal>
           <SectionHeading
-            kicker={site.story.sectionKicker}
             title={
               <>
                 Mexican flavor, <em>rolling through</em> Kansas City.
               </>
             }
+            className="mb-8"
           />
-          <blockquote className="story-quote mt-8">
+          <blockquote className="story-quote">
             <div className="story-quote-mark" aria-hidden>
               &ldquo;
             </div>
@@ -74,7 +74,7 @@ export function StorySection() {
           </blockquote>
         </Reveal>
 
-        <Reveal className="relative mx-auto w-full max-w-lg lg:mx-0 lg:max-w-none">
+        <Reveal className="relative mx-auto w-full min-[880px]:mx-0">
           <div
             className="relative aspect-[4/5] w-full overflow-hidden rounded-[20px] border border-white/10 shadow-[0_24px_60px_-20px_rgba(0,0,0,0.55)]"
             role="region"

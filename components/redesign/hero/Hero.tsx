@@ -102,7 +102,7 @@ export function Hero() {
         initial="hidden"
         animate="show"
         variants={heroContainer}
-        className="relative z-[3] mx-auto grid w-full max-w-[1400px] grid-cols-1 items-end gap-10 px-5 pb-16 pt-12 sm:px-8 sm:pb-20 sm:pt-16 min-[980px]:grid-cols-[1.6fr_1fr] min-[980px]:gap-16"
+        className="relative z-[3] mx-auto grid w-full max-w-[1400px] grid-cols-1 items-end gap-10 px-5 pb-[clamp(4rem,9vw,7rem)] pt-12 sm:px-8 sm:pt-16 min-[980px]:grid-cols-[1.6fr_1fr] min-[980px]:gap-16"
       >
         <div className="max-w-[760px] [text-shadow:0_2px_28px_rgba(0,0,0,0.55)]">
           <motion.div variants={heroItem} className="mb-7 inline-flex items-center gap-3.5">
@@ -118,7 +118,7 @@ export function Hero() {
             Kansas City.
           </motion.h1>
 
-          <motion.p variants={heroItem} className="t-body-lg mb-9 max-w-[540px] text-cream/[0.82]">
+          <motion.p variants={heroItem} className="t-body-lg mb-9 max-w-[540px] text-cream/80">
             Find Angie&apos;s near Linwood and all around KC. Follow today&apos;s pin, order from the
             window, or book the truck for your next event.
           </motion.p>

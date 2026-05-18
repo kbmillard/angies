@@ -1,15 +1,24 @@
 import type { Metadata } from "next";
 import { RedesignHomePage } from "@/components/redesign/RedesignHomePage";
-import { HOME_DESCRIPTION, HOME_TITLE } from "@/lib/seo";
+import { HOME_DESCRIPTION, HOME_TITLE, SITE_NAME } from "@/lib/seo";
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://angieskc.com";
 
 export const metadata: Metadata = {
-  title: `${HOME_TITLE} (preview)`,
+  title: HOME_TITLE,
   description: HOME_DESCRIPTION,
-  alternates: { canonical: "https://angieskc.com/" },
-  robots: { index: false, follow: false },
+  applicationName: SITE_NAME,
+  alternates: { canonical: `${siteUrl}/redesign` },
+  openGraph: {
+    title: HOME_TITLE,
+    description: HOME_DESCRIPTION,
+    url: `${siteUrl}/redesign`,
+    siteName: SITE_NAME,
+    locale: "en_US",
+    type: "website",
+  },
 };
 
-/** Redesign preview only — production homepage stays at `/`. */
-export default function RedesignPreviewPage() {
+export default function RedesignHomeRoute() {
   return <RedesignHomePage />;
 }

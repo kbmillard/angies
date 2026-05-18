@@ -24,7 +24,6 @@ export function SocialPromoSection() {
               aria-hidden
             />
             <div className="relative">
-              <div className="t-kicker t-kicker-gold mb-4">Follow along</div>
               <h2 className="t-section max-w-[18ch]">
                 Follow the truck — <em>same-day</em> updates.
               </h2>

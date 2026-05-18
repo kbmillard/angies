@@ -22,8 +22,7 @@ import { GoogleMapClientResolved } from "@/components/locations/GoogleMapClientR
 import { GoogleMapGreedy } from "@/components/locations/GoogleMapGreedy";
 import { ScheduleListBlock } from "@/components/schedule/ScheduleListBlock";
 
-const MAP_FRAME_CLASS =
-  "aspect-[4/5] w-full min-h-[240px] bg-charcoal sm:min-h-[280px]";
+const MAP_FRAME_CLASS = "absolute inset-0 h-full w-full bg-charcoal";
 
 function addressLines(loc: LocationItem): string[] {
   const cityLine = [loc.city, loc.state, loc.zip].filter(Boolean).join(" ").trim();
@@ -42,7 +41,9 @@ function parseCoord(n: number | null | undefined): number | null {
 
 function MapFrame({ children }: { children: ReactNode }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/10">{children}</div>
+    <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl border border-white/10">
+      {children}
+    </div>
   );
 }
 
@@ -84,7 +85,7 @@ function MapEmbedBlock({ loc }: { loc: LocationItem }) {
         </MapFrame>
       ) : (
         <MapFrame>
-          <div className="flex min-h-[240px] items-center justify-center bg-charcoal/60 p-6 text-sm text-cream/75 sm:min-h-[280px]">
+          <div className="absolute inset-0 flex items-center justify-center bg-charcoal/60 p-6 text-sm text-cream/75">
             <div className="text-center">
               <p className="font-medium text-cream">Map</p>
               <p className="mt-2 text-cream/70">TBD</p>
@@ -116,7 +117,7 @@ export function LocationsSection() {
 
   return (
     <section id="locations" className={homeBandClass}>
-      <div className="mx-auto max-w-[1200px] px-5 sm:px-8">
+      <div className="mx-auto max-w-[1240px] px-5 sm:px-8">
         <div
           id="locations-start"
           tabIndex={-1}
@@ -124,13 +125,14 @@ export function LocationsSection() {
         >
           <Reveal>
             <SectionHeading
-              kicker="Today on the curb"
               title={
                 <>
                   Find us — <em>pin updates</em> from the road.
                 </>
               }
               subtitle="The truck moves daily. Address, hours, and notes update here when they are published."
+              className="mb-10"
+              maxWidthClass="max-w-[720px]"
             />
           </Reveal>
         </div>
@@ -154,8 +156,8 @@ export function LocationsSection() {
           <div className="mt-8 h-96 animate-pulse rounded-3xl bg-white/10" />
         ) : primaryTruck ? (
           <>
-            <Reveal className="mt-10">
-              <article className="grid grid-cols-1 gap-10 rounded-3xl border border-white/10 bg-charcoal/55 p-6 backdrop-blur-md sm:p-8 md:grid-cols-[1.2fr_1fr] md:gap-14 md:p-10 lg:items-center">
+            <Reveal>
+              <article className="grid grid-cols-1 gap-10 rounded-3xl border border-white/10 bg-charcoal/55 p-6 backdrop-blur-md sm:p-8 min-[880px]:grid-cols-[1.2fr_1fr] min-[880px]:gap-14 min-[880px]:p-10 min-[880px]:items-center">
                 <div className="min-w-0">
                   <LocationPublicStatus
                     location={primaryTruck}
@@ -163,7 +165,16 @@ export function LocationsSection() {
                     showNote={false}
                     className="[&_p]:mt-0"
                   />
-                  <h3 className="t-section mt-4 text-3xl sm:text-4xl">{primaryTruck.name}</h3>
+                  <h3
+                    className="mt-4 font-display leading-none tracking-[-0.015em] text-cream"
+                    style={{
+                      fontSize: "clamp(2rem, 3.5vw, 2.75rem)",
+                      fontWeight: 480,
+                      fontVariationSettings: '"SOFT" 60, "opsz" 96',
+                    }}
+                  >
+                    {primaryTruck.name}
+                  </h3>
                   <div className="mt-6 flex items-center gap-3 text-base text-cream/90">
                     <MapPin className="h-5 w-5 shrink-0 text-gold" aria-hidden />
                     <div className="min-w-0">

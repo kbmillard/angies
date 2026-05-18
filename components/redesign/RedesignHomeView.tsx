@@ -14,7 +14,7 @@ import { SocialPromoSection } from "@/components/redesign/social/SocialPromoSect
 import { StorySection } from "@/components/redesign/story/StorySection";
 import { useOrder } from "@/context/OrderContext";
 
-/** Redesign homepage — only mounted at `/redesign`. */
+/** Site homepage — mounted at `/redesign` (root `/` redirects here). */
 export function RedesignHomeView() {
   const { paymentModalOpen, setPaymentModalOpen } = useOrder();
 

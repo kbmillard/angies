@@ -67,10 +67,9 @@ export function InteractiveMenu() {
 
   return (
     <section id="menu" className={homeBandClass}>
-      <div className="mx-auto max-w-7xl">
-        <Reveal as="div" className="mb-12 max-w-2xl">
-          <div className="t-kicker t-kicker-gold mb-4">Menu</div>
-          <h2 className="t-section mb-5">
+      <div className="mx-auto max-w-[1240px] px-5 sm:px-8">
+        <Reveal as="div" className="mb-14 max-w-[720px]">
+          <h2 className="t-section mb-4">
             Fresh Tex-Mex plates, <em>drinks,</em> and daily specials.
           </h2>
           <p className="t-body-lg">
@@ -135,41 +134,6 @@ export function InteractiveMenu() {
             </div>
           ))}
         </div>
-
-        <Reveal as="div" className="mt-12 pt-4">
-          <div className="grid max-w-5xl grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-10">
-            <div>
-              <div className="t-kicker mb-2">Meat upgrades</div>
-              <p className="font-mono text-[12px] leading-relaxed text-cream/65">
-                +$0.50 barbacoa
-                <br />
-                +$1 lengua
-                <br />
-                <span className="text-cream/40">All other meats — no upcharge</span>
-              </p>
-            </div>
-            <div>
-              <div className="t-kicker mb-2">Sides</div>
-              <p className="font-mono text-[12px] leading-relaxed text-cream/65">
-                Rice or beans · $3
-                <br />
-                Chips &amp; salsa · $4
-                <br />
-                Guacamole &amp; chips · $6.50
-              </p>
-            </div>
-            <div>
-              <div className="t-kicker mb-2">Toppings</div>
-              <p className="font-mono text-[12px] leading-relaxed text-cream/65">
-                Pico · $1 · sour cream · $1
-                <br />
-                Guacamole · $2 · lettuce · $0.50
-                <br />
-                <span className="text-cream/40">Red &amp; green salsa included</span>
-              </p>
-            </div>
-          </div>
-        </Reveal>
       </div>
 
       <MeatChoiceModal

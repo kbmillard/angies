@@ -29,11 +29,11 @@ const mono = JetBrains_Mono({
   display: "swap",
 });
 
-/** Fraunces + redesign type/motion tokens — scoped to `/redesign` only. */
+/** Fraunces + redesign type/motion tokens — homepage at `/redesign`. */
 export default function RedesignLayout({ children }: { children: ReactNode }) {
   return (
     <div
-      data-redesign="preview"
+      data-redesign="live"
       className={`${display.variable} ${sans.variable} ${script.variable} ${mono.variable} min-h-screen font-sans`}
     >
       {children}

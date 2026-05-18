@@ -107,30 +107,28 @@ export function LocationPublicStatus({
 
   return (
     <div className={className}>
-      <p className="mt-3 flex items-center gap-2 text-xs text-cream/90">
-        {pending ? (
-          <span className="text-cream/50">Checking hours…</span>
-        ) : (
-          <>
-            <span
-              className={clsx(
-                "h-2 w-2 shrink-0 rounded-full",
-                publicStatus.isOpen ? "bg-accent-green" : "bg-salsa",
-              )}
-              aria-hidden
-            />
-            <span>
-              <span className={clsx("font-semibold", labelColorClass(publicStatus.isOpen))}>
-                {publicStatus.label}
-              </span>
-              {publicStatus.detail ? (
-                <span className="text-cream/80"> · {publicStatus.detail}</span>
-              ) : null}
-            </span>
-          </>
-        )}
-      </p>
-      {showNote && note ? <p className="mt-1 text-xs text-cream/75">{note}</p> : null}
+      {pending ? (
+        <span className="t-kicker text-cream/50">Checking hours…</span>
+      ) : (
+        <span
+          className={clsx(
+            "inline-flex items-center gap-2.5 rounded-full border px-4 py-2 font-sans text-[11px] font-semibold uppercase tracking-[0.28em]",
+            publicStatus.isOpen
+              ? "border-accent-green/30 bg-accent-green/10 text-accent-green"
+              : "border-salsa/30 bg-salsa/10 text-salsa",
+          )}
+        >
+          <span
+            className={clsx(
+              "h-1.5 w-1.5 shrink-0 rounded-full",
+              publicStatus.isOpen ? "bg-accent-green animate-ring-pulse" : "bg-salsa",
+            )}
+            aria-hidden
+          />
+          {publicStatus.label}
+        </span>
+      )}
+      {showNote && note ? <p className="mt-3 text-sm text-cream/75">{note}</p> : null}
     </div>
   );
 }

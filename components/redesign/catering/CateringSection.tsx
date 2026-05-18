@@ -41,10 +41,9 @@ export function CateringSection() {
 
   return (
     <section id="catering" className={homeBandClass}>
-      <Reveal as="div" className="mx-auto max-w-6xl px-5 sm:px-8">
+      <Reveal as="div" className="mx-auto max-w-[1240px] px-5 sm:px-8">
         <div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[1fr_1.05fr] lg:gap-16">
           <div>
-            <div className="t-kicker t-kicker-gold mb-5">{c.kicker}</div>
             <h2 id="catering-heading" className="t-section mb-6">
               {c.title}
             </h2>

@@ -9,10 +9,8 @@ export function FinalConversion() {
   const { openOrderPanel, focusCatering, focusMenu } = useOrder();
 
   return (
-    <section className="relative z-10 mt-10 bg-charcoal/50 pt-20 pb-12 backdrop-blur-sm sm:mt-14 sm:pt-28 sm:pb-14">
-      <Reveal as="div" className="mx-auto max-w-[1100px] px-5 text-center sm:px-8">
-        <div className="t-kicker t-kicker-gold mb-6">Ready</div>
-
+    <section className="relative z-10 bg-charcoal/50 px-5 py-24 backdrop-blur-sm sm:px-8 sm:py-32">
+      <Reveal as="div" className="mx-auto max-w-[1240px] text-center">
         <h2
           className="font-display text-cream mx-auto mb-10 max-w-[14ch]"
           style={{
