@@ -6,6 +6,7 @@ export function resolveAnchorScrollId(id: string): string {
   switch (id) {
     case "menu":
       return "menu-start";
+    case "location":
     case "locations":
       return "locations-start";
     case "schedule":
@@ -51,9 +52,10 @@ export function scrollDocumentToAnchor(
   if (!el) return;
 
   const extra = options?.offset ?? 16;
-  const navPx = readCssLengthAsPx("--nav-h", 68);
+  const stackPx = readCssLengthAsPx("--header-stack-h", 0);
+  const headerPx = stackPx > 0 ? stackPx : readCssLengthAsPx("--nav-h", 68);
   const rect = el.getBoundingClientRect();
-  const top = rect.top + window.scrollY - navPx - extra;
+  const top = rect.top + window.scrollY - headerPx - extra;
 
   window.scrollTo({
     top: Math.max(0, top),

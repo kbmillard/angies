@@ -68,6 +68,12 @@ export function InteractiveMenu() {
   return (
     <section id="menu" className={homeBandClass}>
       <div className="mx-auto max-w-[1240px] px-5 sm:px-8">
+        <div
+          id="menu-start"
+          tabIndex={-1}
+          className="scroll-mt-[calc(var(--header-stack-h)+1rem)] outline-none focus:outline-none"
+          aria-hidden
+        />
         <Reveal as="div" className="mb-14 max-w-[720px]">
           <h2 className="t-section mb-4">
             Fresh Tex-Mex plates, <em>drinks,</em> and daily specials.

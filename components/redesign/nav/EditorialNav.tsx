@@ -6,8 +6,6 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import { useOrder } from "@/context/OrderContext";
-import { cn } from "@/lib/utils/cn";
-
 const NAV_LINKS = [
   { label: "Story", id: "story" },
   { label: "Menu", id: "menu" },
@@ -104,6 +102,16 @@ export function EditorialNav() {
                     </button>
                   </li>
                 ))}
+                <li className="pt-4">
+                  <button
+                    type="button"
+                    className="flex w-full items-center justify-center gap-2 rounded-full bg-angie-orange px-5 py-3 font-sans text-[11px] font-semibold uppercase tracking-[0.28em] text-cream"
+                    onClick={() => go("menu")}
+                  >
+                    <span className="h-1.5 w-1.5 rounded-full bg-cream" aria-hidden />
+                    Order menu
+                  </button>
+                </li>
               </ul>
             </motion.nav>
           </motion.div>
