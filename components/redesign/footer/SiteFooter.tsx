@@ -19,7 +19,7 @@ export function SiteFooter() {
   return (
     <footer
       id="contact"
-      className="relative z-10 scroll-mt-[calc(var(--header-stack-h)+1rem)] border-t border-white/10 bg-charcoal/70 py-10 backdrop-blur-md sm:py-12"
+      className="relative z-10 scroll-mt-[calc(var(--header-stack-h)+1rem)] bg-charcoal/70 py-10 backdrop-blur-md sm:py-12"
     >
       <div className="mx-auto max-w-[1200px] px-5 sm:px-8">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.35fr)_repeat(3,minmax(0,1fr))] lg:gap-8">

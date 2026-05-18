@@ -136,7 +136,7 @@ export function InteractiveMenu() {
           ))}
         </div>
 
-        <Reveal as="div" className="mt-12 border-t border-white/10 pt-8">
+        <Reveal as="div" className="mt-12 pt-4">
           <div className="grid max-w-5xl grid-cols-1 gap-6 sm:grid-cols-3 sm:gap-10">
             <div>
               <div className="t-kicker mb-2">Meat upgrades</div>
