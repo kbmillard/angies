@@ -6,7 +6,7 @@ import { ScheduleCatalogProvider } from "@/context/ScheduleCatalogContext";
 import { SiteSettingsProvider } from "@/context/SiteSettingsContext";
 import { loadSiteSettingsResolved } from "@/lib/site-settings/load";
 
-/** Legacy homepage — redesign preview lives at `/redesign`. */
+/** Production homepage. */
 export default async function Page() {
   const siteSettings = await loadSiteSettingsResolved();
 

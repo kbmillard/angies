@@ -6,7 +6,6 @@ const config: Config = {
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./context/**/*.{js,ts,jsx,tsx,mdx}",
   ],
-  // Redesign preview uses extra utilities; harmless on production `/`.
   theme: {
     extend: {
       colors: {
