@@ -18,7 +18,6 @@ import {
   resolvedMapsUrl,
   telHrefFromDisplay,
 } from "@/lib/locations/helpers";
-import { DEFAULT_MAP_PIN_LAT, DEFAULT_MAP_PIN_LNG } from "@/lib/maps/default-map-pin";
 import { GoogleMapClientResolved } from "@/components/locations/GoogleMapClientResolved";
 import { GoogleMapGreedy } from "@/components/locations/GoogleMapGreedy";
 import { ScheduleListBlock } from "@/components/schedule/ScheduleListBlock";
@@ -72,15 +71,6 @@ function MapEmbedBlock({ loc }: { loc: LocationItem }) {
       ) : useClientResolve ? (
         <MapFrame>
           <GoogleMapClientResolved loc={loc} title={loc.name} className={MAP_FRAME_CLASS} />
-        </MapFrame>
-      ) : src && apiKey ? (
-        <MapFrame>
-          <GoogleMapGreedy
-            lat={DEFAULT_MAP_PIN_LAT}
-            lng={DEFAULT_MAP_PIN_LNG}
-            title={loc.name}
-            className={MAP_FRAME_CLASS}
-          />
         </MapFrame>
       ) : src ? (
         <MapFrame>
