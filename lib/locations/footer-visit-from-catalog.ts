@@ -38,9 +38,15 @@ export function footerRestaurantVisit(
 export function footerTruckVisit(data: LocationsResponse | null): FooterTruckVisit {
   const loc = data?.foodTruckLocations?.[0];
   if (loc?.address?.trim()) {
+    // Filter out statusNote if it's just a location label (e.g., "Linwood")
+    const statusNote = loc.statusNote?.trim() ?? "";
+    const isJustLocationLabel = statusNote && statusNote.length < 20 && 
+      (statusNote.toLowerCase().includes('linwood') || 
+       statusNote.toLowerCase() === loc.name?.toLowerCase().trim());
+    
     return {
       address: loc.address.trim(),
-      detail: loc.statusNote?.trim() ?? "",
+      detail: isJustLocationLabel ? "" : statusNote,
       cityLine: cityStateZipLine(loc) || FOOTER_VISIT_FALLBACK.truck.cityLine,
     };
   }

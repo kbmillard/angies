@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import type { ScheduleItem } from "@/lib/schedule/schema";
 import { parseTimeRange } from "@/lib/admin/parse-time-range";
 
@@ -155,65 +155,146 @@ type DaySectionProps = {
 
 function DaySection({ dayName, dayIndex, entries, onSave, onDelete }: DaySectionProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [isAdding, setIsAdding] = useState(false);
+  const [isAddingLocation, setIsAddingLocation] = useState(false);
+  const [addingTimeForLocation, setAddingTimeForLocation] = useState<string | null>(null);
 
-  const handleAdd = () => {
-    setIsAdding(true);
+  // Group entries by location (locationName + address as key)
+  const locationGroups = useMemo(() => {
+    const groups = new Map<string, ScheduleEntry[]>();
+    
+    entries.forEach((entry) => {
+      const key = `${entry.locationName}|${entry.address}`;
+      if (!groups.has(key)) {
+        groups.set(key, []);
+      }
+      groups.get(key)!.push(entry);
+    });
+
+    // Sort each group's times
+    groups.forEach((groupEntries) => {
+      groupEntries.sort((a, b) => {
+        return a.startTime.localeCompare(b.startTime);
+      });
+    });
+
+    return Array.from(groups.entries());
+  }, [entries]);
+
+  const handleAddLocation = () => {
+    setIsAddingLocation(true);
     setEditingId(null);
+    setAddingTimeForLocation(null);
+  };
+
+  const handleAddTimeForLocation = (locationKey: string) => {
+    setAddingTimeForLocation(locationKey);
+    setEditingId(null);
+    setIsAddingLocation(false);
   };
 
   const handleCancel = () => {
-    setIsAdding(false);
+    setIsAddingLocation(false);
     setEditingId(null);
+    setAddingTimeForLocation(null);
   };
 
   const handleSave = async (entry: ScheduleEntry) => {
     await onSave(entry);
-    setIsAdding(false);
+    setIsAddingLocation(false);
     setEditingId(null);
+    setAddingTimeForLocation(null);
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <h3 className="font-display text-lg text-cream">{dayName}</h3>
       
-      {entries.length === 0 && !isAdding && (
+      {locationGroups.length === 0 && !isAddingLocation && (
         <p className="text-sm text-cream/40">No entries for this day</p>
       )}
 
-      {entries.map((entry) =>
-        editingId === entry.id ? (
+      {locationGroups.map(([locationKey, locationEntries]) => {
+        const firstEntry = locationEntries[0]!;
+        return (
+          <div key={locationKey} className="ml-4 space-y-2 border-l-2 border-white/10 pl-4">
+            <div className="mb-2">
+              <p className="font-medium text-cream">{firstEntry.locationName}</p>
+              {firstEntry.address && (
+                <p className="text-xs text-cream/60">{firstEntry.address}</p>
+              )}
+            </div>
+
+            {locationEntries.map((entry) =>
+              editingId === entry.id ? (
+                <EntryForm
+                  key={entry.id}
+                  initialEntry={entry}
+                  dayIndex={dayIndex}
+                  onSave={handleSave}
+                  onCancel={handleCancel}
+                  onDelete={onDelete}
+                  isTimeSlotEdit
+                />
+              ) : (
+                <TimeSlotCard
+                  key={entry.id}
+                  entry={entry}
+                  onEdit={() => setEditingId(entry.id)}
+                />
+              )
+            )}
+
+            {addingTimeForLocation === locationKey && (
+              <EntryForm
+                initialEntry={{
+                  ...emptyEntry(dayIndex),
+                  locationName: firstEntry.locationName,
+                  address: firstEntry.address,
+                  city: firstEntry.city,
+                  state: firstEntry.state,
+                  zip: firstEntry.zip,
+                  lat: firstEntry.lat,
+                  lng: firstEntry.lng,
+                  mapsUrl: firstEntry.mapsUrl,
+                  timezone: firstEntry.timezone,
+                }}
+                dayIndex={dayIndex}
+                onSave={handleSave}
+                onCancel={handleCancel}
+                onDelete={onDelete}
+                isTimeSlotEdit
+              />
+            )}
+
+            {addingTimeForLocation !== locationKey && (
+              <button
+                type="button"
+                onClick={() => handleAddTimeForLocation(locationKey)}
+                className="text-xs text-gold hover:text-white transition-colors"
+              >
+                + Add time
+              </button>
+            )}
+          </div>
+        );
+      })}
+
+      {isAddingLocation && (
+        <div className="ml-4">
           <EntryForm
-            key={entry.id}
-            initialEntry={entry}
+            initialEntry={emptyEntry(dayIndex)}
             dayIndex={dayIndex}
             onSave={handleSave}
             onCancel={handleCancel}
             onDelete={onDelete}
           />
-        ) : (
-          <EntryCard
-            key={entry.id}
-            entry={entry}
-            onEdit={() => setEditingId(entry.id)}
-          />
-        )
+        </div>
       )}
 
-      {isAdding && (
-        <EntryForm
-          initialEntry={emptyEntry(dayIndex)}
-          dayIndex={dayIndex}
-          onSave={handleSave}
-          onCancel={handleCancel}
-          onDelete={onDelete}
-        />
-      )}
-
-      {!isAdding && (
+      {!isAddingLocation && (
         <button
           type="button"
-          onClick={handleAdd}
+          onClick={handleAddLocation}
           className="text-sm text-gold hover:text-white transition-colors"
         >
           + Add location
@@ -262,15 +343,56 @@ function EntryCard({ entry, onEdit }: EntryCardProps) {
   );
 }
 
+type TimeSlotCardProps = {
+  entry: ScheduleEntry;
+  onEdit: () => void;
+};
+
+function TimeSlotCard({ entry, onEdit }: TimeSlotCardProps) {
+  const formatTime = (time: string) => {
+    if (!time) return "";
+    const [h, m] = time.split(":");
+    const hour = parseInt(h, 10);
+    const period = hour >= 12 ? "PM" : "AM";
+    const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    return `${hour12}:${m} ${period}`;
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={onEdit}
+      className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-left hover:border-gold/30 hover:bg-black/30 transition-colors"
+    >
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-cream">
+            {formatTime(entry.startTime)} - {formatTime(entry.endTime)}
+          </span>
+          {entry.featured && (
+            <span className="rounded-full border border-gold/40 bg-gold/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gold">
+              Featured
+            </span>
+          )}
+        </div>
+        {!entry.active && (
+          <span className="text-xs text-salsa">Inactive</span>
+        )}
+      </div>
+    </button>
+  );
+}
+
 type EntryFormProps = {
   initialEntry: ScheduleEntry;
   dayIndex: number;
   onSave: (entry: ScheduleEntry) => Promise<void>;
   onCancel: () => void;
   onDelete: (id: string) => Promise<void>;
+  isTimeSlotEdit?: boolean;
 };
 
-function EntryForm({ initialEntry, dayIndex, onSave, onCancel, onDelete }: EntryFormProps) {
+function EntryForm({ initialEntry, dayIndex, onSave, onCancel, onDelete, isTimeSlotEdit = false }: EntryFormProps) {
   const [entry, setEntry] = useState<ScheduleEntry>(initialEntry);
   const [timeInput, setTimeInput] = useState("");
   const [timeResult, setTimeResult] = useState<ReturnType<typeof parseTimeRange> | null>(null);
@@ -374,37 +496,41 @@ function EntryForm({ initialEntry, dayIndex, onSave, onCancel, onDelete }: Entry
 
   return (
     <div className="space-y-3 rounded-lg border border-white/15 bg-charcoal/40 p-4">
-      <input
-        type="text"
-        placeholder="Location name"
-        value={entry.locationName}
-        onChange={(e) => setEntry({ ...entry, locationName: e.target.value })}
-        className={inputClass}
-      />
+      {!isTimeSlotEdit && (
+        <>
+          <input
+            type="text"
+            placeholder="Location name"
+            value={entry.locationName}
+            onChange={(e) => setEntry({ ...entry, locationName: e.target.value })}
+            className={inputClass}
+          />
 
-      <div className="space-y-2">
-        <input
-          type="text"
-          placeholder="Address (paste full address)"
-          value={entry.address}
-          onChange={(e) => setEntry({ ...entry, address: e.target.value })}
-          onBlur={handleGeocode}
-          className={inputClass}
-        />
-        <button
-          type="button"
-          onClick={handleGeocode}
-          disabled={geocoding}
-          className="text-xs text-gold hover:text-white transition-colors disabled:opacity-50"
-        >
-          {geocoding ? "Geocoding..." : "📍 Geocode address"}
-        </button>
-        {entry.city && (
-          <div className="text-xs text-cream/50">
-            {entry.city}, {entry.state} {entry.zip}
+          <div className="space-y-2">
+            <input
+              type="text"
+              placeholder="Address (paste full address)"
+              value={entry.address}
+              onChange={(e) => setEntry({ ...entry, address: e.target.value })}
+              onBlur={handleGeocode}
+              className={inputClass}
+            />
+            <button
+              type="button"
+              onClick={handleGeocode}
+              disabled={geocoding}
+              className="text-xs text-gold hover:text-white transition-colors disabled:opacity-50"
+            >
+              {geocoding ? "Geocoding..." : "📍 Geocode address"}
+            </button>
+            {entry.city && (
+              <div className="text-xs text-cream/50">
+                {entry.city}, {entry.state} {entry.zip}
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </>
+      )}
 
       <div className="space-y-2">
         <input

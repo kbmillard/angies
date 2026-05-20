@@ -168,7 +168,7 @@ export function ScheduleListBlock({ variant = "page" }: Props) {
               <ScheduleCard
                 it={it}
                 compact={compact}
-                highlight={it.id === nextId}
+                highlight={!!it.featured}
               />
             </li>
           ))}
