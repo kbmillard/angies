@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import Image from "next/image";
+import { BodyText } from "@/components/ui/BodyText";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
 
@@ -63,7 +64,11 @@ export function StorySection() {
         >
           <SectionHeading kicker={site.story.sectionKicker} title={site.story.sectionTitle} />
           {site.story.body ? (
-            <p className="mt-4 text-sm leading-relaxed text-cream/80">{site.story.body}</p>
+            <BodyText
+              text={site.story.body}
+              className="mt-4"
+              paragraphClassName="text-sm text-cream/80"
+            />
           ) : null}
           {(site.story.quotes ?? []).length > 0 ? (
             <blockquote className="mt-6 border-l-2 border-gold/55 pl-5">
