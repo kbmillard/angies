@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
 import type { CartLine, CustomerInfo, FulfillmentType, PickupLocationId } from "@/lib/types/order";
 
-type PaymentMode = "request" | "clover";
+type PaymentMode = "request" | "square";
 
 type Body = {
   paymentMode?: PaymentMode;
-  /** @deprecated use paymentMode: "clover" instead */
-  mode?: "request" | "payment";
   fulfillment?: FulfillmentType;
   pickupLocation?: PickupLocationId;
   items?: CartLine[];
@@ -18,13 +16,12 @@ type Body = {
   tipCents?: number | null;
   deliveryFeeCents?: number | null;
   totalCents?: number | null;
-  cloverToken?: string;
+  squareToken?: string;
 };
 
 function resolvePaymentMode(body: Body): PaymentMode {
-  if (body.paymentMode === "clover") return "clover";
+  if (body.paymentMode === "square") return "square";
   if (body.paymentMode === "request") return "request";
-  if (body.mode === "payment") return "clover";
   return "request";
 }
 
@@ -102,11 +99,11 @@ export async function POST(req: Request) {
     }
   }
 
-  if (paymentMode === "clover") {
-    const token = body.cloverToken;
+  if (paymentMode === "square") {
+    const token = body.squareToken;
     if (!token || typeof token !== "string" || token.length < 8) {
       return NextResponse.json(
-        { ok: false, error: "Missing or invalid Clover token" },
+        { ok: false, error: "Missing or invalid Square token" },
         { status: 400 },
       );
     }
@@ -126,6 +123,16 @@ export async function POST(req: Request) {
     if (!nums) {
       return NextResponse.json({ ok: false, error: "Invalid totals" }, { status: 400 });
     }
+
+    // TODO: Call Square Payments API with the token to actually charge the card.
+    // import { Client } from 'square';
+    // const squareClient = new Client({ accessToken: process.env.SQUARE_ACCESS_TOKEN, environment: 'sandbox' });
+    // await squareClient.paymentsApi.createPayment({
+    //   sourceId: token,
+    //   idempotencyKey: crypto.randomUUID(),
+    //   amountMoney: { amount: BigInt(body.totalCents), currency: 'USD' },
+    //   locationId: process.env.SQUARE_LOCATION_ID,
+    // });
   }
 
   if (paymentMode === "request") {
@@ -134,15 +141,15 @@ export async function POST(req: Request) {
       ok: true,
       orderId,
       paymentMode: "request",
-      message: "Order request received. We’ll confirm pricing and pickup time.",
+      message: "Order request received. We'll confirm pricing and pickup time.",
     });
   }
 
-  const orderId = `LHL-${Date.now().toString(36).toUpperCase()}`;
+  const orderId = `ANG-${Date.now().toString(36).toUpperCase()}`;
   return NextResponse.json({
     ok: true,
     orderId,
-    paymentMode: "clover",
+    paymentMode: "square",
     message: "Payment recorded.",
     echo: {
       fulfillment: body.fulfillment,

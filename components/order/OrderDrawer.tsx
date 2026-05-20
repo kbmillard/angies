@@ -456,7 +456,7 @@ export function OrderDrawer() {
                   className="flex w-full items-center justify-center gap-2 rounded-full bg-angie-orange py-3 text-sm font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-angie-orange/90 disabled:cursor-not-allowed disabled:opacity-40"
                   onClick={() => setPaymentModalOpen(true)}
                 >
-                  Pay with card (Clover)
+                  Pay with card
                 </button>
               )}
               {!canSendOrderRequest ? (

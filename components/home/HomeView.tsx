@@ -1,6 +1,6 @@
 "use client";
 
-import { CloverPaymentModal } from "@/components/clover/CloverPaymentModal";
+import { SquarePaymentModal } from "@/components/square/SquarePaymentModal";
 import { CateringSection } from "@/components/catering/CateringSection";
 import { FinalConversion } from "@/components/cta/FinalConversion";
 import { SiteFooter } from "@/components/footer/SiteFooter";
@@ -34,7 +34,7 @@ export function HomeView() {
         <SiteFooter />
       </main>
       <OrderDrawer />
-      <CloverPaymentModal open={paymentModalOpen} onOpenChange={setPaymentModalOpen} />
+      <SquarePaymentModal open={paymentModalOpen} onOpenChange={setPaymentModalOpen} />
     </>
   );
 }

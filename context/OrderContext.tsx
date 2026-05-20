@@ -58,8 +58,8 @@ type OrderContextValue = {
   setTipPreset: (t: TipPreset) => void;
   customTipCents: number;
   setCustomTipCents: (n: number) => void;
-  cloverToken: string | null;
-  setCloverToken: (t: string | null) => void;
+  squareToken: string | null;
+  setSquareToken: (t: string | null) => void;
   orderDrawerOpen: boolean;
   setOrderDrawerOpen: (v: boolean) => void;
   paymentModalOpen: boolean;
@@ -81,8 +81,8 @@ type OrderContextValue = {
   focusMenu: () => void;
   focusCatering: () => void;
   focusSchedule: () => void;
-  /** Clover checkout — requires all lines priced */
-  submitOrder: (cloverTokenOverride?: string | null) => Promise<void>;
+  /** Square checkout — requires all lines priced */
+  submitOrder: (squareTokenOverride?: string | null) => Promise<void>;
   /** Order request when any line is unpriced — no card charge */
   submitOrderRequest: () => Promise<void>;
 };
@@ -114,7 +114,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
   const [orderNotes, setOrderNotes] = useState("");
   const [tipPreset, setTipPreset] = useState<TipPreset>("18");
   const [customTipCents, setCustomTipCents] = useState(0);
-  const [cloverToken, setCloverToken] = useState<string | null>(null);
+  const [squareToken, setSquareToken] = useState<string | null>(null);
   const [orderDrawerOpen, setOrderDrawerOpen] = useState(false);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [orderStatus, setOrderStatus] = useState<OrderStatus>("idle");
@@ -204,7 +204,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       setOrderStatus("idle");
       setConfirmationId(null);
       setSuccessMessage(null);
-      setCloverToken(null);
+      setSquareToken(null);
     },
     [itemsById],
   );
@@ -217,13 +217,13 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     setCart((prev) =>
       prev.map((l) => (l.id === lineId ? { ...l, quantity: qty } : l)),
     );
-    setCloverToken(null);
+    setSquareToken(null);
     setSuccessMessage(null);
   }, []);
 
   const removeLine = useCallback((lineId: string) => {
     setCart((prev) => prev.filter((l) => l.id !== lineId));
-    setCloverToken(null);
+    setSquareToken(null);
     setSuccessMessage(null);
   }, []);
 
@@ -340,7 +340,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       );
       setOrderStatus("confirmed");
       setCart([]);
-      setCloverToken(null);
+      setSquareToken(null);
     } catch (e) {
       setOrderStatus("error");
       setOrderError(e instanceof Error ? e.message : "Unknown error");
@@ -362,8 +362,8 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
   ]);
 
   const submitOrder = useCallback(
-    async (cloverTokenOverride?: string | null) => {
-      const token = cloverTokenOverride ?? cloverToken;
+    async (squareTokenOverride?: string | null) => {
+      const token = squareTokenOverride ?? squareToken;
       if (cartHasUnpricedItems || !token || !canOpenPayment) return;
       setOrderStatus("submitting");
       setOrderError(null);
@@ -372,7 +372,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            paymentMode: "clover",
+            paymentMode: "square",
             fulfillment,
             pickupLocation: fulfillment === "pickup" ? pickupLocation : undefined,
             items: cart,
@@ -384,7 +384,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
             tipCents,
             deliveryFeeCents,
             totalCents,
-            cloverToken: token,
+            squareToken: token,
           }),
         });
         const data = (await res.json()) as {
@@ -401,7 +401,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
         setOrderStatus("confirmed");
         setPaymentModalOpen(false);
         setCart([]);
-        setCloverToken(null);
+        setSquareToken(null);
       } catch (e) {
         setOrderStatus("error");
         setOrderError(e instanceof Error ? e.message : "Unknown error");
@@ -411,7 +411,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       canOpenPayment,
       cart,
       cartHasUnpricedItems,
-      cloverToken,
+      squareToken,
       customer,
       deliveryFeeCents,
       fulfillment,
@@ -445,8 +445,8 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       setTipPreset,
       customTipCents,
       setCustomTipCents,
-      cloverToken,
-      setCloverToken,
+      squareToken,
+      setSquareToken,
       orderDrawerOpen,
       setOrderDrawerOpen,
       paymentModalOpen,
@@ -477,7 +477,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       canSendOrderRequest,
       cart,
       cartHasUnpricedItems,
-      cloverToken,
+      squareToken,
       confirmationId,
       customer,
       customTipCents,

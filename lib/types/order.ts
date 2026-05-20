@@ -2,7 +2,7 @@ export type FulfillmentType = "pickup" | "delivery";
 
 export type PickupLocationId = "restaurant" | "truck";
 
-export type PaymentMode = "request" | "clover";
+export type PaymentMode = "request" | "square";
 
 export type OrderStatus =
   | "idle"
@@ -56,5 +56,5 @@ export type OrderPayload = {
   tipCents: number | null;
   deliveryFeeCents: number | null;
   totalCents: number | null;
-  cloverToken?: string | null;
+  squareToken?: string | null;
 };
