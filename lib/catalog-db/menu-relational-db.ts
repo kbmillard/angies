@@ -592,6 +592,25 @@ export async function dbUpdateCatalogModifier(
   return updated.length > 0;
 }
 
+export async function dbCreateCatalogModifier(
+  kind: "meat" | "side" | "topping",
+  name: string,
+  amount: number,
+): Promise<{ id: string }> {
+  const sql = getSql();
+  if (!sql) throw new Error("DATABASE_URL required");
+  if (!(await ensureRelationalMenuCatalogTables())) {
+    throw new Error("Could not ensure relational menu tables");
+  }
+  const slug = name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+  const rows = await sql<{ id: string }[]>`
+    INSERT INTO catalog_menu_modifiers (kind, slug, name, amount, sort_order)
+    VALUES (${kind}, ${slug}, ${name}, ${amount}, 999)
+    RETURNING id::text
+  `;
+  return { id: rows[0]!.id };
+}
+
 export async function dbSetItemMeatPrices(
   itemSlug: string,
   prices: { meatSlug: string; price: number | null }[],

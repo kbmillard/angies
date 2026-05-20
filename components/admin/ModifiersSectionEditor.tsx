@@ -57,6 +57,29 @@ export function ModifiersSectionEditor() {
     }
   }
 
+  async function addModifier(kind: "meat" | "side" | "topping") {
+    setBusy(true);
+    setMsg(null);
+    const defaultName = kind === "meat" ? "New Meat" : kind === "side" ? "New Side" : "New Topping";
+    try {
+      const res = await fetch("/api/admin/catalog-menu/modifiers", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ kind, name: defaultName, amount: 0 }),
+      });
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok) {
+        setMsg(data.error ?? "Failed to add");
+        return;
+      }
+      setMsg(`Added ${defaultName}.`);
+      await load();
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function update(id: string, patch: Partial<Modifier>) {
     setModifiers((prev) => prev.map((m) => (m.id === id ? { ...m, ...patch } : m)));
   }
@@ -82,11 +105,21 @@ export function ModifiersSectionEditor() {
       <div className="mt-6 space-y-3">
         {kinds.map((kind) => {
           const rows = modifiers.filter((m) => m.kind === kind);
-          if (rows.length === 0) return null;
           return (
             <details key={kind} className="rounded-xl border border-white/10 bg-black/20">
-              <summary className="cursor-pointer px-4 py-3 text-sm font-semibold uppercase tracking-editorial text-cream/80 hover:bg-white/5">
-                {kindLabel[kind] ?? kind} ({rows.length})
+              <summary className="cursor-pointer px-4 py-3 text-sm font-semibold uppercase tracking-editorial text-cream/80 hover:bg-white/5 flex items-center justify-between">
+                <span>{kindLabel[kind] ?? kind} ({rows.length})</span>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    void addModifier(kind);
+                  }}
+                  className="rounded-full border border-white/20 px-3 py-1 text-[10px] uppercase tracking-editorial text-cream/70 hover:bg-white/10 hover:text-cream disabled:opacity-40"
+                >
+                  + Add
+                </button>
               </summary>
               <ul className="space-y-3 p-4 pt-2">
                 {rows.map((m) => (
