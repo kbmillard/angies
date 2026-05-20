@@ -56,15 +56,23 @@ export async function putPublicImage(
   const token = process.env.BLOB_READ_WRITE_TOKEN;
 
   if (token) {
-    const blob = await put(`angies/menu/${storedName}`, file, {
-      access: "public",
-      token,
-      addRandomSuffix: false,
-    });
-    return {
-      ok: true,
-      value: { url: blob.url, filename: storedName },
-    };
+    try {
+      const blob = await put(`angies/menu/${storedName}`, file, {
+        access: "public",
+        token,
+        addRandomSuffix: false,
+      });
+      return {
+        ok: true,
+        value: { url: blob.url, filename: storedName },
+      };
+    } catch (e) {
+      console.error("[putPublicImage] Vercel Blob upload failed:", e);
+      return {
+        ok: false,
+        error: `Upload failed: ${e instanceof Error ? e.message : "Unknown error"}`,
+      };
+    }
   }
 
   if (process.env.NODE_ENV === "production") {

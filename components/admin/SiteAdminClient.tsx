@@ -7,7 +7,6 @@ import { SiteSettingsTab } from "@/components/admin/SiteSettingsTab";
 import { MenuSectionEditor } from "@/components/admin/MenuSectionEditor";
 import { ModifiersSectionEditor } from "@/components/admin/ModifiersSectionEditor";
 import { WeeklyScheduleTab } from "@/components/admin/WeeklyScheduleTab";
-import { PhotosLibrarySection } from "@/components/admin/PhotosLibrarySection";
 import { CollapsibleSection } from "@/components/admin/CollapsibleSection";
 import type { PhotosAdminStatus } from "@/lib/photos/admin-status";
 
@@ -20,14 +19,12 @@ const NAV: { id: string; label: string }[] = [
   { id: "schedule", label: "Schedule" },
   { id: "social", label: "Social" },
   { id: "catering", label: "Catering" },
-  { id: "photos", label: "Photos" },
 ];
 
 const TAB_TO_HASH: Record<string, string> = {
   site: "hero",
-  photos: "photos",
   menu: "menu",
-  locations: "schedule", // Redirect old locations to schedule
+  locations: "schedule",
   schedule: "schedule",
 };
 
@@ -199,11 +196,6 @@ export function SiteAdminClient({ initialAuthed, status, initialTab }: Props) {
 
         <CollapsibleSection id="schedule" title="Schedule & Locations" defaultOpen={true}>
           <WeeklyScheduleTab />
-        </CollapsibleSection>
-
-        <CollapsibleSection id="photos" title="Photo Library" defaultOpen={false}>
-          <p className="mb-6 text-sm text-cream/60">Upload images used across hero, menu, and gallery.</p>
-          <PhotosLibrarySection />
         </CollapsibleSection>
       </div>
     </main>
