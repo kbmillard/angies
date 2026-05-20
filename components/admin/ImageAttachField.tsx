@@ -72,7 +72,12 @@ export function ImageAttachField({
       });
       const data = (await res.json()) as { ok?: boolean; photo?: PhotoRecord; error?: string };
       if (!res.ok) {
-        setError(data.error ?? "Upload failed");
+        const errMsg = data.error ?? "Upload failed";
+        if (errMsg.includes("BLOB_READ_WRITE_TOKEN")) {
+          setError("Photo uploads not configured. Add BLOB_READ_WRITE_TOKEN in Vercel.");
+        } else {
+          setError(errMsg);
+        }
         return;
       }
       if (data.photo?.url) {

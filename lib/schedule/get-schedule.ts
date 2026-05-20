@@ -19,7 +19,7 @@ function sortKey(it: ScheduleItem): string {
 }
 
 function isUpcomingOrToday(it: ScheduleItem, today: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(it.date)) return true;
+  if (!it.date || !/^\d{4}-\d{2}-\d{2}$/.test(it.date)) return true;
   return it.date >= today;
 }
 

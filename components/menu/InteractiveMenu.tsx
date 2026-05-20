@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { MENU_CATEGORY_META } from "@/lib/menu/category-meta";
-import type { MenuItem } from "@/lib/menu/schema";
+import type { MenuCategoryColor, MenuCategoryMeta, MenuItem } from "@/lib/menu/schema";
 import { useMenuCatalog } from "@/context/MenuCatalogContext";
 import { useOrder } from "@/context/OrderContext";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -72,9 +72,33 @@ export function InteractiveMenu() {
 
   const visibleMeta = useMemo(() => {
     if (!data?.items.length) return MENU_CATEGORY_META;
-    return MENU_CATEGORY_META.filter((m) =>
+    
+    // Start with known categories that have items
+    const known = MENU_CATEGORY_META.filter((m) =>
       data.items.some((i) => i.category.toLowerCase() === m.label.toLowerCase()),
     );
+    
+    // Find database categories not in MENU_CATEGORY_META
+    const knownLabels = new Set(MENU_CATEGORY_META.map((m) => m.label.toLowerCase()));
+    const extraCategoryNames = [...new Set(
+      data.items
+        .map((i) => i.category)
+        .filter((c) => !knownLabels.has(c.toLowerCase()))
+    )];
+    
+    // Generate metadata for new categories
+    const colors: MenuCategoryColor[] = ["cyan", "green", "orange", "pink", "red", "yellow"];
+    let nextNum = MENU_CATEGORY_META.length + 1;
+    const extras: MenuCategoryMeta[] = extraCategoryNames.map((cat, i) => ({
+      id: cat.toLowerCase().replace(/\s+/g, "-"),
+      label: cat,
+      panelKickerEn: "Specials",
+      subtitle: "",
+      color: colors[(MENU_CATEGORY_META.length + i) % colors.length],
+      number: String(nextNum++).padStart(2, "0"),
+    }));
+    
+    return [...known, ...extras];
   }, [data]);
 
   useEffect(() => {

@@ -64,7 +64,8 @@ export async function ensureCatalogTables(): Promise<boolean> {
     CREATE TABLE IF NOT EXISTS schedule_items (
       id TEXT PRIMARY KEY,
       active BOOLEAN NOT NULL DEFAULT TRUE,
-      date TEXT NOT NULL,
+      day_of_week INT,
+      date TEXT,
       start_time TEXT NOT NULL DEFAULT '',
       end_time TEXT NOT NULL DEFAULT '',
       title TEXT NOT NULL DEFAULT '',
@@ -85,6 +86,18 @@ export async function ensureCatalogTables(): Promise<boolean> {
       item_updated_at TEXT NOT NULL DEFAULT '',
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )
+  `;
+
+  // Add day_of_week column to existing tables
+  await sql`
+    ALTER TABLE schedule_items 
+    ADD COLUMN IF NOT EXISTS day_of_week INT
+  `;
+
+  // Make date nullable for existing tables
+  await sql`
+    ALTER TABLE schedule_items 
+    ALTER COLUMN date DROP NOT NULL
   `;
 
   catalogTablesReady = true;

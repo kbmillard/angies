@@ -5,7 +5,8 @@ import { ensureCatalogTables } from "@/lib/catalog-db/ensure-tables";
 type SchedRow = {
   id: string;
   active: boolean;
-  date: string;
+  day_of_week: number | null;
+  date: string | null;
   start_time: string;
   end_time: string;
   title: string;
@@ -30,7 +31,8 @@ function rowToSchedule(r: SchedRow): ScheduleItem {
   return {
     id: r.id,
     active: r.active,
-    date: r.date,
+    dayOfWeek: r.day_of_week ?? undefined,
+    date: r.date ?? undefined,
     startTime: r.start_time,
     endTime: r.end_time,
     title: r.title,
@@ -70,6 +72,7 @@ export async function dbGetScheduleItems(includeInactive: boolean): Promise<Sche
         SELECT
           id,
           active,
+          day_of_week,
           date,
           start_time,
           end_time,
@@ -90,12 +93,17 @@ export async function dbGetScheduleItems(includeInactive: boolean): Promise<Sche
           timezone,
           item_updated_at
         FROM schedule_items
-        ORDER BY date ASC, start_time ASC, sort_order ASC
+        ORDER BY 
+          CASE WHEN day_of_week IS NOT NULL THEN day_of_week ELSE 99 END ASC,
+          date ASC NULLS LAST,
+          start_time ASC,
+          sort_order ASC
       `
     : await sql<SchedRow[]>`
         SELECT
           id,
           active,
+          day_of_week,
           date,
           start_time,
           end_time,
@@ -117,7 +125,11 @@ export async function dbGetScheduleItems(includeInactive: boolean): Promise<Sche
           item_updated_at
         FROM schedule_items
         WHERE active = true
-        ORDER BY date ASC, start_time ASC, sort_order ASC
+        ORDER BY 
+          CASE WHEN day_of_week IS NOT NULL THEN day_of_week ELSE 99 END ASC,
+          date ASC NULLS LAST,
+          start_time ASC,
+          sort_order ASC
       `;
 
   return rows.map(rowToSchedule);
@@ -132,6 +144,7 @@ export async function dbInsertScheduleItem(item: ScheduleItem): Promise<Schedule
     INSERT INTO schedule_items (
       id,
       active,
+      day_of_week,
       date,
       start_time,
       end_time,
@@ -155,22 +168,23 @@ export async function dbInsertScheduleItem(item: ScheduleItem): Promise<Schedule
     VALUES (
       ${item.id},
       ${item.active},
-      ${item.date},
+      ${item.dayOfWeek ?? null},
+      ${item.date ?? null},
       ${item.startTime},
       ${item.endTime},
-      ${item.title},
+      ${item.title ?? ''},
       ${item.locationName},
       ${item.address},
       ${item.city},
       ${item.state},
       ${item.zip},
-      ${item.status},
-      ${item.statusNote},
+      ${item.status ?? ''},
+      ${item.statusNote ?? ''},
       ${item.mapsUrl},
       ${item.lat},
       ${item.lng},
-      ${item.description},
-      ${item.featured},
+      ${item.description ?? ''},
+      ${item.featured ?? false},
       ${item.sortOrder},
       ${item.timezone},
       ${item.updatedAt}
@@ -178,6 +192,7 @@ export async function dbInsertScheduleItem(item: ScheduleItem): Promise<Schedule
     RETURNING
       id,
       active,
+      day_of_week,
       date,
       start_time,
       end_time,
@@ -213,6 +228,7 @@ export async function dbUpdateScheduleItem(
     SELECT
       id,
       active,
+      day_of_week,
       date,
       start_time,
       end_time,
@@ -244,22 +260,23 @@ export async function dbUpdateScheduleItem(
     UPDATE schedule_items
     SET
       active = ${next.active},
-      date = ${next.date},
+      day_of_week = ${next.dayOfWeek ?? null},
+      date = ${next.date ?? null},
       start_time = ${next.startTime},
       end_time = ${next.endTime},
-      title = ${next.title},
+      title = ${next.title ?? ''},
       location_name = ${next.locationName},
       address = ${next.address},
       city = ${next.city},
       state = ${next.state},
       zip = ${next.zip},
-      status = ${next.status},
-      status_note = ${next.statusNote},
+      status = ${next.status ?? ''},
+      status_note = ${next.statusNote ?? ''},
       maps_url = ${next.mapsUrl},
       lat = ${next.lat},
       lng = ${next.lng},
-      description = ${next.description},
-      featured = ${next.featured},
+      description = ${next.description ?? ''},
+      featured = ${next.featured ?? false},
       sort_order = ${next.sortOrder},
       timezone = ${next.timezone},
       item_updated_at = ${next.updatedAt},
@@ -268,6 +285,7 @@ export async function dbUpdateScheduleItem(
     RETURNING
       id,
       active,
+      day_of_week,
       date,
       start_time,
       end_time,

@@ -21,8 +21,36 @@ export function parseScheduleItemForAdmin(
     id = randomUUID();
   }
 
+  // Parse dayOfWeek (0-6) for recurring schedule
+  let dayOfWeek: number | undefined;
+  if (o.dayOfWeek !== undefined && o.dayOfWeek !== null && o.dayOfWeek !== "") {
+    const dow = typeof o.dayOfWeek === "number" ? o.dayOfWeek : Number(o.dayOfWeek);
+    if (Number.isInteger(dow) && dow >= 0 && dow <= 6) {
+      dayOfWeek = dow;
+    } else {
+      return { ok: false, error: "dayOfWeek must be 0-6 (0=Sunday, 6=Saturday)" };
+    }
+  }
+
+  // Parse date for one-time events
   const date = typeof o.date === "string" ? o.date.trim() : "";
-  if (!date) return { ok: false, error: "date required" };
+
+  // Require either dayOfWeek OR date
+  if (dayOfWeek === undefined && !date) {
+    return { ok: false, error: "Either dayOfWeek or date is required" };
+  }
+
+  // Require locationName and times
+  const locationName = typeof o.locationName === "string" ? o.locationName.trim() : "";
+  if (!locationName) {
+    return { ok: false, error: "locationName required" };
+  }
+
+  const startTime = typeof o.startTime === "string" ? o.startTime.trim() : "";
+  const endTime = typeof o.endTime === "string" ? o.endTime.trim() : "";
+  if (!startTime || !endTime) {
+    return { ok: false, error: "startTime and endTime required" };
+  }
 
   const sortN =
     typeof o.sortOrder === "number"
@@ -46,11 +74,12 @@ export function parseScheduleItemForAdmin(
   const item: ScheduleItem = {
     id,
     active: asBool(o.active, true),
-    date,
-    startTime: typeof o.startTime === "string" ? o.startTime : "",
-    endTime: typeof o.endTime === "string" ? o.endTime : "",
+    dayOfWeek,
+    date: date || undefined,
+    startTime,
+    endTime,
     title: typeof o.title === "string" ? o.title : "",
-    locationName: typeof o.locationName === "string" ? o.locationName : "",
+    locationName,
     address: typeof o.address === "string" ? o.address : "",
     city: typeof o.city === "string" ? o.city : "",
     state: typeof o.state === "string" ? o.state : "",

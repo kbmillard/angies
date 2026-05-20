@@ -7,14 +7,11 @@ import { ImageAttachField } from "@/components/admin/ImageAttachField";
 import { adminInputClass, adminSectionClass } from "@/components/admin/admin-form-styles";
 
 type Category = { slug: string; name: string; sort_order: number; item_count: number };
-type MeatPriceRow = { meatSlug: string; price: string };
 
 export function MenuSectionEditor() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [draft, setDraft] = useState<MenuItem | null>(null);
-  const [meatPrices, setMeatPrices] = useState<MeatPriceRow[]>([]);
-  const [meats, setMeats] = useState<{ slug: string; name: string; amount: number }[]>([]);
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -30,9 +27,8 @@ export function MenuSectionEditor() {
 
   const load = useCallback(async () => {
     setMsg(null);
-    const [menuRes, modRes, catRes] = await Promise.all([
+    const [menuRes, catRes] = await Promise.all([
       fetch("/api/admin/menu", { credentials: "include" }),
-      fetch("/api/admin/catalog-menu/modifiers", { credentials: "include" }),
       fetch("/api/admin/catalog-menu/categories", { credentials: "include" }),
     ]);
     const menuData = (await menuRes.json()) as { ok?: boolean; items?: MenuItem[]; error?: string };
@@ -42,14 +38,6 @@ export function MenuSectionEditor() {
       return;
     }
     setItems(menuData.items ?? []);
-
-    const modData = (await modRes.json()) as {
-      ok?: boolean;
-      modifiers?: { kind: string; slug: string; name: string; amount: number }[];
-    };
-    if (modRes.ok && modData.modifiers) {
-      setMeats(modData.modifiers.filter((m) => m.kind === "meat"));
-    }
 
     const catData = (await catRes.json()) as { ok?: boolean; categories?: Category[] };
     if (catRes.ok && catData.categories) {
@@ -82,34 +70,10 @@ export function MenuSectionEditor() {
     }
   }
 
-  async function selectItem(item: MenuItem) {
+  function selectItem(item: MenuItem) {
     setDraft({ ...item });
     setShowNewItem(false);
     setMsg(null);
-    let meatList = meats;
-    if (meatList.length === 0) {
-      const modRes = await fetch("/api/admin/catalog-menu/modifiers", { credentials: "include" });
-      const modData = (await modRes.json()) as {
-        modifiers?: { kind: string; slug: string; name: string; amount: number }[];
-      };
-      meatList = (modData.modifiers ?? []).filter((m) => m.kind === "meat");
-      setMeats(meatList);
-    }
-    const res = await fetch(
-      `/api/admin/catalog-menu/items/${encodeURIComponent(item.id)}/meat-prices`,
-      { credentials: "include" },
-    );
-    const data = (await res.json()) as {
-      ok?: boolean;
-      meatPrices?: { meatSlug: string; price: number }[];
-    };
-    const overrides = new Map((data.meatPrices ?? []).map((p) => [p.meatSlug, p.price]));
-    setMeatPrices(
-      meatList.map((m) => ({
-        meatSlug: m.slug,
-        price: overrides.has(m.slug) ? String(overrides.get(m.slug)) : "",
-      })),
-    );
   }
 
   function getCatSlug(catName: string): string {
@@ -143,23 +107,6 @@ export function MenuSectionEditor() {
       if (!res.ok) {
         setMsg(data.error ?? "Error");
         return;
-      }
-
-      if (draft.meatChoiceRequired && meats.length > 0) {
-        await fetch(
-          `/api/admin/catalog-menu/items/${encodeURIComponent(draft.id)}/meat-prices`,
-          {
-            method: "PUT",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              prices: meatPrices.map((r) => ({
-                meatSlug: r.meatSlug,
-                price: r.price.trim() === "" ? null : Number(r.price),
-              })),
-            }),
-          },
-        );
       }
 
       setMsg("✓");
@@ -564,32 +511,6 @@ export function MenuSectionEditor() {
                   Meat choice
                 </label>
               </div>
-
-              {draft.meatChoiceRequired && meats.length > 0 && (
-                <div>
-                  <h4 className="mb-2 text-xs font-semibold text-cream/60">Meat prices</h4>
-                  <div className="space-y-2">
-                    {meatPrices.map((row, idx) => {
-                      const meat = meats.find((m) => m.slug === row.meatSlug);
-                      return (
-                        <div key={row.meatSlug} className="flex items-center gap-3">
-                          <span className="min-w-[100px] text-sm text-cream/70">{meat?.name ?? row.meatSlug}</span>
-                          <input
-                            className="w-24 rounded-lg border border-white/15 bg-black/40 px-2 py-1 text-sm text-cream"
-                            placeholder={meat ? String(meat.amount) : "0"}
-                            value={row.price}
-                            onChange={(e) => {
-                              const next = [...meatPrices];
-                              next[idx] = { ...row, price: e.target.value };
-                              setMeatPrices(next);
-                            }}
-                          />
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
 
               <button
                 type="button"

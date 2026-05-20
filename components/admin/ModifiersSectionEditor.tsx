@@ -79,16 +79,16 @@ export function ModifiersSectionEditor() {
           {msg}
         </p>
       ) : null}
-      <div className="mt-6 space-y-8">
+      <div className="mt-6 space-y-3">
         {kinds.map((kind) => {
           const rows = modifiers.filter((m) => m.kind === kind);
           if (rows.length === 0) return null;
           return (
-            <div key={kind}>
-              <h3 className="text-sm font-semibold uppercase tracking-editorial text-cream/70">
-                {kindLabel[kind] ?? kind}
-              </h3>
-              <ul className="mt-3 space-y-3">
+            <details key={kind} className="rounded-xl border border-white/10 bg-black/20">
+              <summary className="cursor-pointer px-4 py-3 text-sm font-semibold uppercase tracking-editorial text-cream/80 hover:bg-white/5">
+                {kindLabel[kind] ?? kind} ({rows.length})
+              </summary>
+              <ul className="space-y-3 p-4 pt-2">
                 {rows.map((m) => (
                   <li
                     key={m.id}
@@ -138,7 +138,7 @@ export function ModifiersSectionEditor() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </details>
           );
         })}
       </div>
