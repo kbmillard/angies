@@ -16,7 +16,7 @@ export function CollapsibleSection({
   children,
   defaultOpen = false,
 }: CollapsibleSectionProps) {
-  const storageKey = `admin-section-${id}`;
+  const storageKey = `admin-section-v2-${id}`;
   
   // Initialize from localStorage
   const [isOpen, setIsOpen] = useState(() => {

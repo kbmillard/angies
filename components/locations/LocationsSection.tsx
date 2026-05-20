@@ -6,8 +6,10 @@ import { SectionHeading } from "@/components/ui/SectionHeading";
 import { glassCtaAccent, glassCtaBase } from "@/components/ui/glass-cta";
 import { cn } from "@/lib/utils/cn";
 import { useLocationsCatalog } from "@/context/LocationsCatalogContext";
+import { useScheduleCatalog } from "@/context/ScheduleCatalogContext";
 import type { LocationItem } from "@/lib/locations/schema";
 import { LocationPublicStatus } from "@/components/locations/LocationPublicStatus";
+import { getCurrentScheduleStatus } from "@/lib/schedule/current-status";
 import {
   formatAddressLine,
   resolvedAppleMapsUrl,
@@ -110,6 +112,7 @@ function MapButton({ label, href, accent }: { label: string; href: string; accen
 
 export function LocationsSection() {
   const { loading, error, data } = useLocationsCatalog();
+  const { data: scheduleData } = useScheduleCatalog();
 
   const trucks = data?.foodTruckLocations ?? [];
   const primaryTruck = trucks[0];
@@ -117,6 +120,41 @@ export function LocationsSection() {
   const phoneTel = phoneDisplay
     ? telHrefFromDisplay(phoneDisplay, CONTACT.phones[0]!.tel)
     : `tel:${CONTACT.phones[0]!.tel}`;
+
+  // Determine current open status and location from schedule
+  const scheduleStatus = getCurrentScheduleStatus(scheduleData?.items ?? []);
+  
+  // Convert ScheduleItem to LocationItem shape for map display
+  const currentLocation: LocationItem | null = scheduleStatus.currentLocation
+    ? {
+        id: scheduleStatus.currentLocation.id,
+        active: true,
+        type: "food_truck",
+        sortOrder: 0,
+        name: scheduleStatus.currentLocation.locationName,
+        label: "Current Location",
+        address: scheduleStatus.currentLocation.address,
+        city: scheduleStatus.currentLocation.city,
+        state: scheduleStatus.currentLocation.state,
+        zip: scheduleStatus.currentLocation.zip,
+        hours: `${scheduleStatus.currentLocation.startTime} - ${scheduleStatus.currentLocation.endTime}`,
+        phone: phoneDisplay,
+        email: "",
+        status: "Open",
+        statusNote: "",
+        mapsUrl: scheduleStatus.currentLocation.mapsUrl,
+        embedUrl: "",
+        lat: scheduleStatus.currentLocation.lat,
+        lng: scheduleStatus.currentLocation.lng,
+        lastUpdated: new Date().toISOString(),
+        timezone: scheduleStatus.currentLocation.timezone,
+        weeklyHoursJson: undefined,
+        messageBoard: "",
+      }
+    : null;
+
+  // Show current location if open, otherwise fall back to home base
+  const displayLocation = currentLocation || primaryTruck;
 
   return (
     <section
@@ -148,28 +186,43 @@ export function LocationsSection() {
 
         {loading ? (
           <div className="mt-8 h-96 animate-pulse rounded-3xl bg-white/10" />
-        ) : primaryTruck ? (
+        ) : displayLocation ? (
           <article className="mt-8 overflow-hidden rounded-3xl border border-white/10 bg-charcoal/35 p-5 backdrop-blur-md sm:p-8 lg:p-10">
             <div className="grid gap-5 border-b border-white/10 pb-6 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-x-12">
               <div className="min-w-0 space-y-2 sm:space-y-3">
-                <p className="text-xs uppercase tracking-editorial text-gold/90">
-                  Current truck location
-                </p>
+                <div className="flex items-center gap-3">
+                  <p className="text-xs uppercase tracking-editorial text-gold/90">
+                    Current truck location
+                  </p>
+                  {scheduleStatus.isOpen ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-accent-green/20 px-2.5 py-1 text-xs font-semibold uppercase tracking-editorial text-accent-green">
+                      <span className="h-1.5 w-1.5 rounded-full bg-accent-green" />
+                      Open
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-salsa/20 px-2.5 py-1 text-xs font-semibold uppercase tracking-editorial text-salsa">
+                      <span className="h-1.5 w-1.5 rounded-full bg-salsa" />
+                      Closed
+                    </span>
+                  )}
+                </div>
                 <h3 className="font-display text-3xl text-cream sm:text-4xl">
-                  {primaryTruck.name}
+                  {displayLocation.name}
                 </h3>
-                <LocationPublicStatus
-                  location={primaryTruck}
-                  variant="card"
-                  showNote={false}
-                  className="[&_p]:mt-0"
-                />
+                {primaryTruck && (
+                  <LocationPublicStatus
+                    location={primaryTruck}
+                    variant="card"
+                    showNote={false}
+                    className="[&_p]:mt-0"
+                  />
+                )}
               </div>
               <div className="flex items-start gap-2 text-sm text-cream/90 sm:text-base lg:justify-end lg:pt-7 lg:text-right">
                 <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-gold" aria-hidden />
                 <div className="min-w-0">
-                  {hasPublishedAddress(primaryTruck) ? (
-                    addressLines(primaryTruck).map((line) => (
+                  {hasPublishedAddress(displayLocation) ? (
+                    addressLines(displayLocation).map((line) => (
                       <p key={line} className="leading-snug">
                         {line}
                       </p>
@@ -197,13 +250,13 @@ export function LocationsSection() {
               </div>
 
               <div className="min-w-0">
-                <MapEmbedBlock loc={primaryTruck} />
+                <MapEmbedBlock loc={displayLocation} />
               </div>
             </div>
 
             <div className="mt-8 grid grid-cols-1 gap-3 border-t border-white/10 pt-8 sm:grid-cols-3 sm:gap-4">
-              <MapButton label="Open in Google Maps" href={resolvedMapsUrl(primaryTruck)} />
-              <MapButton label="Apple Maps" href={resolvedAppleMapsUrl(primaryTruck)} />
+              <MapButton label="Open in Google Maps" href={resolvedMapsUrl(displayLocation)} />
+              <MapButton label="Apple Maps" href={resolvedAppleMapsUrl(displayLocation)} />
               <a href={phoneTel} className={cn(glassCtaAccent, "w-full gap-2")}>
                 <Phone className="h-4 w-4 shrink-0" aria-hidden />
                 Call / text

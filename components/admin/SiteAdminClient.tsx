@@ -194,7 +194,7 @@ export function SiteAdminClient({ initialAuthed, status, initialTab }: Props) {
           <ModifiersSectionEditor />
         </CollapsibleSection>
 
-        <CollapsibleSection id="schedule" title="Schedule & Locations" defaultOpen={true}>
+        <CollapsibleSection id="schedule" title="Schedule & Locations" defaultOpen={false}>
           <WeeklyScheduleTab />
         </CollapsibleSection>
       </div>
