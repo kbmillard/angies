@@ -6,6 +6,7 @@ import { FinalConversion } from "@/components/cta/FinalConversion";
 import { SiteFooter } from "@/components/footer/SiteFooter";
 import { Hero } from "@/components/hero/Hero";
 import { InteractiveMenu } from "@/components/menu/InteractiveMenu";
+import { LocationsSection } from "@/components/locations/LocationsSection";
 import { EditorialNav } from "@/components/nav/EditorialNav";
 import { OrderDrawer } from "@/components/order/OrderDrawer";
 import { FixedBrandBackdrop } from "@/components/prologue/FixedBrandBackdrop";
@@ -26,6 +27,7 @@ export function HomeView() {
         <Prologue />
         <StorySection />
         <InteractiveMenu />
+        <LocationsSection />
         <SocialPromoSection />
         <CateringSection />
         <FinalConversion />

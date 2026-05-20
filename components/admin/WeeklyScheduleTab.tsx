@@ -421,7 +421,7 @@ function EntryForm({ initialEntry, dayIndex, onSave, onCancel, onDelete }: Entry
         )}
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-4">
         <label className="flex items-center gap-2 text-sm text-cream">
           <input
             type="checkbox"
@@ -430,6 +430,15 @@ function EntryForm({ initialEntry, dayIndex, onSave, onCancel, onDelete }: Entry
             className="rounded"
           />
           Active
+        </label>
+        <label className="flex items-center gap-2 text-sm text-cream">
+          <input
+            type="checkbox"
+            checked={entry.featured ?? false}
+            onChange={(e) => setEntry({ ...entry, featured: e.target.checked })}
+            className="rounded"
+          />
+          Featured
         </label>
       </div>
 

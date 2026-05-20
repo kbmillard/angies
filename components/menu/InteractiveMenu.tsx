@@ -36,9 +36,9 @@ function MenuSkeleton() {
 function PriceRow({ name, price }: { name: string; price: number | null }) {
   const priceLabel = price === null ? "TBD" : `$${price.toFixed(2)}`;
   return (
-    <div className="flex min-w-0 flex-col gap-1.5 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+    <div className="flex min-w-0 items-baseline justify-between gap-3">
       <p className="min-w-0 break-words font-medium leading-snug text-cream">{name}</p>
-      <p className="shrink-0 text-sm leading-snug text-cream/85 sm:pt-0.5">{priceLabel}</p>
+      <p className="shrink-0 text-sm leading-snug text-cream/85">{priceLabel}</p>
     </div>
   );
 }
