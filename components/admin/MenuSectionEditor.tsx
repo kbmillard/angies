@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Plus, Trash2, X, Check, Pencil } from "lucide-react";
+import { Plus, Trash2, X, Check, Pencil, Download } from "lucide-react";
 import type { MenuItem } from "@/lib/menu/schema";
 import { ImageAttachField } from "@/components/admin/ImageAttachField";
 import { adminInputClass, adminSectionClass } from "@/components/admin/admin-form-styles";
@@ -17,6 +17,7 @@ export function MenuSectionEditor() {
   const [meats, setMeats] = useState<{ slug: string; name: string; amount: number }[]>([]);
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   const [newCatName, setNewCatName] = useState("");
   const [showNewCat, setShowNewCat] = useState(false);
@@ -37,6 +38,7 @@ export function MenuSectionEditor() {
     const menuData = (await menuRes.json()) as { ok?: boolean; items?: MenuItem[]; error?: string };
     if (!menuRes.ok) {
       setMsg(menuData.error ?? `Error ${menuRes.status}`);
+      setLoaded(true);
       return;
     }
     setItems(menuData.items ?? []);
@@ -56,11 +58,29 @@ export function MenuSectionEditor() {
         setNewItemCat(catData.categories[0].slug);
       }
     }
+    setLoaded(true);
   }, [newItemCat]);
 
   useEffect(() => {
     void load();
   }, [load]);
+
+  async function importMenu() {
+    setBusy(true);
+    setMsg(null);
+    try {
+      const r = await fetch("/api/admin/menu-import-final", { method: "POST", credentials: "include" });
+      const d = (await r.json()) as { ok?: boolean; error?: string; items?: number };
+      if (!r.ok) {
+        setMsg(d.error ?? "Import failed");
+        return;
+      }
+      setMsg(`✓ Loaded ${d.items ?? 0} items`);
+      await load();
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function selectItem(item: MenuItem) {
     setDraft({ ...item });
@@ -240,6 +260,22 @@ export function MenuSectionEditor() {
       {msg ? (
         <p className="mt-3 rounded-lg border border-white/15 bg-black/30 px-3 py-1.5 text-sm text-cream/85">{msg}</p>
       ) : null}
+
+      {/* Load menu button when database is empty */}
+      {loaded && items.length === 0 && (
+        <div className="mt-4 rounded-xl border-2 border-dashed border-gold/50 bg-gold/10 p-6 text-center">
+          <p className="mb-4 text-cream/80">No menu items in database</p>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => void importMenu()}
+            className="inline-flex items-center gap-2 rounded-full bg-gold px-6 py-3 text-sm font-bold text-charcoal hover:bg-gold/90 disabled:opacity-40"
+          >
+            <Download className="h-5 w-5" />
+            {busy ? "Loading..." : "Load Menu"}
+          </button>
+        </div>
+      )}
 
       {/* Categories */}
       <div className="mt-6 rounded-xl border border-white/10 bg-black/20 p-4">
