@@ -7,7 +7,6 @@ import { useSiteSettings } from "@/context/SiteSettingsContext";
 import { CATERING_REQUEST_EMAILS } from "@/lib/data/catering-requests";
 import { CONTACT } from "@/lib/data/locations";
 import { openCateringInquiry, type CateringRequestLaunch } from "@/lib/utils/catering-inquiry";
-import { scrollDocumentToAnchor } from "@/lib/utils/scroll-to-anchor";
 
 const initial = {
   name: "",
@@ -25,13 +24,6 @@ export function CateringSection() {
   const c = site.catering;
   const [form, setForm] = useState(initial);
   const [postSubmit, setPostSubmit] = useState<CateringRequestLaunch | null>(null);
-
-  const scrollToFormAndFocus = useCallback(() => {
-    scrollDocumentToAnchor("catering-form");
-    requestAnimationFrame(() => {
-      document.getElementById("catering-name")?.focus();
-    });
-  }, []);
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,15 +86,6 @@ export function CateringSection() {
                 </>
               ) : null}
             </p>
-            <div className="pt-4">
-              <button
-                type="button"
-                className="rounded-full bg-angie-orange px-5 py-2 text-[10px] font-semibold uppercase tracking-editorial text-cream shadow-sm transition hover:bg-angie-orange/90"
-                onClick={scrollToFormAndFocus}
-              >
-                Open request form
-              </button>
-            </div>
             {(c.quotes ?? []).length > 0 ? (
               <blockquote className="mt-6 border-l-2 border-gold/55 pl-5">
                 {(c.quotes ?? []).map((q, i) => (
