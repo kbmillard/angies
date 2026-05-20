@@ -1,31 +1,38 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { Plus, Trash2, X, Check, Pencil } from "lucide-react";
 import type { MenuItem } from "@/lib/menu/schema";
-import { MENU_CATEGORY_META } from "@/lib/menu/category-meta";
 import { ImageAttachField } from "@/components/admin/ImageAttachField";
-import { adminInputClass, adminLabelClass, adminSectionClass } from "@/components/admin/admin-form-styles";
+import { adminInputClass, adminSectionClass } from "@/components/admin/admin-form-styles";
 
+type Category = { slug: string; name: string; sort_order: number; item_count: number };
 type MeatPriceRow = { meatSlug: string; price: string };
 
-function categorySlugForLabel(label: string): string {
-  return MENU_CATEGORY_META.find((c) => c.label.toLowerCase() === label.toLowerCase())?.id ?? label.toLowerCase();
-}
-
 export function MenuSectionEditor() {
+  const [categories, setCategories] = useState<Category[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [draft, setDraft] = useState<MenuItem | null>(null);
   const [meatPrices, setMeatPrices] = useState<MeatPriceRow[]>([]);
   const [meats, setMeats] = useState<{ slug: string; name: string; amount: number }[]>([]);
   const [msg, setMsg] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [importFile, setImportFile] = useState<File | null>(null);
+
+  const [newCatName, setNewCatName] = useState("");
+  const [showNewCat, setShowNewCat] = useState(false);
+  const [showNewItem, setShowNewItem] = useState(false);
+  const [newItemName, setNewItemName] = useState("");
+  const [newItemCat, setNewItemCat] = useState("");
+  const [newItemPrice, setNewItemPrice] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [confirmDeleteCat, setConfirmDeleteCat] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setMsg(null);
-    const [menuRes, modRes] = await Promise.all([
+    const [menuRes, modRes, catRes] = await Promise.all([
       fetch("/api/admin/menu", { credentials: "include" }),
       fetch("/api/admin/catalog-menu/modifiers", { credentials: "include" }),
+      fetch("/api/admin/catalog-menu/categories", { credentials: "include" }),
     ]);
     const menuData = (await menuRes.json()) as { ok?: boolean; items?: MenuItem[]; error?: string };
     if (!menuRes.ok) {
@@ -41,7 +48,15 @@ export function MenuSectionEditor() {
     if (modRes.ok && modData.modifiers) {
       setMeats(modData.modifiers.filter((m) => m.kind === "meat"));
     }
-  }, []);
+
+    const catData = (await catRes.json()) as { ok?: boolean; categories?: Category[] };
+    if (catRes.ok && catData.categories) {
+      setCategories(catData.categories);
+      if (!newItemCat && catData.categories[0]) {
+        setNewItemCat(catData.categories[0].slug);
+      }
+    }
+  }, [newItemCat]);
 
   useEffect(() => {
     void load();
@@ -49,6 +64,7 @@ export function MenuSectionEditor() {
 
   async function selectItem(item: MenuItem) {
     setDraft({ ...item });
+    setShowNewItem(false);
     setMsg(null);
     let meatList = meats;
     if (meatList.length === 0) {
@@ -76,6 +92,11 @@ export function MenuSectionEditor() {
     );
   }
 
+  function getCatSlug(catName: string): string {
+    const cat = categories.find((c) => c.name.toLowerCase() === catName.toLowerCase());
+    return cat?.slug ?? catName.toLowerCase().replace(/\s+/g, "-");
+  }
+
   async function saveItem() {
     if (!draft) return;
     setBusy(true);
@@ -95,17 +116,17 @@ export function MenuSectionEditor() {
           active: draft.active,
           featured: draft.featured,
           sortOrder: draft.sortOrder,
-          categorySlug: categorySlugForLabel(draft.category),
+          categorySlug: getCatSlug(draft.category),
         }),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string; item?: MenuItem };
       if (!res.ok) {
-        setMsg(data.error ?? "Save failed");
+        setMsg(data.error ?? "Error");
         return;
       }
 
       if (draft.meatChoiceRequired && meats.length > 0) {
-        const mpRes = await fetch(
+        await fetch(
           `/api/admin/catalog-menu/items/${encodeURIComponent(draft.id)}/meat-prices`,
           {
             method: "PUT",
@@ -119,14 +140,9 @@ export function MenuSectionEditor() {
             }),
           },
         );
-        const mpData = (await mpRes.json()) as { ok?: boolean; error?: string };
-        if (!mpRes.ok) {
-          setMsg(mpData.error ?? "Meat prices save failed");
-          return;
-        }
       }
 
-      setMsg("Saved. Refresh the home page to see menu changes.");
+      setMsg("✓");
       await load();
       if (data.item) setDraft(data.item);
     } finally {
@@ -134,112 +150,322 @@ export function MenuSectionEditor() {
     }
   }
 
-  async function importFinalBundled() {
+  async function addCategory() {
+    if (!newCatName.trim()) return;
     setBusy(true);
-    setMsg(null);
     try {
-      const r = await fetch("/api/admin/menu-import-final", { method: "POST", credentials: "include" });
-      const d = (await r.json()) as { ok?: boolean; error?: string; items?: number };
-      if (!r.ok) {
-        setMsg(d.error ?? "Import failed");
-        return;
+      const res = await fetch("/api/admin/catalog-menu/categories", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: newCatName.trim() }),
+      });
+      if (res.ok) {
+        setNewCatName("");
+        setShowNewCat(false);
+        await load();
       }
-      setMsg(`Loaded menu.json (${d.items ?? 0} items).`);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function deleteCategory(slug: string) {
+    setBusy(true);
+    try {
+      const res = await fetch(`/api/admin/catalog-menu/categories/${encodeURIComponent(slug)}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!res.ok) {
+        setMsg(data.error ?? "Error");
+      }
+      setConfirmDeleteCat(null);
       await load();
     } finally {
       setBusy(false);
     }
   }
 
-  async function importJson() {
-    if (!importFile) {
-      setMsg("Choose a .json file first.");
-      return;
-    }
+  async function addItem() {
+    if (!newItemName.trim() || !newItemCat) return;
     setBusy(true);
-    setMsg(null);
     try {
-      const text = await importFile.text();
-      const r = await fetch("/api/admin/menu-import", {
+      const res = await fetch("/api/admin/catalog-menu/items", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: text,
+        body: JSON.stringify({
+          name: newItemName.trim(),
+          categorySlug: newItemCat,
+          basePrice: newItemPrice ? Number(newItemPrice) : 0,
+        }),
       });
-      const d = (await r.json()) as { ok?: boolean; error?: string; items?: number };
-      if (!r.ok) {
-        setMsg(d.error ?? "Import failed");
-        return;
+      if (res.ok) {
+        setNewItemName("");
+        setNewItemPrice("");
+        setShowNewItem(false);
+        await load();
       }
-      setMsg(`Imported ${d.items ?? 0} items.`);
-      setImportFile(null);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function deleteItem(slug: string) {
+    setBusy(true);
+    try {
+      await fetch(`/api/admin/catalog-menu/items/${encodeURIComponent(slug)}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      setConfirmDelete(null);
+      if (draft?.id === slug) setDraft(null);
       await load();
     } finally {
       setBusy(false);
     }
   }
+
+  const grouped = categories.map((cat) => ({
+    ...cat,
+    items: items.filter((i) => i.category.toLowerCase() === cat.name.toLowerCase()),
+  }));
 
   return (
     <section id="menu" className={adminSectionClass}>
       <h2 className="font-display text-2xl text-cream">Menu</h2>
-      <p className="mt-2 text-sm text-cream/60">Edit names, prices, descriptions, and photos. Saves to the live menu API.</p>
 
       {msg ? (
-        <p className="mt-4 rounded-xl border border-white/15 bg-black/30 px-4 py-2 text-sm text-cream/85">{msg}</p>
+        <p className="mt-3 rounded-lg border border-white/15 bg-black/30 px-3 py-1.5 text-sm text-cream/85">{msg}</p>
       ) : null}
 
-      <div className="mt-6 grid gap-8 lg:grid-cols-[260px_1fr]">
-        <div>
-          <h3 className="text-sm font-medium text-cream/80">Items ({items.length})</h3>
-          <ul className="mt-3 max-h-[50vh] space-y-1 overflow-y-auto rounded-xl border border-white/10 bg-black/25 p-2">
-            {items.map((it) => (
-              <li key={it.id}>
-                <button
-                  type="button"
-                  onClick={() => void selectItem(it)}
-                  className={`w-full rounded-lg px-3 py-2 text-left text-sm transition ${
-                    draft?.id === it.id
-                      ? "bg-angie-orange/25 text-cream"
-                      : "text-cream/75 hover:bg-white/5"
-                  }`}
-                >
-                  <span className="block truncate font-medium">{it.name}</span>
-                  <span className="block truncate text-xs text-cream/50">{it.category}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
+      {/* Categories */}
+      <div className="mt-6 rounded-xl border border-white/10 bg-black/20 p-4">
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-cream/80">Categories</h3>
+          <button
+            type="button"
+            onClick={() => setShowNewCat(true)}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-angie-orange text-cream hover:bg-angie-orange/80"
+            aria-label="Add category"
+          >
+            <Plus className="h-5 w-5" />
+          </button>
         </div>
 
-        <div className="space-y-4 rounded-xl border border-white/10 bg-black/20 p-5">
-          {draft ? (
-            <>
-              <h3 className="font-display text-lg text-cream">Edit: {draft.name}</h3>
+        {showNewCat && (
+          <div className="mt-3 flex items-center gap-2">
+            <input
+              className={`${adminInputClass} flex-1`}
+              placeholder="Category name..."
+              value={newCatName}
+              onChange={(e) => setNewCatName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && void addCategory()}
+              autoFocus
+            />
+            <button
+              type="button"
+              onClick={() => void addCategory()}
+              disabled={busy || !newCatName.trim()}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-green-600 text-white disabled:opacity-40"
+            >
+              <Check className="h-5 w-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => { setShowNewCat(false); setNewCatName(""); }}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-cream/70"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        )}
+
+        <div className="mt-3 flex flex-wrap gap-2">
+          {categories.map((cat) => (
+            <div
+              key={cat.slug}
+              className="group flex items-center gap-1 rounded-full border border-white/15 bg-black/30 px-3 py-1.5 text-sm text-cream/80"
+            >
+              <span>{cat.name}</span>
+              <span className="text-xs text-cream/50">({cat.item_count})</span>
+              {cat.item_count === 0 && (
+                confirmDeleteCat === cat.slug ? (
+                  <button
+                    type="button"
+                    onClick={() => void deleteCategory(cat.slug)}
+                    className="ml-1 text-red-400 hover:text-red-300"
+                    title="Confirm delete"
+                  >
+                    <Check className="h-4 w-4" />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDeleteCat(cat.slug)}
+                    className="ml-1 text-cream/40 opacity-0 group-hover:opacity-100 hover:text-red-400"
+                    title="Delete"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                )
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Items by category */}
+      <div className="mt-6 grid gap-6 lg:grid-cols-[320px_1fr]">
+        <div className="space-y-4">
+          {/* Add Item button */}
+          <button
+            type="button"
+            onClick={() => { setShowNewItem(true); setDraft(null); }}
+            className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-angie-orange/50 bg-angie-orange/10 py-3 text-sm font-semibold text-angie-orange hover:border-angie-orange hover:bg-angie-orange/20"
+          >
+            <Plus className="h-5 w-5" />
+            <span>+ Item</span>
+          </button>
+
+          {/* Items list grouped by category */}
+          <div className="max-h-[60vh] space-y-4 overflow-y-auto">
+            {grouped.map((cat) => (
+              <div key={cat.slug}>
+                <h4 className="mb-2 text-xs font-bold uppercase tracking-wider text-cream/50">{cat.name}</h4>
+                <ul className="space-y-1 rounded-xl border border-white/10 bg-black/25 p-2">
+                  {cat.items.length === 0 && (
+                    <li className="px-3 py-2 text-xs text-cream/40 italic">No items</li>
+                  )}
+                  {cat.items.map((it) => (
+                    <li key={it.id} className="group flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={() => void selectItem(it)}
+                        className={`flex-1 rounded-lg px-3 py-2 text-left text-sm transition ${
+                          draft?.id === it.id
+                            ? "bg-angie-orange/25 text-cream"
+                            : "text-cream/75 hover:bg-white/5"
+                        }`}
+                      >
+                        <span className="block truncate font-medium">{it.name}</span>
+                        <span className="text-xs text-cream/50">
+                          {it.price != null ? `$${it.price.toFixed(2)}` : "—"}
+                        </span>
+                      </button>
+                      {confirmDelete === it.id ? (
+                        <button
+                          type="button"
+                          onClick={() => void deleteItem(it.id)}
+                          className="flex h-8 w-8 items-center justify-center rounded-full bg-red-600 text-white"
+                          title="Confirm"
+                        >
+                          <Check className="h-4 w-4" />
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setConfirmDelete(it.id)}
+                          className="flex h-8 w-8 items-center justify-center rounded-full text-cream/30 opacity-0 group-hover:opacity-100 hover:bg-red-600/20 hover:text-red-400"
+                          title="Delete"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Edit panel */}
+        <div className="rounded-xl border border-white/10 bg-black/20 p-5">
+          {showNewItem ? (
+            <div className="space-y-4">
+              <h3 className="font-display text-lg text-cream">+ New Item</h3>
+              <input
+                className={adminInputClass}
+                placeholder="Name..."
+                value={newItemName}
+                onChange={(e) => setNewItemName(e.target.value)}
+                autoFocus
+              />
+              <select
+                className={adminInputClass}
+                value={newItemCat}
+                onChange={(e) => setNewItemCat(e.target.value)}
+              >
+                {categories.map((c) => (
+                  <option key={c.slug} value={c.slug}>{c.name}</option>
+                ))}
+              </select>
+              <input
+                className={adminInputClass}
+                placeholder="Price (optional)"
+                value={newItemPrice}
+                onChange={(e) => setNewItemPrice(e.target.value)}
+              />
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => void addItem()}
+                  disabled={busy || !newItemName.trim() || !newItemCat}
+                  className="flex items-center gap-2 rounded-full bg-angie-orange px-5 py-2.5 text-sm font-semibold text-cream disabled:opacity-40"
+                >
+                  <Check className="h-4 w-4" /> Save
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setShowNewItem(false); setNewItemName(""); setNewItemPrice(""); }}
+                  className="rounded-full border border-white/20 px-5 py-2.5 text-sm text-cream/70"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : draft ? (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-display text-lg text-cream">{draft.name}</h3>
+                <button
+                  type="button"
+                  onClick={() => setDraft(null)}
+                  className="text-cream/50 hover:text-cream"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
               <div className="grid gap-3 sm:grid-cols-2">
-                <label className={adminLabelClass}>
-                  Name
+                <div>
+                  <label className="mb-1 block text-xs text-cream/60">Name</label>
                   <input
                     className={adminInputClass}
                     value={draft.name}
                     onChange={(e) => setDraft({ ...draft, name: e.target.value })}
                   />
-                </label>
-                <label className={adminLabelClass}>
-                  Category
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs text-cream/60">Category</label>
                   <select
                     className={adminInputClass}
-                    value={draft.category}
-                    onChange={(e) => setDraft({ ...draft, category: e.target.value })}
+                    value={getCatSlug(draft.category)}
+                    onChange={(e) => {
+                      const cat = categories.find((c) => c.slug === e.target.value);
+                      if (cat) setDraft({ ...draft, category: cat.name });
+                    }}
                   >
-                    {MENU_CATEGORY_META.map((c) => (
-                      <option key={c.id} value={c.label}>
-                        {c.label}
-                      </option>
+                    {categories.map((c) => (
+                      <option key={c.slug} value={c.slug}>{c.name}</option>
                     ))}
                   </select>
-                </label>
-                <label className={adminLabelClass}>
-                  Price (USD)
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs text-cream/60">Price ($)</label>
                   <input
                     className={adminInputClass}
                     value={draft.price ?? ""}
@@ -248,35 +474,35 @@ export function MenuSectionEditor() {
                       setDraft({ ...draft, price: t === "" ? null : Number(t.replace(/[$,]/g, "")) });
                     }}
                   />
-                </label>
-                <label className={adminLabelClass}>
-                  Sort order
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs text-cream/60">Order</label>
                   <input
                     type="number"
                     className={adminInputClass}
                     value={draft.sortOrder}
-                    onChange={(e) =>
-                      setDraft({ ...draft, sortOrder: Number(e.target.value) || 0 })
-                    }
+                    onChange={(e) => setDraft({ ...draft, sortOrder: Number(e.target.value) || 0 })}
                   />
-                </label>
-                <label className={`sm:col-span-2 ${adminLabelClass}`}>
-                  Description
+                </div>
+                <div className="sm:col-span-2">
+                  <label className="mb-1 block text-xs text-cream/60">Description</label>
                   <textarea
-                    className={`${adminInputClass} min-h-[88px]`}
+                    className={`${adminInputClass} min-h-[80px]`}
                     value={draft.description ?? ""}
                     onChange={(e) => setDraft({ ...draft, description: e.target.value })}
                   />
-                </label>
+                </div>
               </div>
+
               <ImageAttachField
-                label="Menu photo"
+                label="Photo"
                 value={draft.imageUrl ?? ""}
                 alt={draft.imageAlt ?? ""}
                 onChange={(url) => setDraft({ ...draft, imageUrl: url || undefined })}
                 onAltChange={(alt) => setDraft({ ...draft, imageAlt: alt })}
               />
-              <div className="flex flex-wrap gap-4 text-xs text-cream/80">
+
+              <div className="flex flex-wrap gap-4 text-sm text-cream/80">
                 <label className="flex items-center gap-2">
                   <input
                     type="checkbox"
@@ -297,28 +523,23 @@ export function MenuSectionEditor() {
                   <input
                     type="checkbox"
                     checked={draft.meatChoiceRequired}
-                    onChange={(e) =>
-                      setDraft({ ...draft, meatChoiceRequired: e.target.checked })
-                    }
+                    onChange={(e) => setDraft({ ...draft, meatChoiceRequired: e.target.checked })}
                   />
-                  Requires meat choice
+                  Meat choice
                 </label>
               </div>
-              {draft.meatChoiceRequired && meats.length > 0 ? (
+
+              {draft.meatChoiceRequired && meats.length > 0 && (
                 <div>
-                  <h4 className="text-xs font-semibold uppercase tracking-editorial text-cream/65">
-                    Meat price overrides (blank = use default upcharge)
-                  </h4>
-                  <div className="mt-2 space-y-2">
+                  <h4 className="mb-2 text-xs font-semibold text-cream/60">Meat prices</h4>
+                  <div className="space-y-2">
                     {meatPrices.map((row, idx) => {
                       const meat = meats.find((m) => m.slug === row.meatSlug);
                       return (
                         <div key={row.meatSlug} className="flex items-center gap-3">
-                          <span className="min-w-[120px] text-sm text-cream/80">
-                            {meat?.name ?? row.meatSlug}
-                          </span>
+                          <span className="min-w-[100px] text-sm text-cream/70">{meat?.name ?? row.meatSlug}</span>
                           <input
-                            className="w-28 rounded-lg border border-white/15 bg-black/40 px-2 py-1 text-sm text-cream"
+                            className="w-24 rounded-lg border border-white/15 bg-black/40 px-2 py-1 text-sm text-cream"
                             placeholder={meat ? String(meat.amount) : "0"}
                             value={row.price}
                             onChange={(e) => {
@@ -332,52 +553,26 @@ export function MenuSectionEditor() {
                     })}
                   </div>
                 </div>
-              ) : null}
+              )}
+
               <button
                 type="button"
                 disabled={busy}
                 onClick={() => void saveItem()}
-                className="rounded-full bg-angie-orange px-6 py-2.5 text-xs font-semibold uppercase tracking-editorial text-cream disabled:opacity-40"
+                className="flex items-center gap-2 rounded-full bg-angie-orange px-6 py-2.5 text-sm font-semibold text-cream disabled:opacity-40"
               >
-                {busy ? "Saving…" : "Save item"}
+                <Check className="h-4 w-4" />
+                {busy ? "..." : "Save"}
               </button>
-            </>
+            </div>
           ) : (
-            <p className="text-sm text-cream/55">Select an item from the list.</p>
+            <div className="flex h-40 items-center justify-center text-cream/40">
+              <Pencil className="mr-2 h-5 w-5" />
+              <span>Select item to edit</span>
+            </div>
           )}
         </div>
       </div>
-
-      <details className="mt-8 rounded-xl border border-white/10 bg-black/20 p-4">
-        <summary className="cursor-pointer text-sm font-semibold uppercase tracking-editorial text-cream/70">
-          Advanced: import menu JSON
-        </summary>
-        <div className="mt-4 flex flex-wrap gap-3">
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => void importFinalBundled()}
-            className="rounded-full bg-gold/90 px-4 py-2 text-xs font-semibold uppercase tracking-editorial text-charcoal disabled:opacity-40"
-          >
-            Load site menu.json
-          </button>
-          <input
-            type="file"
-            accept="application/json,.json"
-            disabled={busy}
-            onChange={(e) => setImportFile(e.target.files?.[0] ?? null)}
-            className="text-sm text-cream/80 file:mr-3 file:rounded-full file:border-0 file:bg-angie-orange file:px-4 file:py-2 file:text-xs file:font-semibold file:text-cream"
-          />
-          <button
-            type="button"
-            disabled={busy || !importFile}
-            onClick={() => void importJson()}
-            className="rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-editorial text-cream/85 disabled:opacity-40"
-          >
-            Import file
-          </button>
-        </div>
-      </details>
     </section>
   );
 }

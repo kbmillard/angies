@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireAdminGate } from "@/lib/admin/require-admin-gate";
 import { revalidatePublicCatalog } from "@/lib/admin/revalidate-public";
 import {
+  dbDeleteCatalogMenuItem,
   dbGetItemMeatPrices,
   dbGetRelationalMenuAsMenuItems,
   dbUpdateCatalogMenuItem,
@@ -67,4 +68,27 @@ export async function PATCH(
     const msg = e instanceof Error ? e.message : "Update failed";
     return NextResponse.json({ ok: false, error: msg }, { status: 400 });
   }
+}
+
+export async function DELETE(
+  _req: Request,
+  ctx: { params: Promise<{ slug: string }> },
+) {
+  const gate = await requireAdminGate();
+  if (gate) return gate;
+  if (!getSql()) {
+    return NextResponse.json({ ok: false, error: "DATABASE_URL is required." }, { status: 503 });
+  }
+
+  const { slug } = await ctx.params;
+  if (!slug?.trim()) {
+    return NextResponse.json({ ok: false, error: "Invalid slug" }, { status: 400 });
+  }
+
+  const deleted = await dbDeleteCatalogMenuItem(slug);
+  if (!deleted) {
+    return NextResponse.json({ ok: false, error: "Item not found" }, { status: 404 });
+  }
+  revalidatePublicCatalog();
+  return NextResponse.json({ ok: true });
 }

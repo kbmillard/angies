@@ -622,3 +622,161 @@ export async function dbSetItemMeatPrices(
     }
   });
 }
+
+// ─────────────────────────────────────────────────────────────
+// Category CRUD
+// ─────────────────────────────────────────────────────────────
+
+export type CategoryRow = { slug: string; name: string; sort_order: number; item_count: number };
+
+export async function dbListCategories(): Promise<CategoryRow[]> {
+  const sql = getSql();
+  if (!sql) return [];
+  if (!(await ensureRelationalMenuCatalogTables())) return [];
+  const rows = await sql<CategoryRow[]>`
+    SELECT c.slug, c.name, c.sort_order,
+           (SELECT COUNT(*)::int FROM catalog_menu_items i WHERE i.category_slug = c.slug) AS item_count
+    FROM catalog_menu_categories c
+    ORDER BY c.sort_order ASC, c.name ASC
+  `;
+  return rows;
+}
+
+function toSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "")
+    .slice(0, 50) || "category";
+}
+
+export async function dbInsertCategory(
+  name: string,
+): Promise<{ slug: string; name: string; sort_order: number }> {
+  const sql = getSql();
+  if (!sql) throw new Error("DATABASE_URL is not configured");
+  if (!(await ensureRelationalMenuCatalogTables())) {
+    throw new Error("Could not ensure relational menu tables");
+  }
+  const baseSlug = toSlug(name);
+  let slug = baseSlug;
+  let attempt = 0;
+  while (true) {
+    const existing = await sql<{ slug: string }[]>`
+      SELECT slug FROM catalog_menu_categories WHERE slug = ${slug} LIMIT 1
+    `;
+    if (!existing[0]) break;
+    attempt++;
+    slug = `${baseSlug}-${attempt}`;
+    if (attempt > 100) throw new Error("Could not generate unique slug");
+  }
+  const maxOrder = await sql<{ m: number }[]>`
+    SELECT COALESCE(MAX(sort_order), -1)::int AS m FROM catalog_menu_categories
+  `;
+  const sortOrder = (maxOrder[0]?.m ?? -1) + 1;
+  await sql`
+    INSERT INTO catalog_menu_categories (slug, name, sort_order)
+    VALUES (${slug}, ${name}, ${sortOrder})
+  `;
+  return { slug, name, sort_order: sortOrder };
+}
+
+export async function dbUpdateCategory(
+  slug: string,
+  patch: { name?: string; sortOrder?: number },
+): Promise<boolean> {
+  const sql = getSql();
+  if (!sql) return false;
+  if (!(await ensureRelationalMenuCatalogTables())) return false;
+  const updated = await sql<{ slug: string }[]>`
+    UPDATE catalog_menu_categories
+    SET
+      name = COALESCE(${patch.name ?? null}, name),
+      sort_order = COALESCE(${patch.sortOrder ?? null}, sort_order)
+    WHERE slug = ${slug}
+    RETURNING slug
+  `;
+  return updated.length > 0;
+}
+
+export async function dbDeleteCategory(slug: string): Promise<{ deleted: boolean; error?: string }> {
+  const sql = getSql();
+  if (!sql) return { deleted: false, error: "No database" };
+  if (!(await ensureRelationalMenuCatalogTables())) return { deleted: false, error: "Tables not ready" };
+  const items = await sql<{ c: number }[]>`
+    SELECT COUNT(*)::int AS c FROM catalog_menu_items WHERE category_slug = ${slug}
+  `;
+  if ((items[0]?.c ?? 0) > 0) {
+    return { deleted: false, error: "Category has items" };
+  }
+  await sql`DELETE FROM catalog_menu_categories WHERE slug = ${slug}`;
+  return { deleted: true };
+}
+
+// ─────────────────────────────────────────────────────────────
+// Menu Item Create / Delete
+// ─────────────────────────────────────────────────────────────
+
+export type NewItemData = {
+  name: string;
+  categorySlug: string;
+  basePrice?: number;
+  description?: string;
+  requiresMeatSelection?: boolean;
+  imageUrl?: string | null;
+};
+
+export async function dbInsertCatalogMenuItem(
+  data: NewItemData,
+): Promise<{ slug: string }> {
+  const sql = getSql();
+  if (!sql) throw new Error("DATABASE_URL is not configured");
+  if (!(await ensureRelationalMenuCatalogTables())) {
+    throw new Error("Could not ensure relational menu tables");
+  }
+  const cat = await sql<{ slug: string }[]>`
+    SELECT slug FROM catalog_menu_categories WHERE slug = ${data.categorySlug} LIMIT 1
+  `;
+  if (!cat[0]) throw new Error("Unknown category");
+
+  const baseSlug = toSlug(data.name);
+  let slug = baseSlug;
+  let attempt = 0;
+  while (true) {
+    const existing = await sql<{ slug: string }[]>`
+      SELECT slug FROM catalog_menu_items WHERE slug = ${slug} LIMIT 1
+    `;
+    if (!existing[0]) break;
+    attempt++;
+    slug = `${baseSlug}-${attempt}`;
+    if (attempt > 100) throw new Error("Could not generate unique slug");
+  }
+
+  const maxOrder = await sql<{ m: number }[]>`
+    SELECT COALESCE(MAX(sort_order), -1)::int AS m FROM catalog_menu_items WHERE category_slug = ${data.categorySlug}
+  `;
+  const sortOrder = (maxOrder[0]?.m ?? -1) + 1;
+
+  await sql`
+    INSERT INTO catalog_menu_items (
+      slug, category_slug, name, description, base_price,
+      requires_meat_selection, sort_order, active, featured, image_url, image_alt
+    ) VALUES (
+      ${slug}, ${data.categorySlug}, ${data.name}, ${data.description ?? ""},
+      ${data.basePrice ?? 0}, ${data.requiresMeatSelection ?? false},
+      ${sortOrder}, true, false, ${data.imageUrl ?? null}, null
+    )
+  `;
+  return { slug };
+}
+
+export async function dbDeleteCatalogMenuItem(slug: string): Promise<boolean> {
+  const sql = getSql();
+  if (!sql) return false;
+  if (!(await ensureRelationalMenuCatalogTables())) return false;
+  await sql`DELETE FROM catalog_menu_item_meat_prices WHERE item_slug = ${slug}`;
+  const del = await sql<{ slug: string }[]>`
+    DELETE FROM catalog_menu_items WHERE slug = ${slug} RETURNING slug
+  `;
+  return del.length > 0;
+}
