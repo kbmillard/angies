@@ -143,12 +143,23 @@ export function SiteSettingsTab() {
         </div>
 
         <h3 className="mt-8 text-sm font-semibold uppercase tracking-editorial text-cream/70">Hero slideshow</h3>
-        <div className="mt-4 space-y-4">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {settings.hero.slides.map((s, idx) => (
             <div
               key={`hero-${idx}`}
-              className="grid gap-3 rounded-xl border border-white/10 bg-black/20 p-4 sm:grid-cols-[1fr_1fr_auto]"
+              className="group relative rounded-xl border border-white/10 bg-black/20 p-3 hover:border-white/20 transition-colors"
             >
+              <button
+                type="button"
+                title="Remove slide"
+                className="absolute right-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-white/20 bg-black/80 text-cream/70 opacity-0 hover:border-salsa hover:text-salsa group-hover:opacity-100 transition-all"
+                onClick={() => {
+                  const slides = settings.hero.slides.filter((_, i) => i !== idx);
+                  setSettings({ ...settings, hero: { ...settings.hero, slides } });
+                }}
+              >
+                ×
+              </button>
               <ImageAttachField
                 label={`Slide ${idx + 1}`}
                 value={s.src}
@@ -164,34 +175,24 @@ export function SiteSettingsTab() {
                   setSettings({ ...settings, hero: { ...settings.hero, slides } });
                 }}
               />
-              <button
-                type="button"
-                className="rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-editorial text-cream/85 hover:bg-white/5"
-                onClick={() => {
-                  const slides = settings.hero.slides.filter((_, i) => i !== idx);
-                  setSettings({ ...settings, hero: { ...settings.hero, slides } });
-                }}
-              >
-                Remove slide
-              </button>
             </div>
           ))}
-          <button
-            type="button"
-            className="rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-editorial text-cream/85 hover:bg-white/5"
-            onClick={() =>
-              setSettings({
-                ...settings,
-                hero: {
-                  ...settings.hero,
-                  slides: [...settings.hero.slides, { src: "/gallery/truck.png", alt: "" }],
-                },
-              })
-            }
-          >
-            Add hero slide
-          </button>
         </div>
+        <button
+          type="button"
+          className="mt-4 rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-editorial text-cream/85 hover:bg-white/5"
+          onClick={() =>
+            setSettings({
+              ...settings,
+              hero: {
+                ...settings.hero,
+                slides: [...settings.hero.slides, { src: "/gallery/truck.png", alt: "" }],
+              },
+            })
+          }
+        >
+          Add hero slide
+        </button>
       </section>
 
       <section id="prologue" className={adminSectionClass}>

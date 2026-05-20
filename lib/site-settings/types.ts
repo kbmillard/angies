@@ -25,6 +25,11 @@ export type SectionCopyBlock = {
   body?: string;
 };
 
+export type QuoteBlock = {
+  quote: string;
+  footer: string;
+};
+
 export type SocialSettings = SectionCopyBlock & {
   instagramHandle?: string;
   facebookHandle?: string;
@@ -46,11 +51,12 @@ export type SiteSettingsResolved = {
   story: {
     sectionKicker: string;
     sectionTitle: string;
-    quote1: string;
-    quote2: string;
-    quoteFooter: string;
+    body?: string;
+    quotes: QuoteBlock[];
     slides: StorySlideResolved[];
   };
-  catering: SectionCopyBlock;
+  catering: SectionCopyBlock & {
+    quotes: QuoteBlock[];
+  };
   social: SocialSettings;
 };

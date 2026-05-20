@@ -6,10 +6,9 @@ import { useEffect, useState } from "react";
 import { SiteSettingsTab } from "@/components/admin/SiteSettingsTab";
 import { MenuSectionEditor } from "@/components/admin/MenuSectionEditor";
 import { ModifiersSectionEditor } from "@/components/admin/ModifiersSectionEditor";
-import { LocationsCatalogTab } from "@/components/admin/LocationsCatalogTab";
-import { ScheduleCatalogTab } from "@/components/admin/ScheduleCatalogTab";
+import { WeeklyScheduleTab } from "@/components/admin/WeeklyScheduleTab";
 import { PhotosLibrarySection } from "@/components/admin/PhotosLibrarySection";
-import { adminSectionClass } from "@/components/admin/admin-form-styles";
+import { CollapsibleSection } from "@/components/admin/CollapsibleSection";
 import type { PhotosAdminStatus } from "@/lib/photos/admin-status";
 
 const NAV: { id: string; label: string }[] = [
@@ -18,7 +17,6 @@ const NAV: { id: string; label: string }[] = [
   { id: "story", label: "Story" },
   { id: "menu", label: "Menu" },
   { id: "modifiers", label: "Modifiers" },
-  { id: "locations", label: "Locations" },
   { id: "schedule", label: "Schedule" },
   { id: "social", label: "Social" },
   { id: "catering", label: "Catering" },
@@ -29,7 +27,7 @@ const TAB_TO_HASH: Record<string, string> = {
   site: "hero",
   photos: "photos",
   menu: "menu",
-  locations: "locations",
+  locations: "schedule", // Redirect old locations to schedule
   schedule: "schedule",
 };
 
@@ -188,27 +186,25 @@ export function SiteAdminClient({ initialAuthed, status, initialTab }: Props) {
         ))}
       </nav>
 
-      <div className="mt-10 space-y-12 pb-24">
+      <div className="mt-10 space-y-8 pb-24">
         <SiteSettingsTab />
 
-        <MenuSectionEditor />
-        <ModifiersSectionEditor />
+        <CollapsibleSection id="menu" title="Menu" defaultOpen={false}>
+          <MenuSectionEditor />
+        </CollapsibleSection>
 
-        <section id="locations" className={adminSectionClass}>
-          <h2 className="mb-6 font-display text-2xl text-cream">Locations</h2>
-          <LocationsCatalogTab />
-        </section>
+        <CollapsibleSection id="modifiers" title="Modifiers" defaultOpen={false}>
+          <ModifiersSectionEditor />
+        </CollapsibleSection>
 
-        <section id="schedule" className={adminSectionClass}>
-          <h2 className="mb-6 font-display text-2xl text-cream">Schedule</h2>
-          <ScheduleCatalogTab />
-        </section>
+        <CollapsibleSection id="schedule" title="Schedule & Locations" defaultOpen={true}>
+          <WeeklyScheduleTab />
+        </CollapsibleSection>
 
-        <section id="photos" className={adminSectionClass}>
-          <h2 className="mb-2 font-display text-2xl text-cream">Photo library</h2>
+        <CollapsibleSection id="photos" title="Photo Library" defaultOpen={false}>
           <p className="mb-6 text-sm text-cream/60">Upload images used across hero, menu, and gallery.</p>
           <PhotosLibrarySection />
-        </section>
+        </CollapsibleSection>
       </div>
     </main>
   );

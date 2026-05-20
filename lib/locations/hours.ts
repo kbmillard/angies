@@ -345,3 +345,90 @@ export function getLocationPublicStatus(
   // "Open", empty, or any other sheet value: hours drive open/closed; label/detail from schedule.
   return computed;
 }
+
+/**
+ * Public-facing hours status based on schedule entries.
+ * Checks recurring schedule entries (with dayOfWeek) against current time in America/Chicago.
+ */
+export function getSchedulePublicStatus(
+  scheduleEntries: Array<{ dayOfWeek?: number; startTime: string; endTime: string; locationName: string }>,
+  now: Date = new Date(),
+): PublicHoursStatus {
+  const tz = DEFAULT_TIMEZONE; // Always America/Chicago for schedule
+
+  // Get current day (0=Sunday) and time in Chicago
+  const { dayKey, minutes } = getZonedDayAndMinutes(now, tz);
+  const dayOfWeek = dayKeyToIndex(dayKey);
+
+  // Find entries for today
+  const todayEntries = scheduleEntries.filter(
+    (e) => e.dayOfWeek === dayOfWeek && e.startTime && e.endTime
+  );
+
+  // Check if any entry is active now
+  for (const entry of todayEntries) {
+    const start = parseHHmm(entry.startTime);
+    const end = parseHHmm(entry.endTime);
+    if (start == null || end == null) continue;
+    if (minutes >= start && minutes < end) {
+      return {
+        isOpen: true,
+        label: "Open",
+        detail: `at ${entry.locationName} until ${formatMinutes12h(end)}`,
+        activeWindowLabel: entry.locationName,
+        timezone: tz,
+      };
+    }
+  }
+
+  // Closed now - find next opening
+  // Check rest of today first
+  for (const entry of todayEntries) {
+    const start = parseHHmm(entry.startTime);
+    if (start == null) continue;
+    if (start > minutes) {
+      return {
+        isOpen: false,
+        label: "Closed",
+        detail: `Opens today at ${formatMinutes12h(start)} (${entry.locationName})`,
+        timezone: tz,
+      };
+    }
+  }
+
+  // Check next 7 days
+  for (let offset = 1; offset <= 7; offset++) {
+    const nextDay = (dayOfWeek + offset) % 7;
+    const nextEntries = scheduleEntries.filter(
+      (e) => e.dayOfWeek === nextDay && e.startTime
+    );
+    if (nextEntries.length > 0) {
+      const earliest = nextEntries.reduce((prev, curr) => {
+        const prevStart = parseHHmm(prev.startTime);
+        const currStart = parseHHmm(curr.startTime);
+        if (prevStart == null) return curr;
+        if (currStart == null) return prev;
+        return currStart < prevStart ? curr : prev;
+      });
+      const start = parseHHmm(earliest.startTime);
+      if (start != null) {
+        const nextDayKey = DAY_KEYS[nextDay]!;
+        const dayName = offset === 1 ? "tomorrow" : DAY_DISPLAY[nextDayKey];
+        return {
+          isOpen: false,
+          label: "Closed",
+          detail: `Opens ${dayName} at ${formatMinutes12h(start)} (${earliest.locationName})`,
+          timezone: tz,
+        };
+      }
+    }
+  }
+
+  // No schedule found
+  return {
+    isOpen: false,
+    label: "Closed",
+    detail: "Schedule coming soon",
+    timezone: tz,
+  };
+}
