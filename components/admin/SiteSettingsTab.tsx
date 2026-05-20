@@ -6,8 +6,8 @@ import { ImageAttachField } from "@/components/admin/ImageAttachField";
 import {
   adminInputClass as inputClass,
   adminLabelClass as labelClass,
-  adminSectionClass,
 } from "@/components/admin/admin-form-styles";
+import { CollapsibleSection } from "@/components/admin/CollapsibleSection";
 
 export function SiteSettingsTab() {
   const [settings, setSettings] = useState<SiteSettingsResolved | null>(null);
@@ -73,10 +73,9 @@ export function SiteSettingsTab() {
         </p>
       ) : null}
 
-      <section id="hero" className={adminSectionClass}>
-        <h2 className="font-display text-xl text-cream">Hero</h2>
-        <p className="mt-1 text-sm text-cream/55">Upload or pick images for the homepage slideshow.</p>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      <CollapsibleSection id="hero" title="Hero" defaultOpen={false}>
+        <p className="mb-4 text-sm text-cream/55">Upload or pick images for the homepage slideshow.</p>
+        <div className="grid gap-4 sm:grid-cols-2">
           <label className={labelClass}>
             Eyebrow
             <input
@@ -193,11 +192,10 @@ export function SiteSettingsTab() {
         >
           Add hero slide
         </button>
-      </section>
+      </CollapsibleSection>
 
-      <section id="prologue" className={adminSectionClass}>
-        <h2 className="font-display text-xl text-cream">Prologue</h2>
-        <div className="mt-6 space-y-4">
+      <CollapsibleSection id="prologue" title="Prologue" defaultOpen={false}>
+        <div className="space-y-4">
           <label className={labelClass}>
             Title
             <input
@@ -219,11 +217,10 @@ export function SiteSettingsTab() {
             />
           </label>
         </div>
-      </section>
+      </CollapsibleSection>
 
-      <section id="story" className={adminSectionClass}>
-        <h2 className="font-display text-xl text-cream">Story</h2>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      <CollapsibleSection id="story" title="Story" defaultOpen={false}>
+        <div className="grid gap-4 sm:grid-cols-2">
           <label className={labelClass}>
             Section kicker
             <input
@@ -312,11 +309,25 @@ export function SiteSettingsTab() {
         </div>
 
         <h3 className="mt-8 text-sm font-semibold uppercase tracking-editorial text-cream/70">Story carousel</h3>
-        <div className="mt-4 space-y-4">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {settings.story.slides.map((s, idx) => (
-            <div key={`story-${idx}`} className="grid gap-3 rounded-xl border border-white/10 bg-black/20 p-4">
+            <div
+              key={`story-${idx}`}
+              className="group relative rounded-xl border border-white/10 bg-black/20 p-3 hover:border-white/20 transition-colors"
+            >
+              <button
+                type="button"
+                title="Remove slide"
+                className="absolute right-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-white/20 bg-black/80 text-cream/70 opacity-0 hover:border-salsa hover:text-salsa group-hover:opacity-100 transition-all"
+                onClick={() => {
+                  const slides = settings.story.slides.filter((_, i) => i !== idx);
+                  setSettings({ ...settings, story: { ...settings.story, slides } });
+                }}
+              >
+                ×
+              </button>
               <ImageAttachField
-                label={`Story slide ${idx + 1}`}
+                label={`Slide ${idx + 1}`}
                 value={s.src}
                 alt={s.alt}
                 onChange={(src) => {
@@ -330,10 +341,10 @@ export function SiteSettingsTab() {
                   setSettings({ ...settings, story: { ...settings.story, slides } });
                 }}
               />
-              <label className={labelClass}>
-                Overlay kicker
+              <div className="mt-2 space-y-2">
                 <input
-                  className={inputClass}
+                  className={`${inputClass} text-xs`}
+                  placeholder="Kicker"
                   value={s.kicker}
                   onChange={(e) => {
                     const slides = [...settings.story.slides];
@@ -341,11 +352,9 @@ export function SiteSettingsTab() {
                     setSettings({ ...settings, story: { ...settings.story, slides } });
                   }}
                 />
-              </label>
-              <label className={labelClass}>
-                Overlay line
                 <input
-                  className={inputClass}
+                  className={`${inputClass} text-xs`}
+                  placeholder="Line"
                   value={s.line}
                   onChange={(e) => {
                     const slides = [...settings.story.slides];
@@ -353,43 +362,32 @@ export function SiteSettingsTab() {
                     setSettings({ ...settings, story: { ...settings.story, slides } });
                   }}
                 />
-              </label>
-              <button
-                type="button"
-                className="self-start rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-editorial text-cream/85 hover:bg-white/5"
-                onClick={() => {
-                  const slides = settings.story.slides.filter((_, i) => i !== idx);
-                  setSettings({ ...settings, story: { ...settings.story, slides } });
-                }}
-              >
-                Remove slide
-              </button>
+              </div>
             </div>
           ))}
-          <button
-            type="button"
-            className="rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-editorial text-cream/85 hover:bg-white/5"
-            onClick={() =>
-              setSettings({
-                ...settings,
-                story: {
-                  ...settings.story,
-                  slides: [
-                    ...settings.story.slides,
-                    { src: "/gallery/truck1.jpg", alt: "", kicker: "", line: "" },
-                  ],
-                },
-              })
-            }
-          >
-            Add story slide
-          </button>
         </div>
-      </section>
+        <button
+          type="button"
+          className="mt-4 rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-editorial text-cream/85 hover:bg-white/5"
+          onClick={() =>
+            setSettings({
+              ...settings,
+              story: {
+                ...settings.story,
+                slides: [
+                  ...settings.story.slides,
+                  { src: "/gallery/truck1.jpg", alt: "", kicker: "", line: "" },
+                ],
+              },
+            })
+          }
+        >
+          Add story slide
+        </button>
+      </CollapsibleSection>
 
-      <section id="social" className={adminSectionClass}>
-        <h2 className="font-display text-xl text-cream">Social</h2>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      <CollapsibleSection id="social" title="Social" defaultOpen={false}>
+        <div className="grid gap-4 sm:grid-cols-2">
           {(["kicker", "title", "subtitle", "body"] as const).map((key) => (
             <label key={key} className={key === "body" || key === "subtitle" ? `sm:col-span-2 ${labelClass}` : labelClass}>
               {key}
@@ -445,11 +443,10 @@ export function SiteSettingsTab() {
             />
           </label>
         </div>
-      </section>
+      </CollapsibleSection>
 
-      <section id="catering" className={adminSectionClass}>
-        <h2 className="font-display text-xl text-cream">Catering</h2>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      <CollapsibleSection id="catering" title="Catering" defaultOpen={false}>
+        <div className="grid gap-4 sm:grid-cols-2">
           {(["kicker", "title", "subtitle", "body"] as const).map((key) => (
             <label key={key} className={key === "body" || key === "subtitle" ? `sm:col-span-2 ${labelClass}` : labelClass}>
               {key}
@@ -536,7 +533,7 @@ export function SiteSettingsTab() {
             + Add quote
           </button>
         </div>
-      </section>
+      </CollapsibleSection>
 
       <div className="flex flex-wrap gap-3">
         <button
