@@ -219,6 +219,68 @@ export function SiteSettingsTab() {
         </div>
       </CollapsibleSection>
 
+      <CollapsibleSection id="menu-header" title="Menu Header" defaultOpen={false}>
+        <p className="mb-4 text-sm text-cream/55">Header text shown above the menu section on the homepage.</p>
+        <div className="space-y-4">
+          <label className={labelClass}>
+            Kicker
+            <input
+              className={inputClass}
+              value={settings.menu?.kicker ?? ""}
+              onChange={(e) =>
+                setSettings({ ...settings, menu: { ...settings.menu!, kicker: e.target.value } })
+              }
+            />
+          </label>
+          <label className={labelClass}>
+            Title
+            <input
+              className={inputClass}
+              value={settings.menu?.title ?? ""}
+              onChange={(e) =>
+                setSettings({ ...settings, menu: { ...settings.menu!, title: e.target.value } })
+              }
+            />
+          </label>
+          <label className={labelClass}>
+            Subtitle
+            <textarea
+              className={`${inputClass} min-h-[72px]`}
+              value={settings.menu?.subtitle ?? ""}
+              onChange={(e) =>
+                setSettings({ ...settings, menu: { ...settings.menu!, subtitle: e.target.value } })
+              }
+            />
+          </label>
+        </div>
+      </CollapsibleSection>
+
+      <CollapsibleSection id="location-header" title="Location Header" defaultOpen={false}>
+        <p className="mb-4 text-sm text-cream/55">Header text shown above the location/schedule section on the homepage.</p>
+        <div className="space-y-4">
+          <label className={labelClass}>
+            Title
+            <input
+              className={inputClass}
+              value={settings.location?.title ?? ""}
+              onChange={(e) =>
+                setSettings({ ...settings, location: { ...settings.location!, title: e.target.value } })
+              }
+            />
+          </label>
+          <label className={labelClass}>
+            Subtitle
+            <textarea
+              className={`${inputClass} min-h-[72px]`}
+              value={settings.location?.subtitle ?? ""}
+              onChange={(e) =>
+                setSettings({ ...settings, location: { ...settings.location!, subtitle: e.target.value } })
+              }
+            />
+          </label>
+        </div>
+      </CollapsibleSection>
+
       <CollapsibleSection id="story" title="Story" defaultOpen={false}>
         <div className="grid gap-4 sm:grid-cols-2">
           <label className={labelClass}>

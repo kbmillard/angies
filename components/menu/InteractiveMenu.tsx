@@ -8,6 +8,7 @@ import { MENU_CATEGORY_META } from "@/lib/menu/category-meta";
 import type { MenuCategoryColor, MenuCategoryMeta, MenuItem } from "@/lib/menu/schema";
 import { useMenuCatalog } from "@/context/MenuCatalogContext";
 import { useOrder } from "@/context/OrderContext";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { cn } from "@/lib/utils/cn";
 import { MeatChoiceModal } from "@/components/menu/MeatChoiceModal";
@@ -60,6 +61,7 @@ function defaultCategoryHero(items: MenuItem[]): { src: string; alt: string } | 
 export function InteractiveMenu() {
   const { data, loading, error } = useMenuCatalog();
   const { addItem, openOrderPanel } = useOrder();
+  const site = useSiteSettings();
   const reduceMotion = useReducedMotion();
   const categoryScrollRef = useRef<HTMLDivElement>(null);
   const activeIdRef = useRef(MENU_CATEGORY_META[0]!.id);
@@ -193,9 +195,9 @@ export function InteractiveMenu() {
           className="w-full min-w-0 max-w-full outline-none focus:outline-none"
         >
           <SectionHeading
-            kicker="Menu"
-            title="Fresh Tex-Mex plates, drinks, and daily specials."
-            subtitle="Everything is built at the window — see each item for price when set in admin."
+            kicker={site.menu?.kicker ?? "Menu"}
+            title={site.menu?.title ?? "Fresh Tex-Mex plates, drinks, and daily specials."}
+            subtitle={site.menu?.subtitle ?? "Everything is built at the window — see each item for price when set in admin."}
           />
         </div>
 

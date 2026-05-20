@@ -22,6 +22,15 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsResolved = {
     subtitle:
       "Fresh Mexican plates from the window — tacos, birria, burritos, aguas frescas, and daily specials. Follow the pin for today's stop, or book us for your next event.",
   },
+  menu: {
+    kicker: "Menu",
+    title: "Fresh Tex-Mex plates, drinks, and daily specials.",
+    subtitle: "Everything is built at the window — see each item for price when set in admin.",
+  },
+  location: {
+    title: "Find us on the curb — pin updates from the road.",
+    subtitle: "The truck moves daily. Address, hours, and notes update here when they are published.",
+  },
   story: {
     sectionKicker: "Our story",
     sectionTitle: "Mexican flavor, rolling through Kansas City.",

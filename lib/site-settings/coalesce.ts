@@ -170,6 +170,25 @@ export function coalesceSiteSettings(stored: unknown): SiteSettingsResolved {
       subtitle:
         typeof proIn?.subtitle === "string" && proIn.subtitle.trim() ? proIn.subtitle.trim() : d.prologue.subtitle,
     },
+    menu: {
+      kicker: isRecord(stored.menu) && typeof stored.menu.kicker === "string" && stored.menu.kicker.trim()
+        ? stored.menu.kicker.trim()
+        : d.menu.kicker,
+      title: isRecord(stored.menu) && typeof stored.menu.title === "string" && stored.menu.title.trim()
+        ? stored.menu.title.trim()
+        : d.menu.title,
+      subtitle: isRecord(stored.menu) && typeof stored.menu.subtitle === "string" && stored.menu.subtitle.trim()
+        ? stored.menu.subtitle.trim()
+        : d.menu.subtitle,
+    },
+    location: {
+      title: isRecord(stored.location) && typeof stored.location.title === "string" && stored.location.title.trim()
+        ? stored.location.title.trim()
+        : d.location.title,
+      subtitle: isRecord(stored.location) && typeof stored.location.subtitle === "string" && stored.location.subtitle.trim()
+        ? stored.location.subtitle.trim()
+        : d.location.subtitle,
+    },
     story: {
       sectionKicker:
         typeof storyIn?.sectionKicker === "string" && storyIn.sectionKicker.trim()

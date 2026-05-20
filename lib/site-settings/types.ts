@@ -48,6 +48,15 @@ export type SiteSettingsResolved = {
     title: string;
     subtitle: string;
   };
+  menu: {
+    kicker: string;
+    title: string;
+    subtitle: string;
+  };
+  location: {
+    title: string;
+    subtitle: string;
+  };
   story: {
     sectionKicker: string;
     sectionTitle: string;

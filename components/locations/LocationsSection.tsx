@@ -7,6 +7,7 @@ import { glassCtaAccent, glassCtaBase } from "@/components/ui/glass-cta";
 import { cn } from "@/lib/utils/cn";
 import { useLocationsCatalog } from "@/context/LocationsCatalogContext";
 import { useScheduleCatalog } from "@/context/ScheduleCatalogContext";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 import type { LocationItem } from "@/lib/locations/schema";
 import { LocationPublicStatus } from "@/components/locations/LocationPublicStatus";
 import { getCurrentScheduleStatus } from "@/lib/schedule/current-status";
@@ -113,6 +114,7 @@ function MapButton({ label, href, accent }: { label: string; href: string; accen
 export function LocationsSection() {
   const { loading, error, data } = useLocationsCatalog();
   const { data: scheduleData } = useScheduleCatalog();
+  const site = useSiteSettings();
 
   const trucks = data?.foodTruckLocations ?? [];
   const primaryTruck = trucks[0];
@@ -164,8 +166,8 @@ export function LocationsSection() {
       <div className="mx-auto max-w-[1200px] px-5 sm:px-8">
         <div id="locations-start" tabIndex={-1} className="outline-none focus:outline-none">
           <SectionHeading
-            title="Find us on the curb — pin updates from the road."
-            subtitle="The truck moves daily. Address, hours, and notes update here when they are published."
+            title={site.location?.title ?? "Find us on the curb — pin updates from the road."}
+            subtitle={site.location?.subtitle ?? "The truck moves daily. Address, hours, and notes update here when they are published."}
           />
         </div>
 
