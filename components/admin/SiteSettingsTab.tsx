@@ -245,31 +245,70 @@ export function SiteSettingsTab() {
             />
           </label>
           <label className={`sm:col-span-2 ${labelClass}`}>
-            Quote 1
+            Body
             <textarea
               className={`${inputClass} min-h-[72px]`}
-              value={settings.story.quote1}
-              onChange={(e) => setSettings({ ...settings, story: { ...settings.story, quote1: e.target.value } })}
+              value={settings.story.body ?? ""}
+              onChange={(e) => setSettings({ ...settings, story: { ...settings.story, body: e.target.value } })}
             />
           </label>
-          <label className={`sm:col-span-2 ${labelClass}`}>
-            Quote 2
-            <textarea
-              className={`${inputClass} min-h-[72px]`}
-              value={settings.story.quote2}
-              onChange={(e) => setSettings({ ...settings, story: { ...settings.story, quote2: e.target.value } })}
-            />
-          </label>
-          <label className={`sm:col-span-2 ${labelClass}`}>
-            Quote footer
-            <input
-              className={inputClass}
-              value={settings.story.quoteFooter}
-              onChange={(e) =>
-                setSettings({ ...settings, story: { ...settings.story, quoteFooter: e.target.value } })
-              }
-            />
-          </label>
+        </div>
+
+        <h3 className="mt-8 text-sm font-semibold uppercase tracking-editorial text-cream/70">Quotes</h3>
+        <div className="mt-4 space-y-4">
+          {(settings.story.quotes ?? []).map((q, idx) => (
+            <div key={`story-quote-${idx}`} className="rounded-xl border border-white/10 bg-black/20 p-4 space-y-3">
+              <label className={labelClass}>
+                Quote
+                <textarea
+                  className={`${inputClass} min-h-[72px]`}
+                  value={q.quote}
+                  onChange={(e) => {
+                    const quotes = [...(settings.story.quotes ?? [])];
+                    quotes[idx] = { ...quotes[idx]!, quote: e.target.value };
+                    setSettings({ ...settings, story: { ...settings.story, quotes } });
+                  }}
+                />
+              </label>
+              <label className={labelClass}>
+                Quote footer
+                <input
+                  className={inputClass}
+                  value={q.footer}
+                  onChange={(e) => {
+                    const quotes = [...(settings.story.quotes ?? [])];
+                    quotes[idx] = { ...quotes[idx]!, footer: e.target.value };
+                    setSettings({ ...settings, story: { ...settings.story, quotes } });
+                  }}
+                />
+              </label>
+              <button
+                type="button"
+                className="rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-editorial text-cream/85 hover:bg-white/5"
+                onClick={() => {
+                  const quotes = (settings.story.quotes ?? []).filter((_, i) => i !== idx);
+                  setSettings({ ...settings, story: { ...settings.story, quotes } });
+                }}
+              >
+                Remove quote
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            className="rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-editorial text-cream/85 hover:bg-white/5"
+            onClick={() =>
+              setSettings({
+                ...settings,
+                story: {
+                  ...settings.story,
+                  quotes: [...(settings.story.quotes ?? []), { quote: "", footer: "" }],
+                },
+              })
+            }
+          >
+            + Add quote
+          </button>
         </div>
 
         <h3 className="mt-8 text-sm font-semibold uppercase tracking-editorial text-cream/70">Story carousel</h3>
@@ -439,6 +478,63 @@ export function SiteSettingsTab() {
               )}
             </label>
           ))}
+        </div>
+
+        <h3 className="mt-8 text-sm font-semibold uppercase tracking-editorial text-cream/70">Quotes</h3>
+        <div className="mt-4 space-y-4">
+          {(settings.catering.quotes ?? []).map((q, idx) => (
+            <div key={`catering-quote-${idx}`} className="rounded-xl border border-white/10 bg-black/20 p-4 space-y-3">
+              <label className={labelClass}>
+                Quote
+                <textarea
+                  className={`${inputClass} min-h-[72px]`}
+                  value={q.quote}
+                  onChange={(e) => {
+                    const quotes = [...(settings.catering.quotes ?? [])];
+                    quotes[idx] = { ...quotes[idx]!, quote: e.target.value };
+                    setSettings({ ...settings, catering: { ...settings.catering, quotes } });
+                  }}
+                />
+              </label>
+              <label className={labelClass}>
+                Quote footer
+                <input
+                  className={inputClass}
+                  value={q.footer}
+                  onChange={(e) => {
+                    const quotes = [...(settings.catering.quotes ?? [])];
+                    quotes[idx] = { ...quotes[idx]!, footer: e.target.value };
+                    setSettings({ ...settings, catering: { ...settings.catering, quotes } });
+                  }}
+                />
+              </label>
+              <button
+                type="button"
+                className="rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-editorial text-cream/85 hover:bg-white/5"
+                onClick={() => {
+                  const quotes = (settings.catering.quotes ?? []).filter((_, i) => i !== idx);
+                  setSettings({ ...settings, catering: { ...settings.catering, quotes } });
+                }}
+              >
+                Remove quote
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            className="rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-editorial text-cream/85 hover:bg-white/5"
+            onClick={() =>
+              setSettings({
+                ...settings,
+                catering: {
+                  ...settings.catering,
+                  quotes: [...(settings.catering.quotes ?? []), { quote: "", footer: "" }],
+                },
+              })
+            }
+          >
+            + Add quote
+          </button>
         </div>
       </section>
 

@@ -103,6 +103,22 @@ export function CateringSection() {
                 Open request form
               </button>
             </div>
+            {(c.quotes ?? []).length > 0 ? (
+              <blockquote className="mt-6 border-l-2 border-gold/55 pl-5">
+                {(c.quotes ?? []).map((q, i) => (
+                  <div key={i} className={i > 0 ? "mt-4" : ""}>
+                    <p className="text-sm italic leading-relaxed text-cream/85">
+                      &ldquo;{q.quote}&rdquo;
+                    </p>
+                    {q.footer ? (
+                      <footer className="mt-2 text-xs font-medium tracking-editorial text-cream/65">
+                        — {q.footer}
+                      </footer>
+                    ) : null}
+                  </div>
+                ))}
+              </blockquote>
+            ) : null}
           </motion.div>
 
           <form

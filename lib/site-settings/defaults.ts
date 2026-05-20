@@ -25,10 +25,17 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsResolved = {
   story: {
     sectionKicker: "Our story",
     sectionTitle: "Mexican flavor, rolling through Kansas City.",
-    quote1: "You will experience bold Tex-Mex flavor without leaving Kansas City.",
-    quote2:
-      "We had the opportunity to have Angie's Food Truck present for one of our events. Over 100 guests raved about the food…",
-    quoteFooter: "Short public review snippets — confirm exact wording with owner.",
+    body: "",
+    quotes: [
+      {
+        quote: "You will experience bold Tex-Mex flavor without leaving Kansas City.",
+        footer: "",
+      },
+      {
+        quote: "We had the opportunity to have Angie's Food Truck present for one of our events. Over 100 guests raved about the food…",
+        footer: "Short public review snippets — confirm exact wording with owner.",
+      },
+    ],
     slides: DEFAULT_STORY_SLIDES.map((s) => ({ ...s })),
   },
   catering: {
@@ -37,6 +44,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettingsResolved = {
     subtitle:
       "Festivals, office lunches, birthdays, and private parties — Angie's rolls up with a bright truck, Mexican favorites, aguas frescas, and a crew that keeps the line moving.",
     body: "",
+    quotes: [],
   },
   social: {
     kicker: "Social",

@@ -2,6 +2,7 @@ import { DEFAULT_SITE_SETTINGS } from "@/lib/site-settings/defaults";
 import type {
   HeroCtaLabels,
   HeroSlideResolved,
+  QuoteBlock,
   SectionCopyBlock,
   SiteSettingsResolved,
   SocialSettings,
@@ -100,6 +101,39 @@ function dedupeStorySlides(slides: StorySlideResolved[]): StorySlideResolved[] {
   });
 }
 
+function parseQuotes(v: unknown): QuoteBlock[] | null {
+  if (!Array.isArray(v) || v.length === 0) return null;
+  const out: QuoteBlock[] = [];
+  for (const item of v) {
+    if (!isRecord(item)) continue;
+    const quote = item.quote;
+    const footer = item.footer;
+    if (typeof quote !== "string") continue;
+    out.push({
+      quote: quote.trim(),
+      footer: typeof footer === "string" ? footer.trim() : "",
+    });
+  }
+  return out.length > 0 ? out : null;
+}
+
+function migrateOldQuotes(storyIn: Record<string, unknown>): QuoteBlock[] {
+  const quotes: QuoteBlock[] = [];
+  const q1 = storyIn.quote1;
+  const q2 = storyIn.quote2;
+  const footer = storyIn.quoteFooter;
+  if (typeof q1 === "string" && q1.trim()) {
+    quotes.push({ quote: q1.trim(), footer: "" });
+  }
+  if (typeof q2 === "string" && q2.trim()) {
+    quotes.push({
+      quote: q2.trim(),
+      footer: typeof footer === "string" ? footer.trim() : "",
+    });
+  }
+  return quotes;
+}
+
 /** Merge stored JSON with built-in defaults so new keys ship without DB migrations. */
 export function coalesceSiteSettings(stored: unknown): SiteSettingsResolved {
   const d = DEFAULT_SITE_SETTINGS;
@@ -145,15 +179,17 @@ export function coalesceSiteSettings(stored: unknown): SiteSettingsResolved {
         typeof storyIn?.sectionTitle === "string" && storyIn.sectionTitle.trim()
           ? storyIn.sectionTitle.trim()
           : d.story.sectionTitle,
-      quote1: typeof storyIn?.quote1 === "string" && storyIn.quote1.trim() ? storyIn.quote1.trim() : d.story.quote1,
-      quote2: typeof storyIn?.quote2 === "string" && storyIn.quote2.trim() ? storyIn.quote2.trim() : d.story.quote2,
-      quoteFooter:
-        typeof storyIn?.quoteFooter === "string" && storyIn.quoteFooter.trim()
-          ? storyIn.quoteFooter.trim()
-          : d.story.quoteFooter,
+      body: typeof storyIn?.body === "string" ? storyIn.body.trim() : d.story.body,
+      quotes: storyIn
+        ? (parseQuotes(storyIn.quotes) ?? migrateOldQuotes(storyIn))
+        : d.story.quotes,
       slides: storySlides ?? d.story.slides,
     },
-    catering: { ...d.catering, ...(cateringIn ?? {}) },
+    catering: {
+      ...d.catering,
+      ...(cateringIn ?? {}),
+      quotes: isRecord(stored.catering) ? (parseQuotes(stored.catering.quotes) ?? []) : [],
+    },
     social: { ...d.social, ...(socialIn ?? {}) },
   };
 }

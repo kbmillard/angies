@@ -62,17 +62,25 @@ export function StorySection() {
           transition={{ duration: 0.6 }}
         >
           <SectionHeading kicker={site.story.sectionKicker} title={site.story.sectionTitle} />
-          <blockquote className="mt-6 border-l-2 border-gold/55 pl-5">
-            <p className="text-sm italic leading-relaxed text-cream/85">
-              &ldquo;{site.story.quote1}&rdquo;
-            </p>
-            <p className="mt-3 text-sm italic leading-relaxed text-cream/85">
-              &ldquo;{site.story.quote2}&rdquo;
-            </p>
-            <footer className="mt-4 text-xs font-medium tracking-editorial text-cream/65">
-              {site.story.quoteFooter}
-            </footer>
-          </blockquote>
+          {site.story.body ? (
+            <p className="mt-4 text-sm leading-relaxed text-cream/80">{site.story.body}</p>
+          ) : null}
+          {(site.story.quotes ?? []).length > 0 ? (
+            <blockquote className="mt-6 border-l-2 border-gold/55 pl-5">
+              {(site.story.quotes ?? []).map((q, i) => (
+                <div key={i} className={i > 0 ? "mt-4" : ""}>
+                  <p className="text-sm italic leading-relaxed text-cream/85">
+                    &ldquo;{q.quote}&rdquo;
+                  </p>
+                  {q.footer ? (
+                    <footer className="mt-2 text-xs font-medium tracking-editorial text-cream/65">
+                      — {q.footer}
+                    </footer>
+                  ) : null}
+                </div>
+              ))}
+            </blockquote>
+          ) : null}
         </motion.div>
 
         <motion.div
