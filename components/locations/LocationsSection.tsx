@@ -7,9 +7,7 @@ import { glassCtaAccent, glassCtaBase } from "@/components/ui/glass-cta";
 import { cn } from "@/lib/utils/cn";
 import { useLocationsCatalog } from "@/context/LocationsCatalogContext";
 import { useScheduleCatalog } from "@/context/ScheduleCatalogContext";
-import { useSiteSettings } from "@/context/SiteSettingsContext";
 import type { LocationItem } from "@/lib/locations/schema";
-import { LocationPublicStatus } from "@/components/locations/LocationPublicStatus";
 import { getCurrentScheduleStatus } from "@/lib/schedule/current-status";
 import {
   formatAddressLine,
@@ -114,7 +112,6 @@ function MapButton({ label, href, accent }: { label: string; href: string; accen
 export function LocationsSection() {
   const { loading, error, data } = useLocationsCatalog();
   const { data: scheduleData } = useScheduleCatalog();
-  const site = useSiteSettings();
 
   const trucks = data?.foodTruckLocations ?? [];
   const primaryTruck = trucks[0];
@@ -166,8 +163,8 @@ export function LocationsSection() {
       <div className="mx-auto max-w-[1200px] px-5 sm:px-8">
         <div id="locations-start" tabIndex={-1} className="outline-none focus:outline-none">
           <SectionHeading
-            title={site.location?.title ?? "Find us on the curb — pin updates from the road."}
-            subtitle={site.location?.subtitle ?? "The truck moves daily. Address, hours, and notes update here when they are published."}
+            title="Find us on the curb — pin updates from the road."
+            subtitle="The truck moves daily. Address, hours, and notes update here when they are published."
           />
         </div>
 
@@ -211,14 +208,6 @@ export function LocationsSection() {
                 <h3 className="font-display text-3xl text-cream sm:text-4xl">
                   {displayLocation.name}
                 </h3>
-                {primaryTruck && (
-                  <LocationPublicStatus
-                    location={primaryTruck}
-                    variant="card"
-                    showNote={false}
-                    className="[&_p]:mt-0"
-                  />
-                )}
               </div>
               <div className="flex items-start gap-2 text-sm text-cream/90 sm:text-base lg:justify-end lg:pt-7 lg:text-right">
                 <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-gold" aria-hidden />

@@ -304,45 +304,6 @@ function DaySection({ dayName, dayIndex, entries, onSave, onDelete }: DaySection
   );
 }
 
-type EntryCardProps = {
-  entry: ScheduleEntry;
-  onEdit: () => void;
-};
-
-function EntryCard({ entry, onEdit }: EntryCardProps) {
-  const formatTime = (time: string) => {
-    if (!time) return "";
-    const [h, m] = time.split(":");
-    const hour = parseInt(h, 10);
-    const period = hour >= 12 ? "PM" : "AM";
-    const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
-    return `${hour12}:${m} ${period}`;
-  };
-
-  return (
-    <button
-      type="button"
-      onClick={onEdit}
-      className="w-full rounded-lg border border-white/10 bg-black/20 px-4 py-3 text-left hover:border-gold/30 hover:bg-black/30 transition-colors"
-    >
-      <div className="flex items-start justify-between">
-        <div className="space-y-1">
-          <div className="font-medium text-cream">{entry.locationName}</div>
-          {entry.address && (
-            <div className="text-sm text-cream/60">{entry.address}</div>
-          )}
-          <div className="text-sm text-cream/80">
-            {formatTime(entry.startTime)} - {formatTime(entry.endTime)}
-          </div>
-        </div>
-        {!entry.active && (
-          <span className="text-xs text-salsa">Inactive</span>
-        )}
-      </div>
-    </button>
-  );
-}
-
 type TimeSlotCardProps = {
   entry: ScheduleEntry;
   onEdit: () => void;

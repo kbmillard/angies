@@ -1,9 +1,10 @@
 "use client";
 
-import { CalendarRange, MapPin, Star } from "lucide-react";
+import { CalendarRange, MapPin, Star, Clock } from "lucide-react";
 import { useScheduleCatalog } from "@/context/ScheduleCatalogContext";
 import type { ScheduleItem } from "@/lib/schedule/schema";
 import { SOCIAL_LINKS } from "@/lib/data/social";
+import { getCurrentScheduleStatus } from "@/lib/schedule/current-status";
 import {
   formatScheduleWhen,
   scheduleAppleHref,
@@ -15,10 +16,12 @@ function ScheduleCard({
   it,
   compact,
   highlight,
+  showNextOpening,
 }: {
   it: ScheduleItem;
   compact: boolean;
   highlight: boolean;
+  showNextOpening?: boolean;
 }) {
   return (
     <article
@@ -31,6 +34,12 @@ function ScheduleCard({
       }`}
     >
       <div className="flex flex-wrap items-center gap-2">
+        {showNextOpening ? (
+          <span className="inline-flex items-center gap-1 rounded-full border border-accent-green/40 bg-accent-green/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-editorial text-accent-green">
+            <Clock className="h-3 w-3" aria-hidden />
+            Next opening
+          </span>
+        ) : null}
         {it.featured ? (
           <span className="inline-flex items-center gap-1 rounded-full border border-gold/40 bg-gold/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-editorial text-gold">
             <Star className="h-3 w-3" aria-hidden />
@@ -103,8 +112,11 @@ type Props = {
 export function ScheduleListBlock({ variant = "page" }: Props) {
   const { loading, error, data } = useScheduleCatalog();
   const items = data?.items ?? [];
-  const nextId = items[0]?.id;
   const compact = variant === "embedded";
+  
+  // Determine if truck is currently closed to show "Next opening" badge
+  const scheduleStatus = getCurrentScheduleStatus(items);
+  const showNextOpeningOnFirst = !scheduleStatus.isOpen && items.length > 0;
 
   return (
     <>
@@ -163,12 +175,13 @@ export function ScheduleListBlock({ variant = "page" }: Props) {
             compact ? "mt-6 grid-cols-1" : "mt-12 sm:grid-cols-2"
           }`}
         >
-          {items.map((it) => (
+          {items.map((it, index) => (
             <li key={it.id}>
               <ScheduleCard
                 it={it}
                 compact={compact}
                 highlight={!!it.featured}
+                showNextOpening={showNextOpeningOnFirst && index === 0}
               />
             </li>
           ))}

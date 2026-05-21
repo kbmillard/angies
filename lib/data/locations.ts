@@ -1,13 +1,9 @@
 import { SOCIAL_LINKS } from "@/lib/data/social";
 
-/** Public footer hours (fixed marketing copy). */
+/** Public footer hours - dynamic from schedule. */
 export const PUBLIC_HOURS_LINES = [
-  "Monday & Tuesday",
-  "10:00 AM to 2:00 PM",
-  "Wednesday – Friday",
-  "10:00 AM to 8:00 PM",
-  "Saturday",
-  "10:00 AM to 4:00 PM",
+  "Hours vary by location and day",
+  "Check schedule above for current times",
 ] as const;
 
 /** Footer / location card hours rows (mockup layout). */
