@@ -359,6 +359,8 @@ function EntryForm({ initialEntry, dayIndex, onSave, onCancel, onDelete, isTimeS
   const [timeResult, setTimeResult] = useState<ReturnType<typeof parseTimeRange> | null>(null);
   const [geocoding, setGeocoding] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [repeatWeekly, setRepeatWeekly] = useState(false);
+  const [numWeeks, setNumWeeks] = useState(4);
 
   // Initialize time input if entry has times
   useEffect(() => {
@@ -441,7 +443,39 @@ function EntryForm({ initialEntry, dayIndex, onSave, onCancel, onDelete, isTimeS
     }
 
     setBusy(true);
-    await onSave({ ...entry, dayOfWeek: dayIndex });
+    
+    if (repeatWeekly && numWeeks > 0) {
+      // Create multiple date-specific entries for consecutive weeks
+      const today = new Date();
+      const currentDayOfWeek = today.getDay();
+      
+      // Calculate days until the target day
+      let daysUntilTarget = dayIndex - currentDayOfWeek;
+      if (daysUntilTarget < 0) daysUntilTarget += 7;
+      
+      // Find the next occurrence of this day
+      const firstDate = new Date(today);
+      firstDate.setDate(today.getDate() + daysUntilTarget);
+      
+      // Create entries for each week
+      for (let week = 0; week < numWeeks; week++) {
+        const entryDate = new Date(firstDate);
+        entryDate.setDate(firstDate.getDate() + (week * 7));
+        
+        const dateStr = entryDate.toISOString().split('T')[0]; // YYYY-MM-DD
+        
+        await onSave({ 
+          ...entry, 
+          dayOfWeek: dayIndex,
+          date: dateStr,
+          id: '' // Force create new entry
+        });
+      }
+    } else {
+      // Single recurring entry (no specific date)
+      await onSave({ ...entry, dayOfWeek: dayIndex });
+    }
+    
     setBusy(false);
   };
 
@@ -508,7 +542,7 @@ function EntryForm({ initialEntry, dayIndex, onSave, onCancel, onDelete, isTimeS
         )}
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 flex-wrap">
         <label className="flex items-center gap-2 text-sm text-cream">
           <input
             type="checkbox"
@@ -527,6 +561,29 @@ function EntryForm({ initialEntry, dayIndex, onSave, onCancel, onDelete, isTimeS
           />
           Featured
         </label>
+        <label className="flex items-center gap-2 text-sm text-cream">
+          <input
+            type="checkbox"
+            checked={repeatWeekly}
+            onChange={(e) => setRepeatWeekly(e.target.checked)}
+            className="rounded"
+          />
+          Repeat weekly
+        </label>
+        {repeatWeekly && (
+          <div className="flex items-center gap-2">
+            <label className="text-xs text-cream/70">for</label>
+            <input
+              type="number"
+              min="1"
+              max="52"
+              value={numWeeks}
+              onChange={(e) => setNumWeeks(parseInt(e.target.value, 10) || 1)}
+              className="w-16 rounded border border-white/15 bg-black/40 px-2 py-1 text-sm text-cream"
+            />
+            <label className="text-xs text-cream/70">weeks</label>
+          </div>
+        )}
       </div>
 
       <div className="flex gap-2">
