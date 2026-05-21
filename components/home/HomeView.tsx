@@ -8,6 +8,7 @@ import { Hero } from "@/components/hero/Hero";
 import { InteractiveMenu } from "@/components/menu/InteractiveMenu";
 import { LocationsSection } from "@/components/locations/LocationsSection";
 import { EditorialNav } from "@/components/nav/EditorialNav";
+import { CartTotalFab } from "@/components/order/CartTotalFab";
 import { OrderDrawer } from "@/components/order/OrderDrawer";
 import { FixedBrandBackdrop } from "@/components/prologue/FixedBrandBackdrop";
 import { Prologue } from "@/components/prologue/Prologue";
@@ -33,6 +34,7 @@ export function HomeView() {
         <FinalConversion />
         <SiteFooter />
       </main>
+      <CartTotalFab />
       <OrderDrawer />
       <SquarePaymentModal open={paymentModalOpen} onOpenChange={setPaymentModalOpen} />
     </>

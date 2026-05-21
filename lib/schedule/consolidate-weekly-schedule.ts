@@ -14,6 +14,7 @@ export type WeeklyLocationGroup = {
   address: string;
   days: WeekdayRow[];
   sampleEntry: ScheduleItem;
+  featured: boolean;
 };
 
 export const WEEKDAY_LABELS: Record<number, string> = {
@@ -114,6 +115,18 @@ export function consolidateWeeklySchedule(items: ScheduleItem[]): WeeklyLocation
       address: formatScheduleAddress(sample),
       days,
       sampleEntry: sample,
+      featured: groupEntries.some((e) => e.featured),
     };
   });
+}
+
+export function splitWeeklySchedule(items: ScheduleItem[]): {
+  regular: WeeklyLocationGroup[];
+  featured: WeeklyLocationGroup[];
+} {
+  const groups = consolidateWeeklySchedule(items);
+  return {
+    regular: groups.filter((g) => !g.featured),
+    featured: groups.filter((g) => g.featured),
+  };
 }

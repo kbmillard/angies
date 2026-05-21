@@ -3,7 +3,7 @@
 import { CalendarRange } from "lucide-react";
 import { useScheduleCatalog } from "@/context/ScheduleCatalogContext";
 import { WeeklySchedulePanel } from "@/components/schedule/WeeklySchedulePanel";
-import { consolidateWeeklySchedule } from "@/lib/schedule/consolidate-weekly-schedule";
+import { splitWeeklySchedule } from "@/lib/schedule/consolidate-weekly-schedule";
 
 type Props = {
   /** Full-page vs embedded — both use the consolidated weekly panel now */
@@ -13,7 +13,8 @@ type Props = {
 export function ScheduleListBlock({ variant = "page" }: Props) {
   const { loading, error, data } = useScheduleCatalog();
   const items = data?.items ?? [];
-  const groups = consolidateWeeklySchedule(items);
+  const { regular, featured } = splitWeeklySchedule(items);
+  const hasSchedule = regular.length > 0 || featured.length > 0;
   const compact = variant === "embedded";
 
   if (error) {
@@ -34,7 +35,7 @@ export function ScheduleListBlock({ variant = "page" }: Props) {
     );
   }
 
-  if (groups.length === 0) {
+  if (!hasSchedule) {
     return (
       <div
         className={`rounded-3xl border border-white/10 bg-black/30 p-6 text-center ${

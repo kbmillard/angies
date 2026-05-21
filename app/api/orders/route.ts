@@ -1,5 +1,13 @@
 import { NextResponse } from "next/server";
-import type { CartLine, CustomerInfo, FulfillmentType, PickupLocationId } from "@/lib/types/order";
+import type { CartLine, CustomerInfo, FulfillmentType, PickupLocationId, OrderPayload } from "@/lib/types/order";
+import { ensureOrderTables } from "@/lib/orders/ensure-tables";
+import { upsertCustomer, insertOrder } from "@/lib/orders/db";
+import { createSquarePayment } from "@/lib/square/create-payment";
+import { sendTelegramOrderNotification } from "@/lib/notifications/telegram";
+import {
+  sendCustomerOrderEmail,
+  sendMerchantOrderEmail,
+} from "@/lib/notifications/resend";
 
 type PaymentMode = "request" | "square";
 
@@ -123,20 +131,101 @@ export async function POST(req: Request) {
     if (!nums) {
       return NextResponse.json({ ok: false, error: "Invalid totals" }, { status: 400 });
     }
-
-    // TODO: Call Square Payments API with the token to actually charge the card.
-    // import { Client } from 'square';
-    // const squareClient = new Client({ accessToken: process.env.SQUARE_ACCESS_TOKEN, environment: 'sandbox' });
-    // await squareClient.paymentsApi.createPayment({
-    //   sourceId: token,
-    //   idempotencyKey: crypto.randomUUID(),
-    //   amountMoney: { amount: BigInt(body.totalCents), currency: 'USD' },
-    //   locationId: process.env.SQUARE_LOCATION_ID,
-    // });
   }
 
+  // Ensure database tables exist
+  await ensureOrderTables();
+
+  // Build order payload
+  const orderPayload: OrderPayload = {
+    paymentMode,
+    fulfillment: body.fulfillment!,
+    pickupLocation: body.pickupLocation,
+    items: body.items!,
+    customer: body.customer!,
+    requestedTime: body.requestedTime!,
+    orderNotes: body.orderNotes,
+    subtotalCents: body.subtotalCents ?? 0,
+    taxCents: body.taxCents ?? 0,
+    tipCents: body.tipCents ?? 0,
+    deliveryFeeCents: body.deliveryFeeCents ?? 0,
+    totalCents: body.totalCents ?? 0,
+    squareToken: body.squareToken,
+  };
+
+  // 1. Upsert customer
+  const customer = await upsertCustomer(
+    orderPayload.customer,
+    orderPayload.totalCents ?? 0,
+  );
+  if (!customer) {
+    return NextResponse.json(
+      { ok: false, error: "Failed to save customer data" },
+      { status: 500 },
+    );
+  }
+
+  // 2. Charge Square if payment mode is square
+  let squarePaymentId: string | undefined;
+  let squareReceiptUrl: string | undefined;
+
+  if (paymentMode === "square") {
+    const paymentResult = await createSquarePayment(
+      body.squareToken!,
+      orderPayload.totalCents ?? 0,
+      orderPayload.customer.email,
+    );
+
+    if (!paymentResult.success) {
+      return NextResponse.json(
+        { ok: false, error: `Payment failed: ${paymentResult.error}` },
+        { status: 400 },
+      );
+    }
+
+    squarePaymentId = paymentResult.paymentId;
+    squareReceiptUrl = paymentResult.receiptUrl;
+  }
+
+  // 3. Generate order ID
+  const orderId =
+    paymentMode === "request"
+      ? `REQ-${Date.now()}`
+      : `ANG-${Date.now().toString(36).toUpperCase()}`;
+
+  // 4. Insert order into database
+  const orderInserted = await insertOrder(
+    orderId,
+    customer.customer_id,
+    orderPayload,
+    squarePaymentId,
+    squareReceiptUrl,
+  );
+
+  if (!orderInserted) {
+    return NextResponse.json(
+      { ok: false, error: "Failed to save order" },
+      { status: 500 },
+    );
+  }
+
+  // 5. Send Telegram notification to Angie (fire and forget)
+  sendTelegramOrderNotification(orderId, orderPayload).catch((err) => {
+    console.error("Failed to send Telegram notification:", err);
+  });
+
+  // 5b. Merchant email backup (same inbox as catering by default)
+  sendMerchantOrderEmail(orderId, orderPayload).catch((err) => {
+    console.error("Failed to send merchant order email:", err);
+  });
+
+  // 6. Send customer email confirmation (fire and forget)
+  sendCustomerOrderEmail(orderId, orderPayload).catch((err) => {
+    console.error("Failed to send customer email:", err);
+  });
+
+  // 7. Return success
   if (paymentMode === "request") {
-    const orderId = `REQ-${Date.now()}`;
     return NextResponse.json({
       ok: true,
       orderId,
@@ -145,16 +234,11 @@ export async function POST(req: Request) {
     });
   }
 
-  const orderId = `ANG-${Date.now().toString(36).toUpperCase()}`;
   return NextResponse.json({
     ok: true,
     orderId,
     paymentMode: "square",
-    message: "Payment recorded.",
-    echo: {
-      fulfillment: body.fulfillment,
-      lineCount: body.items.length,
-      totalCents: body.totalCents,
-    },
+    message: "Payment recorded. You'll receive a confirmation email shortly.",
+    receiptUrl: squareReceiptUrl,
   });
 }

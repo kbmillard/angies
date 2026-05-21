@@ -12,8 +12,15 @@ export type SquareCard = {
   destroy: () => void;
 };
 
+/** Square Web Payments SDK card style map (selectors → CSS properties). */
+export type SquareCardStyle = Record<string, Record<string, string>>;
+
+export type SquareCardOptions = {
+  style?: SquareCardStyle;
+};
+
 export type SquarePayments = {
-  card: () => Promise<SquareCard>;
+  card: (options?: SquareCardOptions) => Promise<SquareCard>;
 };
 
 export type SquarePaymentsFactory = (

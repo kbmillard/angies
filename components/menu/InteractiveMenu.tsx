@@ -136,9 +136,19 @@ export function InteractiveMenu() {
     return categoryHero;
   }, [categoryHero, hoverItemId, items, selectedItemId]);
 
+  const previewItem = useMemo(() => {
+    const previewId = hoverItemId ?? selectedItemId;
+    if (!previewId) return null;
+    return items.find((i) => i.id === previewId) ?? null;
+  }, [hoverItemId, selectedItemId, items]);
+
+  const displayTitle = previewItem?.name ?? active?.label ?? "";
+  const displayDescription =
+    previewItem?.description?.trim() || active?.subtitle || "";
+  const previewCopyKey = previewItem?.id ?? active?.id ?? "menu-panel";
+
   useEffect(() => {
-    const firstWithImage = items.find((i) => i.imageUrl?.trim());
-    setSelectedItemId(firstWithImage?.id ?? null);
+    setSelectedItemId(items[0]?.id ?? null);
     setHoverItemId(null);
   }, [activeId, items]);
 
@@ -286,10 +296,20 @@ export function InteractiveMenu() {
                     <div className="grid min-w-0 w-full max-w-full grid-cols-1 gap-8 lg:grid-cols-[1.1fr_0.9fr]">
                       <div className="min-w-0 w-full max-w-full">
                         <p className={navPrimaryLinkClass}>{active.number} / {active.panelKickerEn}</p>
-                        <h3 className="mt-2 font-display text-4xl text-cream">{active.label}</h3>
-                        <p className="mt-4 text-sm leading-relaxed text-cream/75 sm:text-base">
-                          {active.subtitle}
-                        </p>
+                        <AnimatePresence mode="wait" initial={false}>
+                          <motion.div
+                            key={previewCopyKey}
+                            initial={{ opacity: reduceMotion ? 1 : 0, y: reduceMotion ? 0 : 6 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: reduceMotion ? 1 : 0, y: reduceMotion ? 0 : -4 }}
+                            transition={{ duration: reduceMotion ? 0 : 0.22, ease: "easeOut" }}
+                          >
+                            <h3 className="mt-2 font-display text-4xl text-cream">{displayTitle}</h3>
+                            <p className="mt-4 text-sm leading-relaxed text-cream/75 sm:text-base">
+                              {displayDescription}
+                            </p>
+                          </motion.div>
+                        </AnimatePresence>
                         <div
                           className={cn(
                             "relative mt-8 aspect-[4/3] w-full max-w-full overflow-hidden rounded-2xl border border-white/10",
@@ -329,35 +349,28 @@ export function InteractiveMenu() {
 
                       <div className="min-w-0 w-full max-w-full space-y-4">
                         {items.map((item) => {
-                          const hasPreviewImage = Boolean(item.imageUrl?.trim());
+                          const isPreviewTarget =
+                            (hoverItemId ?? selectedItemId) === item.id;
                           return (
                           <article
                             key={item.id}
-                            role={hasPreviewImage ? "button" : undefined}
-                            tabIndex={hasPreviewImage ? 0 : undefined}
-                            aria-pressed={hasPreviewImage ? selectedItemId === item.id : undefined}
+                            role="button"
+                            tabIndex={0}
+                            aria-pressed={isPreviewTarget}
                             className={cn(
-                              "w-full min-w-0 max-w-full rounded-2xl border bg-charcoal/50 p-4 transition-colors sm:p-5",
-                              hasPreviewImage && "cursor-pointer",
-                              selectedItemId === item.id
+                              "w-full min-w-0 max-w-full cursor-pointer rounded-2xl border bg-charcoal/50 p-4 transition-colors sm:p-5",
+                              isPreviewTarget
                                 ? "border-cream/25 ring-1 ring-cream/15"
                                 : "border-white/10",
                             )}
-                            onClick={() => {
-                              if (hasPreviewImage) setSelectedItemId(item.id);
-                            }}
+                            onClick={() => setSelectedItemId(item.id)}
                             onKeyDown={(e) => {
-                              if (
-                                hasPreviewImage &&
-                                (e.key === "Enter" || e.key === " ")
-                              ) {
+                              if (e.key === "Enter" || e.key === " ") {
                                 e.preventDefault();
                                 setSelectedItemId(item.id);
                               }
                             }}
-                            onMouseEnter={() => {
-                              if (hasPreviewImage) setHoverItemId(item.id);
-                            }}
+                            onMouseEnter={() => setHoverItemId(item.id)}
                             onMouseLeave={() => setHoverItemId(null)}
                           >
                             <div className="flex w-full min-w-0 flex-col gap-3">

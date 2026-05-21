@@ -116,7 +116,12 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
   const [customTipCents, setCustomTipCents] = useState(0);
   const [squareToken, setSquareToken] = useState<string | null>(null);
   const [orderDrawerOpen, setOrderDrawerOpen] = useState(false);
-  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const [paymentModalOpen, setPaymentModalOpenState] = useState(false);
+
+  const setPaymentModalOpen = useCallback((open: boolean) => {
+    if (open) setOrderDrawerOpen(false);
+    setPaymentModalOpenState(open);
+  }, []);
   const [orderStatus, setOrderStatus] = useState<OrderStatus>("idle");
   const [orderError, setOrderError] = useState<string | null>(null);
   const [confirmationId, setConfirmationId] = useState<string | null>(null);
@@ -492,6 +497,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       orderNotes,
       orderStatus,
       paymentModalOpen,
+      setPaymentModalOpen,
       pickupLocation,
       removeLine,
       requestedTime,

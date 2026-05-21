@@ -8,7 +8,7 @@ const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", 
 
 type ScheduleEntry = ScheduleItem;
 
-function emptyEntry(dayOfWeek: number): ScheduleEntry {
+function emptyEntry(dayOfWeek: number, featured = false): ScheduleEntry {
   return {
     id: "",
     active: true,
@@ -27,6 +27,7 @@ function emptyEntry(dayOfWeek: number): ScheduleEntry {
     sortOrder: 0,
     timezone: "America/Chicago",
     updatedAt: new Date().toISOString(),
+    featured,
   };
 }
 
@@ -256,7 +257,7 @@ function DaySection({ dayName, dayIndex, entries, onSave, onDelete }: DaySection
             {addingTimeForLocation === locationKey && (
               <EntryForm
                 initialEntry={{
-                  ...emptyEntry(dayIndex),
+                  ...emptyEntry(dayIndex, firstEntry.featured ?? false),
                   title: firstEntry.title,
                   locationName: firstEntry.locationName,
                   address: firstEntry.address,
@@ -292,7 +293,7 @@ function DaySection({ dayName, dayIndex, entries, onSave, onDelete }: DaySection
       {isAddingLocation && (
         <div className="ml-4">
           <EntryForm
-            initialEntry={emptyEntry(dayIndex)}
+            initialEntry={emptyEntry(dayIndex, locationGroups.length > 0)}
             dayIndex={dayIndex}
             onSave={handleSave}
             onCancel={handleCancel}
@@ -340,6 +341,11 @@ function TimeSlotCard({ entry, onEdit }: TimeSlotCardProps) {
           <span className="text-sm font-medium text-cream">
             {formatTime(entry.startTime)} - {formatTime(entry.endTime)}
           </span>
+          {entry.featured ? (
+            <span className="rounded-full border border-gold/40 bg-gold/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-gold">
+              Featured
+            </span>
+          ) : null}
         </div>
         {!entry.active && (
           <span className="text-xs text-salsa">Inactive</span>
@@ -530,6 +536,17 @@ function EntryForm({ initialEntry, dayIndex, onSave, onCancel, onDelete, isTimeS
           />
           Active
         </label>
+        {!isTimeSlotEdit ? (
+          <label className="flex items-center gap-2 text-sm text-cream">
+            <input
+              type="checkbox"
+              checked={entry.featured ?? false}
+              onChange={(e) => setEntry({ ...entry, featured: e.target.checked })}
+              className="rounded"
+            />
+            Featured
+          </label>
+        ) : null}
       </div>
 
       <div className="flex gap-2">
