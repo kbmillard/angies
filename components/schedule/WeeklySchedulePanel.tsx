@@ -48,15 +48,10 @@ function LocationGroupCard({
         ) : null}
       </div>
 
-      {(group.addressLine || group.cityLine) && (
+      {(group.address) && (
         <div className="flex items-start gap-2 text-sm text-cream/90 sm:text-base">
           <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-gold" aria-hidden />
-          <div>
-            {group.addressLine ? <p className="leading-snug">{group.addressLine}</p> : null}
-            {group.cityLine && group.cityLine !== group.addressLine ? (
-              <p className="leading-snug text-cream/75">{group.cityLine}</p>
-            ) : null}
-          </div>
+          <p className="leading-snug">{group.address}</p>
         </div>
       )}
 
@@ -64,13 +59,13 @@ function LocationGroupCard({
         {group.days.map((day) => (
           <li
             key={day.dayOfWeek}
-            className="flex items-baseline justify-between gap-4 py-2 text-sm"
+            className="grid grid-cols-[2.5rem_1fr] gap-x-3 py-1.5 text-sm"
           >
-            <span className="w-8 shrink-0 font-mono text-xs font-medium uppercase tracking-wide text-gold/90">
+            <span className="font-mono text-xs font-medium uppercase tracking-wide text-gold/90">
               {day.label}
             </span>
-            <span className="font-mono text-xs text-cream/65 sm:text-sm">
-              {day.timeRange ?? "Closed"}
+            <span className="font-mono text-xs text-cream/80 sm:text-sm">
+              {day.timeRange}
             </span>
           </li>
         ))}
@@ -163,7 +158,7 @@ export function WeeklySchedulePanel() {
     <div className="space-y-8">
       {groups.map((group, index) => (
         <LocationGroupCard
-          key={`${group.header}-${group.addressLine}-${index}`}
+          key={`${group.header}-${group.address}-${index}`}
           group={group}
           showNextStop={!!nextStop && index === 0}
           nextStopLabel={nextStop?.dateLabel ?? nextStop?.dayName ?? ""}

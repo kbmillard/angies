@@ -4,20 +4,18 @@ import { formatTimeRange } from "./schedule-ui-helpers";
 export type WeekdayRow = {
   dayOfWeek: number;
   label: string;
-  timeRange: string | null;
-  entry: ScheduleItem | null;
+  timeRange: string;
+  entry: ScheduleItem;
 };
 
 export type WeeklyLocationGroup = {
   header: string;
   description: string;
-  addressLine: string;
-  cityLine: string;
+  address: string;
   days: WeekdayRow[];
   sampleEntry: ScheduleItem;
 };
 
-/** Mon–Fri rows; Sat/Sun appended when schedule has entries. */
 export const WEEKDAY_LABELS: Record<number, string> = {
   0: "Su",
   1: "M",
@@ -27,8 +25,6 @@ export const WEEKDAY_LABELS: Record<number, string> = {
   5: "F",
   6: "Sa",
 };
-
-const BASE_DISPLAY_DAYS = [1, 2, 3, 4, 5] as const;
 
 export function isRecurringWeeklyEntry(it: ScheduleItem): boolean {
   return (
@@ -43,21 +39,39 @@ function locationKey(it: ScheduleItem): string {
   return `${(it.title ?? "").trim()}|${it.locationName.trim()}|${it.address.trim()}`;
 }
 
-function cityLine(it: ScheduleItem): string {
-  return [it.city, it.state, it.zip].filter(Boolean).join(" ").trim();
+function sortDayOfWeek(a: number, b: number): number {
+  const order = (d: number) => (d === 0 ? 7 : d);
+  return order(a) - order(b);
 }
 
-function displayDaysForEntries(entries: ScheduleItem[]): number[] {
-  const days = new Set<number>(BASE_DISPLAY_DAYS);
+/** Only days that have at least one entry in this location group. */
+function daysWithEntries(entries: ScheduleItem[]): number[] {
+  const days = new Set<number>();
   for (const e of entries) {
-    if (e.dayOfWeek != null && (e.dayOfWeek === 0 || e.dayOfWeek === 6)) {
-      days.add(e.dayOfWeek);
-    }
+    if (e.dayOfWeek != null) days.add(e.dayOfWeek);
   }
-  return Array.from(days).sort((a, b) => {
-    const order = (d: number) => (d === 0 ? 7 : d);
-    return order(a) - order(b);
-  });
+  return Array.from(days).sort(sortDayOfWeek);
+}
+
+export function formatScheduleAddress(it: ScheduleItem): string {
+  const street = it.address?.trim() ?? "";
+  const cityPart = [it.city, it.state, it.zip].filter(Boolean).join(" ").trim();
+
+  if (!street) return cityPart;
+  if (!cityPart) return street;
+
+  const streetLower = street.toLowerCase();
+  const cityLower = it.city?.trim().toLowerCase() ?? "";
+  const zip = it.zip?.trim() ?? "";
+
+  if (
+    (cityLower && streetLower.includes(cityLower)) ||
+    (zip && street.includes(zip))
+  ) {
+    return street;
+  }
+
+  return `${street}, ${cityPart}`;
 }
 
 export function consolidateWeeklySchedule(items: ScheduleItem[]): WeeklyLocationGroup[] {
@@ -74,21 +88,12 @@ export function consolidateWeeklySchedule(items: ScheduleItem[]): WeeklyLocation
     const sample = groupEntries[0]!;
     const header = (sample.title ?? "").trim() || "Angie's Food Truck";
     const description = sample.locationName.trim();
-    const daysToShow = displayDaysForEntries(groupEntries);
+    const daysToShow = daysWithEntries(groupEntries);
 
     const days: WeekdayRow[] = daysToShow.map((dayOfWeek) => {
       const dayEntries = groupEntries
         .filter((e) => e.dayOfWeek === dayOfWeek)
         .sort((a, b) => a.startTime.localeCompare(b.startTime));
-
-      if (dayEntries.length === 0) {
-        return {
-          dayOfWeek,
-          label: WEEKDAY_LABELS[dayOfWeek] ?? "?",
-          timeRange: null,
-          entry: null,
-        };
-      }
 
       const timeRange = dayEntries
         .map((e) => formatTimeRange(e.startTime, e.endTime))
@@ -98,16 +103,15 @@ export function consolidateWeeklySchedule(items: ScheduleItem[]): WeeklyLocation
       return {
         dayOfWeek,
         label: WEEKDAY_LABELS[dayOfWeek] ?? "?",
-        timeRange: timeRange || null,
-        entry: dayEntries[0] ?? null,
+        timeRange: timeRange || "—",
+        entry: dayEntries[0]!,
       };
     });
 
     return {
       header,
       description,
-      addressLine: sample.address?.trim() ?? "",
-      cityLine: cityLine(sample),
+      address: formatScheduleAddress(sample),
       days,
       sampleEntry: sample,
     };
