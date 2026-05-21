@@ -3,7 +3,6 @@
 import { CalendarRange, MapPin, Star, Clock } from "lucide-react";
 import { useScheduleCatalog } from "@/context/ScheduleCatalogContext";
 import type { ScheduleItem } from "@/lib/schedule/schema";
-import { SOCIAL_LINKS } from "@/lib/data/social";
 import { getCurrentScheduleStatus } from "@/lib/schedule/current-status";
 import {
   formatScheduleWhen,
@@ -40,7 +39,7 @@ function ScheduleCard({
           <div className="flex items-center gap-2 flex-wrap">
             <span className="inline-flex items-center gap-1 rounded-full border border-accent-green/40 bg-accent-green/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-editorial text-accent-green">
               <Clock className="h-3 w-3" aria-hidden />
-              Next opening
+              Next Stop
             </span>
             <span className="text-xs text-cream/80">
               {formatDayOfWeek(it.date)} · {formatTimeRange(it.startTime, it.endTime)}
@@ -152,28 +151,10 @@ export function ScheduleListBlock({ variant = "page" }: Props) {
         >
           <CalendarRange className="mx-auto h-10 w-10 text-gold/80" aria-hidden />
           <p className="mt-4 font-display text-xl text-cream sm:text-2xl">
-            Schedule coming soon
+            No public stops posted yet
           </p>
           <p className="mx-auto mt-3 max-w-lg text-sm text-cream/75">
-            Follow{" "}
-            <a
-              href={SOCIAL_LINKS.facebook.href}
-              className="text-gold underline-offset-4 hover:underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Facebook
-            </a>{" "}
-            or{" "}
-            <a
-              href={SOCIAL_LINKS.instagram.href}
-              className="text-gold underline-offset-4 hover:underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {SOCIAL_LINKS.instagram.handle}
-            </a>{" "}
-            for daily truck updates until the live schedule is published.
+            Check back soon or call Angie&apos;s for catering and private events.
           </p>
         </div>
       ) : (

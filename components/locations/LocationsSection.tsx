@@ -189,37 +189,50 @@ export function LocationsSection() {
           <div className="mt-8 h-96 animate-pulse rounded-3xl bg-white/10" />
         ) : displayLocation ? (
           <article className="mt-8 overflow-hidden rounded-3xl border border-white/10 bg-charcoal/35 p-5 backdrop-blur-md sm:p-8 lg:p-10">
-            <div className="grid gap-5 border-b border-white/10 pb-6 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-x-12">
-              <div className="min-w-0 space-y-2 sm:space-y-3">
-                <div className="flex items-center gap-3">
-                  <p className="text-xs uppercase tracking-editorial text-gold/90">
-                    Truck status
+            <div className="grid gap-5 border-b border-white/10 pb-6 sm:gap-6">
+              <div className="min-w-0 space-y-3 sm:space-y-4">
+                <div>
+                  <div className="flex items-center gap-3">
+                    <p className="text-xs uppercase tracking-editorial text-gold/90">
+                      Truck status
+                    </p>
+                    {scheduleStatus.isOpen ? (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-accent-green/20 px-2.5 py-1 text-xs font-semibold uppercase tracking-editorial text-accent-green">
+                        <span className="h-1.5 w-1.5 rounded-full bg-accent-green" />
+                        Open Now
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 rounded-full bg-salsa/20 px-2.5 py-1 text-xs font-semibold uppercase tracking-editorial text-salsa">
+                        <span className="h-1.5 w-1.5 rounded-full bg-salsa" />
+                        Closed
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-2 text-sm text-cream/75">
+                    {scheduleStatus.isOpen
+                      ? "Angie's is serving now at the location below. Stop by or open directions."
+                      : "Angie's is not serving right now. See this week's schedule below for the next stop."}
                   </p>
-                  {scheduleStatus.isOpen ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-accent-green/20 px-2.5 py-1 text-xs font-semibold uppercase tracking-editorial text-accent-green">
-                      <span className="h-1.5 w-1.5 rounded-full bg-accent-green" />
-                      Open
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-salsa/20 px-2.5 py-1 text-xs font-semibold uppercase tracking-editorial text-salsa">
-                      <span className="h-1.5 w-1.5 rounded-full bg-salsa" />
-                      Closed
-                    </span>
-                  )}
                 </div>
-              </div>
-              <div className="flex items-start gap-2 text-sm text-cream/90 sm:text-base lg:justify-end lg:pt-7 lg:text-right">
-                <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-gold" aria-hidden />
-                <div className="min-w-0">
-                  {hasPublishedAddress(displayLocation) ? (
-                    addressLines(displayLocation).map((line) => (
-                      <p key={line} className="leading-snug">
-                        {line}
-                      </p>
-                    ))
-                  ) : (
-                    <p className="text-cream/75">TBD</p>
-                  )}
+                
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-editorial text-gold/90">
+                    Current Location
+                  </p>
+                  <div className="mt-2 flex items-start gap-2 text-sm text-cream/90 sm:text-base">
+                    <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-gold" aria-hidden />
+                    <div className="min-w-0">
+                      {hasPublishedAddress(displayLocation) ? (
+                        addressLines(displayLocation).map((line) => (
+                          <p key={line} className="leading-snug">
+                            {line}
+                          </p>
+                        ))
+                      ) : (
+                        <p className="text-cream/75">TBD</p>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -231,9 +244,9 @@ export function LocationsSection() {
                 className="min-w-0 scroll-mt-[calc(var(--nav-h)+16px)] outline-none focus:outline-none"
               >
                 <p className="text-xs font-semibold uppercase tracking-editorial text-gold/90">
-                  Upcoming schedule
+                  This Week&apos;s Schedule
                 </p>
-                <p className="mt-1 text-sm text-cream/65">Where we&apos;re rolling next.</p>
+                <p className="mt-1 text-sm text-cream/65">Fresh stops, times, and locations for this week.</p>
                 <div className="mt-3">
                   <ScheduleListBlock variant="embedded" />
                 </div>

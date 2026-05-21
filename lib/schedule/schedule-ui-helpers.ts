@@ -6,9 +6,11 @@ export function formatScheduleWhen(it: ScheduleItem): string {
   const a = it.startTime?.trim();
   const b = it.endTime?.trim();
   if (!d) return "—";
-  if (a && b) return `${d} · ${a} – ${b}`;
-  if (a) return `${d} · from ${a}`;
-  return d;
+  
+  const formattedDate = formatFullDate(d);
+  if (a && b) return `${formattedDate} · ${formatTimeRange(a, b)}`;
+  if (a) return `${formattedDate} · from ${a}`;
+  return formattedDate || d;
 }
 
 export function scheduleLineAddress(it: ScheduleItem): string {
@@ -56,4 +58,18 @@ export function formatTimeRange(startTime: string | undefined, endTime: string |
   };
   
   return `${formatTime(startTime)} - ${formatTime(endTime)}`;
+}
+
+export function formatFullDate(dateStr: string | undefined): string {
+  if (!dateStr) return "";
+  try {
+    const date = new Date(dateStr + "T00:00:00");
+    return new Intl.DateTimeFormat("en-US", { 
+      weekday: "long", 
+      month: "long", 
+      day: "numeric" 
+    }).format(date);
+  } catch {
+    return "";
+  }
 }
