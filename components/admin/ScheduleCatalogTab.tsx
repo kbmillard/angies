@@ -210,14 +210,6 @@ export function ScheduleCatalogTab() {
             />
             active
           </label>
-          <label className="flex items-center gap-2 text-xs">
-            <input
-              type="checkbox"
-              checked={draft.featured}
-              onChange={(e) => setDraft((d) => ({ ...d, featured: e.target.checked }))}
-            />
-            featured
-          </label>
           <div className="flex flex-wrap gap-2 pt-2">
             <button
               type="button"

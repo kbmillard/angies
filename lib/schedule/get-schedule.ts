@@ -15,7 +15,9 @@ function chicagoCalendarDate(d: Date): string {
 
 function sortKey(it: ScheduleItem): string {
   const t = (it.startTime || "00:00").trim().padStart(5, "0");
-  return `${it.date}T${t}`;
+  if (it.date?.trim()) return `${it.date}T${t}`;
+  const dow = it.dayOfWeek ?? 99;
+  return `week-${String(dow).padStart(2, "0")}T${t}`;
 }
 
 function isUpcomingOrToday(it: ScheduleItem, today: string): boolean {

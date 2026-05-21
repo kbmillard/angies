@@ -34,8 +34,12 @@ export function getCurrentScheduleStatus(scheduleEntries: ScheduleItem[]): Curre
   const todayEntries = scheduleEntries.filter((entry) => {
     if (!entry.active) return false;
     
-    // Check if entry matches today by dayOfWeek (recurring schedule)
-    if (entry.dayOfWeek !== undefined && entry.dayOfWeek !== null) {
+    // Recurring weekly (dayOfWeek only — no specific date)
+    if (
+      entry.dayOfWeek !== undefined &&
+      entry.dayOfWeek !== null &&
+      !entry.date?.trim()
+    ) {
       return entry.dayOfWeek === chicagoDayOfWeek;
     }
     
