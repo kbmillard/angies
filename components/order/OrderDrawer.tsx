@@ -442,7 +442,7 @@ export function OrderDrawer() {
               {/* TODO: Wire SMS, email, Toast, Square, or POS when replacing mock order routes. */}
             </div>
 
-            <footer className="shrink-0 space-y-3 border-t border-sky-400/25 p-4 sm:p-5">
+            <footer className="shrink-0 space-y-3 border-t border-sky-400/30 bg-blue-900/30 p-4 sm:p-5">
               {/* TODO: Replace null prices with confirmed restaurant pricing before enabling real payment checkout. */}
               {cartHasUnpricedItems ? (
                 <button
