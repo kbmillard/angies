@@ -33,3 +33,27 @@ export function scheduleAppleHref(it: ScheduleItem): string {
   );
   return `https://maps.apple.com/?q=${qApple}`;
 }
+
+export function formatDayOfWeek(dateStr: string | undefined): string {
+  if (!dateStr) return "";
+  try {
+    const date = new Date(dateStr + "T00:00:00");
+    return new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(date);
+  } catch {
+    return "";
+  }
+}
+
+export function formatTimeRange(startTime: string | undefined, endTime: string | undefined): string {
+  if (!startTime || !endTime) return "";
+  
+  const formatTime = (time: string): string => {
+    const [h, m] = time.split(":");
+    const hour = parseInt(h, 10);
+    const period = hour >= 12 ? "PM" : "AM";
+    const hour12 = hour === 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    return `${hour12}:${m} ${period}`;
+  };
+  
+  return `${formatTime(startTime)} - ${formatTime(endTime)}`;
+}

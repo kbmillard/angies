@@ -10,6 +10,8 @@ import {
   scheduleAppleHref,
   scheduleLineAddress,
   scheduleMapsHref,
+  formatDayOfWeek,
+  formatTimeRange,
 } from "@/lib/schedule/schedule-ui-helpers";
 
 function ScheduleCard({
@@ -35,15 +37,20 @@ function ScheduleCard({
     >
       <div className="flex flex-wrap items-center gap-2">
         {showNextOpening ? (
-          <span className="inline-flex items-center gap-1 rounded-full border border-accent-green/40 bg-accent-green/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-editorial text-accent-green">
-            <Clock className="h-3 w-3" aria-hidden />
-            Next opening
-          </span>
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="inline-flex items-center gap-1 rounded-full border border-accent-green/40 bg-accent-green/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-editorial text-accent-green">
+              <Clock className="h-3 w-3" aria-hidden />
+              Next opening
+            </span>
+            <span className="text-xs text-cream/80">
+              {formatDayOfWeek(it.date)} · {formatTimeRange(it.startTime, it.endTime)}
+            </span>
+          </div>
         ) : null}
         {it.featured ? (
           <span className="inline-flex items-center gap-1 rounded-full border border-gold/40 bg-gold/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-editorial text-gold">
             <Star className="h-3 w-3" aria-hidden />
-            Featured
+            Featured this week
           </span>
         ) : null}
         {it.status ? (

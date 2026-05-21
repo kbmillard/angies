@@ -22,28 +22,50 @@ export function ScheduleCatalogProvider({ children }: { children: React.ReactNod
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<ScheduleResponse | null>(null);
 
-  useEffect(() => {
-    let cancelled = false;
+  // Fetch schedule data
+  const fetchSchedule = React.useCallback(() => {
     fetch("/api/schedule")
       .then((r) => {
         if (!r.ok) throw new Error(`Schedule API ${r.status}`);
         return r.json() as Promise<ScheduleResponse>;
       })
       .then((json) => {
-        if (!cancelled) setData(json);
+        setData(json);
+        setError(null);
       })
       .catch((e) => {
-        if (!cancelled) {
-          setError(e instanceof Error ? e.message : "Schedule failed to load");
-        }
+        setError(e instanceof Error ? e.message : "Schedule failed to load");
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        setLoading(false);
       });
-    return () => {
-      cancelled = true;
-    };
   }, []);
+
+  // Initial fetch and polling
+  useEffect(() => {
+    fetchSchedule();
+
+    // Poll every 30 seconds
+    const intervalId = setInterval(fetchSchedule, 30000);
+
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [fetchSchedule]);
+
+  // Refetch when tab becomes visible
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchSchedule();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [fetchSchedule]);
 
   const value = useMemo(
     () => ({ loading, error, data }),
