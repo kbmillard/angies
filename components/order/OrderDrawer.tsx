@@ -28,16 +28,16 @@ function lineLineTotal(cents: number | null, qty: number) {
   return formatMoney(cents * qty);
 }
 
-/** Centered checkout pop-out — BLUE panel + sky accents */
+/** Centered checkout pop-out — navy panel + sky accents */
 const panel =
-  "border border-sky-400/40 bg-gradient-to-br from-blue-900/95 to-blue-950/95 shadow-2xl shadow-blue-950/60 ring-1 ring-sky-400/20";
+  "border border-sky-400/30 bg-navy shadow-2xl shadow-sky-950/40 ring-1 ring-sky-500/15";
 const field =
-  "rounded-xl border border-sky-400/40 bg-blue-950/60 px-3 py-2 text-sm text-cream placeholder:text-cream/40 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400/30";
-const sectionBox = "rounded-2xl border border-sky-400/30 bg-blue-950/50 backdrop-blur-sm";
-const pillActive = "border-sky-300 bg-sky-500 text-white shadow-sm shadow-sky-900/50";
-const pillIdle = "border-sky-400/30 text-cream/85 hover:border-sky-400/50 hover:bg-sky-500/15";
+  "rounded-xl border border-sky-400/35 bg-[#0a1628] px-3 py-2 text-sm text-cream placeholder:text-cream/40 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-400/25";
+const sectionBox = "rounded-2xl border border-sky-400/20 bg-[#0a1628]/80";
+const pillActive = "border-sky-300 bg-sky-500 text-white shadow-sm";
+const pillIdle = "border-sky-400/25 text-cream/85 hover:border-sky-400/45 hover:bg-sky-500/10";
 const btnPrimary =
-  "rounded-full bg-sky-500 py-3 text-sm font-semibold uppercase tracking-editorial text-white shadow-lg shadow-sky-900/50 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-40";
+  "rounded-full bg-sky-500 py-3 text-sm font-semibold uppercase tracking-editorial text-white shadow-lg shadow-sky-900/40 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-40";
 
 export function OrderDrawer() {
   const [mounted, setMounted] = useState(false);
@@ -110,7 +110,7 @@ export function OrderDrawer() {
             aria-modal="true"
             aria-label="Order and checkout"
           >
-            <header className="flex shrink-0 items-start justify-between gap-3 border-b border-sky-400/30 bg-blue-900/30 px-4 pb-3 pt-4 sm:px-5 sm:pb-4">
+            <header className="flex shrink-0 items-start justify-between gap-3 border-b border-sky-400/25 px-4 pb-3 pt-4 sm:px-5 sm:pb-4">
               <div className="flex min-w-0 items-center gap-3">
                 <BrandLogo width={48} height={48} />
                 <div className="min-w-0">
