@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { SiteSettingsResolved } from "@/lib/site-settings/types";
+import { DEFAULT_SITE_SETTINGS } from "@/lib/site-settings/defaults";
 import { ImageAttachField } from "@/components/admin/ImageAttachField";
 import {
   adminInputClass as inputClass,
@@ -228,7 +229,10 @@ export function SiteSettingsTab() {
               className={inputClass}
               value={settings.menu?.kicker ?? ""}
               onChange={(e) =>
-                setSettings({ ...settings, menu: { ...settings.menu!, kicker: e.target.value } })
+                setSettings({
+                  ...settings,
+                  menu: { ...DEFAULT_SITE_SETTINGS.menu, ...settings.menu, kicker: e.target.value },
+                })
               }
             />
           </label>
@@ -238,7 +242,10 @@ export function SiteSettingsTab() {
               className={inputClass}
               value={settings.menu?.title ?? ""}
               onChange={(e) =>
-                setSettings({ ...settings, menu: { ...settings.menu!, title: e.target.value } })
+                setSettings({
+                  ...settings,
+                  menu: { ...DEFAULT_SITE_SETTINGS.menu, ...settings.menu, title: e.target.value },
+                })
               }
             />
           </label>
@@ -248,7 +255,10 @@ export function SiteSettingsTab() {
               className={`${inputClass} min-h-[72px]`}
               value={settings.menu?.subtitle ?? ""}
               onChange={(e) =>
-                setSettings({ ...settings, menu: { ...settings.menu!, subtitle: e.target.value } })
+                setSettings({
+                  ...settings,
+                  menu: { ...DEFAULT_SITE_SETTINGS.menu, ...settings.menu, subtitle: e.target.value },
+                })
               }
             />
           </label>
@@ -264,7 +274,14 @@ export function SiteSettingsTab() {
               className={inputClass}
               value={settings.location?.title ?? ""}
               onChange={(e) =>
-                setSettings({ ...settings, location: { ...settings.location!, title: e.target.value } })
+                setSettings({
+                  ...settings,
+                  location: {
+                    ...DEFAULT_SITE_SETTINGS.location,
+                    ...settings.location,
+                    title: e.target.value,
+                  },
+                })
               }
             />
           </label>
@@ -274,7 +291,14 @@ export function SiteSettingsTab() {
               className={`${inputClass} min-h-[72px]`}
               value={settings.location?.subtitle ?? ""}
               onChange={(e) =>
-                setSettings({ ...settings, location: { ...settings.location!, subtitle: e.target.value } })
+                setSettings({
+                  ...settings,
+                  location: {
+                    ...DEFAULT_SITE_SETTINGS.location,
+                    ...settings.location,
+                    subtitle: e.target.value,
+                  },
+                })
               }
             />
           </label>

@@ -7,6 +7,7 @@ import { glassCtaAccent, glassCtaBase } from "@/components/ui/glass-cta";
 import { cn } from "@/lib/utils/cn";
 import { useLocationsCatalog } from "@/context/LocationsCatalogContext";
 import { useScheduleCatalog } from "@/context/ScheduleCatalogContext";
+import { useSiteSettings } from "@/context/SiteSettingsContext";
 import type { LocationItem } from "@/lib/locations/schema";
 import { getCurrentScheduleStatus } from "@/lib/schedule/current-status";
 import {
@@ -112,6 +113,7 @@ function MapButton({ label, href, accent }: { label: string; href: string; accen
 export function LocationsSection() {
   const { loading, error, data } = useLocationsCatalog();
   const { data: scheduleData } = useScheduleCatalog();
+  const site = useSiteSettings();
 
   const trucks = data?.foodTruckLocations ?? [];
   const primaryTruck = trucks[0];
@@ -163,8 +165,8 @@ export function LocationsSection() {
       <div className="mx-auto max-w-[1200px] px-5 sm:px-8">
         <div id="locations-start" tabIndex={-1} className="outline-none focus:outline-none">
           <SectionHeading
-            title="Find us on the curb — pin updates from the road."
-            subtitle="The truck moves daily. Address, hours, and notes update here when they are published."
+            title={site.location.title}
+            subtitle={site.location.subtitle}
           />
         </div>
 
@@ -191,7 +193,7 @@ export function LocationsSection() {
               <div className="min-w-0 space-y-2 sm:space-y-3">
                 <div className="flex items-center gap-3">
                   <p className="text-xs uppercase tracking-editorial text-gold/90">
-                    Current truck location
+                    Truck status
                   </p>
                   {scheduleStatus.isOpen ? (
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-accent-green/20 px-2.5 py-1 text-xs font-semibold uppercase tracking-editorial text-accent-green">
@@ -205,9 +207,6 @@ export function LocationsSection() {
                     </span>
                   )}
                 </div>
-                <h3 className="font-display text-3xl text-cream sm:text-4xl">
-                  {displayLocation.name}
-                </h3>
               </div>
               <div className="flex items-start gap-2 text-sm text-cream/90 sm:text-base lg:justify-end lg:pt-7 lg:text-right">
                 <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-gold" aria-hidden />
