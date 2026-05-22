@@ -31,34 +31,21 @@ export async function waitForSquareMountVisible(
 }
 
 /**
- * After attach, wait for iframe shell plus a Square input event (proves fields rendered).
- * Empty iframes from sandbox font/CSP bugs fail here instead of showing a dead mount.
+ * After attach, wait for Square's iframe to appear with card-field dimensions.
+ * Do not require focus/brand events — those only fire after user interaction and
+ * falsely fail when the iframe is fine (e.g. Square iframe-internal font CSP noise).
  */
 export async function waitForSquareCardReady(
-  card: SquareCard,
+  _card: SquareCard,
   container: HTMLElement,
-  timeoutMs = 5000,
+  timeoutMs = 6000,
 ): Promise<boolean> {
-  const visible = await waitForSquareMountVisible(
-    container,
-    Math.min(timeoutMs, 3000),
-  );
+  const visible = await waitForSquareMountVisible(container, timeoutMs);
   if (!visible) return false;
 
-  return new Promise((resolve) => {
-    let settled = false;
-    const finish = (ok: boolean) => {
-      if (settled) return;
-      settled = true;
-      resolve(ok);
-    };
-
-    const onSignal = () => finish(true);
-    card.addEventListener("focusClassAdded", onSignal);
-    card.addEventListener("cardBrandChanged", onSignal);
-
-    window.setTimeout(() => finish(false), timeoutMs);
-  });
+  // Brief paint buffer so the iframe is not torn down while Square still initializes.
+  await new Promise((resolve) => setTimeout(resolve, 250));
+  return waitForSquareMountVisible(container, 1500, 50);
 }
 
 export function squareMountFailureMessage(environment: SquareEnv): string {

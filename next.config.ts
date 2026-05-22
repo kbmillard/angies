@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { buildSquareContentSecurityPolicy } from "./lib/square/csp";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -27,19 +26,8 @@ const nextConfig: NextConfig = {
       pathname: "/**",
     })),
   },
-  async headers() {
-    return [
-      {
-        source: "/:path*",
-        headers: [
-          {
-            key: "Content-Security-Policy",
-            value: buildSquareContentSecurityPolicy(),
-          },
-        ],
-      },
-    ];
-  },
+  // Site-wide CSP removed: merged policy still blocked card mount for some users.
+  // lib/square/csp.ts remains if PCI/compliance needs headers later.
 };
 
 export default nextConfig;
