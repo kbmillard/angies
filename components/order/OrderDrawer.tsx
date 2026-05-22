@@ -168,58 +168,86 @@ export function OrderDrawer() {
 
   useScrollLock(orderDrawerOpen);
 
-  const cardMountId = `square-card-mount-${cardMountKey}`;
-
   // Initialize Square card fields when user taps Checkout with Square
   useLayoutEffect(() => {
-    if (!showCardFields) return;
+    if (!showCardFields || !mountRef.current) return;
+    
+    const mountElement = mountRef.current;
     let cancelled = false;
 
-    if (mountRef.current) {
-      mountRef.current.innerHTML = "";
-    }
+    // Clear any existing content
+    mountElement.innerHTML = "";
     setCardReady(false);
     setCardMessage(null);
 
-    (async () => {
-      try {
-        await loadSquareSdk();
-        if (cancelled) return;
+    // Wait for next frame to ensure DOM is fully painted
+    requestAnimationFrame(() => {
+      if (cancelled) return;
 
-        const payments = await createSquarePayments();
-        if (!payments || cancelled) {
-          setCardMessage(
-            "Square is not configured — add application ID and location ID to environment variables.",
-          );
-          return;
-        }
+      (async () => {
+        try {
+          // Verify mount element still exists and is in DOM
+          if (!mountElement || !document.body.contains(mountElement)) {
+            throw new Error("Mount element not found in DOM");
+          }
 
-        const card = await payments.card({ style: SQUARE_CARD_STYLE });
-        if (cancelled) {
-          card.destroy();
-          return;
-        }
+          await loadSquareSdk();
+          if (cancelled) return;
 
-        await card.attach(`#${cardMountId}`);
-        cardRef.current = card;
-        setCardReady(true);
-        setCardMessage(null);
-      } catch {
-        if (!cancelled) {
-          setCardMessage("Could not initialize Square card fields. Check your connection and keys.");
+          const payments = await createSquarePayments();
+          if (!payments || cancelled) {
+            setCardMessage(
+              "Square is not configured — add application ID and location ID to environment variables.",
+            );
+            return;
+          }
+
+          const card = await payments.card({ style: SQUARE_CARD_STYLE });
+          if (cancelled) {
+            card.destroy();
+            return;
+          }
+
+          // Attach using CSS selector - verify element has ID
+          const elementId = mountElement.id || "square-card-mount-fallback";
+          if (!mountElement.id) {
+            mountElement.id = elementId;
+          }
+
+          await card.attach(`#${elementId}`);
+          
+          if (cancelled) {
+            card.destroy();
+            return;
+          }
+
+          cardRef.current = card;
+          setCardReady(true);
+          setCardMessage(null);
+        } catch (err) {
+          if (!cancelled) {
+            console.error("Square card mount failed:", err);
+            setCardMessage(
+              err instanceof Error ? err.message : "Could not initialize Square card fields. Try refreshing the page."
+            );
+          }
         }
-      }
-    })();
+      })();
+    });
 
     return () => {
       cancelled = true;
       if (cardRef.current) {
-        cardRef.current.destroy();
+        try {
+          cardRef.current.destroy();
+        } catch {
+          // Ignore cleanup errors
+        }
         cardRef.current = null;
       }
       setCardReady(false);
     };
-  }, [showCardFields, cardMountKey, cardMountId]);
+  }, [showCardFields, cardMountKey]);
 
   // Handle Square payment submission
   const handleSquarePay = useCallback(async () => {
@@ -722,8 +750,9 @@ export function OrderDrawer() {
 
                   {/* Card mount */}
                   <div
-                    id={cardMountId}
+                    id="square-card-mount"
                     ref={mountRef}
+                    key={`mount-${cardMountKey}`}
                     className={cn(
                       "min-h-[72px] rounded-xl border border-white/15 bg-black/40 p-3",
                       !cardReady && "flex items-center justify-center text-sm text-cream/50",
