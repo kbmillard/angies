@@ -396,8 +396,15 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
         setConfirmationId(data.orderId ?? null);
         setSuccessMessage(data.message ?? "Payment recorded.");
         setOrderStatus("confirmed");
+        
+        // Clear cart and form data
         setCart([]);
         setSquareToken(null);
+        setCustomerState(initialCustomer);
+        setRequestedTime("");
+        setOrderNotes("");
+        setTipPreset("18");
+        setCustomTipCents(0);
       } catch (e) {
         setOrderStatus("error");
         setOrderError(e instanceof Error ? e.message : "Unknown error");
