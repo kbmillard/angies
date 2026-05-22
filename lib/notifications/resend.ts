@@ -23,8 +23,27 @@ function getMerchantOrderEmails(): string[] {
 function formatMerchantLineItem(line: CartLine): string {
   let text = `${line.quantity}x ${line.name}`;
   if (line.selectedMeat) text += ` (${line.selectedMeat})`;
-  if (line.notes) text += ` — ${line.notes}`;
-  return `<li style="margin-bottom: 6px;">${text}</li>`;
+  
+  // Add modifiers
+  if (line.modifiers && line.modifiers.length > 0) {
+    const mods = line.modifiers.map(m => m.label).join(', ');
+    text += `<br />&nbsp;&nbsp;+ ${mods}`;
+  }
+  
+  // Add selected options
+  if (line.selectedOptions) {
+    for (const [, value] of Object.entries(line.selectedOptions)) {
+      const vals = Array.isArray(value) ? value.join(', ') : value;
+      text += `<br />&nbsp;&nbsp;• ${vals}`;
+    }
+  }
+  
+  if (line.includesFries) {
+    text += `<br />&nbsp;&nbsp;+ Includes fries`;
+  }
+  
+  if (line.notes) text += `<br />&nbsp;&nbsp;→ ${line.notes}`;
+  return `<li style="margin-bottom: 8px;">${text}</li>`;
 }
 
 function formatMerchantFulfillmentHtml(payload: OrderPayload): string {
@@ -48,8 +67,26 @@ function formatLineItem(line: CartLine): string {
     text += ` (${line.selectedMeat})`;
   }
   
+  // Add modifiers
+  if (line.modifiers && line.modifiers.length > 0) {
+    const mods = line.modifiers.map(m => m.label).join(', ');
+    text += `<br />&nbsp;&nbsp;&nbsp;&nbsp;+ Add-ons: ${mods}`;
+  }
+  
+  // Add selected options
+  if (line.selectedOptions) {
+    for (const [, value] of Object.entries(line.selectedOptions)) {
+      const vals = Array.isArray(value) ? value.join(', ') : value;
+      text += `<br />&nbsp;&nbsp;&nbsp;&nbsp;• ${vals}`;
+    }
+  }
+  
+  if (line.includesFries) {
+    text += `<br />&nbsp;&nbsp;&nbsp;&nbsp;+ Includes fries`;
+  }
+  
   if (line.notes) {
-    text += ` - ${line.notes}`;
+    text += `<br />&nbsp;&nbsp;&nbsp;&nbsp;→ Notes: ${line.notes}`;
   }
   
   return `<li style="margin-bottom: 8px;">

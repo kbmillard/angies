@@ -1,0 +1,1561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Angie's Food Truck — Redesign Concept</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght,SOFT@0,9..144,300..900,0..100;1,9..144,300..900,0..100&family=DM+Sans:opsz,wght@9..40,300..700&family=Caveat:wght@400..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --nav-h: 4.5rem;
+
+    /* Tokens — kept faithful to spec, lightly tuned */
+    --charcoal:      #101114;
+    --charcoal-deep: #08090b;
+    --cream:         #fff7ec;
+    --tortilla:      #eadcc4;
+    --salsa:         #b92b19;
+    --angie-orange:  #f7542d;
+    --gold:          #f6a21a;
+    --navy:          #0b1726;
+    --midnight:      #060b14;
+    --accent-green:  #45b82e;
+    --agave:         #0f766e;
+
+    /* Type roles */
+    --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+    --font-sans:    "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-script:  "Caveat", "Brush Script MT", cursive;
+    --font-mono:    "JetBrains Mono", ui-monospace, monospace;
+
+    /* Spacing scale */
+    --pad-section: clamp(4.5rem, 9vw, 8rem);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-sans);
+    background: var(--charcoal);
+    color: var(--cream);
+    line-height: 1.55;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ============ TYPE SYSTEM ============ */
+  /* One scale. Every heading on the page picks from this set. */
+
+  .t-kicker {
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(255, 247, 236, 0.6);
+  }
+  .t-kicker--gold { color: var(--gold); }
+  .t-kicker--orange { color: var(--angie-orange); }
+
+  .t-hero {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    font-variation-settings: "SOFT" 50, "opsz" 144;
+    font-size: clamp(2.75rem, 7vw, 5.75rem);
+    font-weight: 460;
+    line-height: 0.98;
+    letter-spacing: -0.025em;
+    color: var(--cream);
+  }
+  .t-hero em {
+    font-style: italic;
+    font-variation-settings: "SOFT" 100, "opsz" 144;
+    color: var(--angie-orange);
+  }
+
+  .t-section {
+    font-family: var(--font-display);
+    font-variation-settings: "SOFT" 50, "opsz" 96;
+    font-size: clamp(2rem, 4.2vw, 3.5rem);
+    font-weight: 480;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    color: var(--cream);
+  }
+  .t-section em {
+    font-style: italic;
+    font-variation-settings: "SOFT" 100, "opsz" 96;
+    color: var(--gold);
+  }
+
+  .t-quote {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-variation-settings: "SOFT" 100, "opsz" 144;
+    font-size: clamp(1.5rem, 2.8vw, 2.25rem);
+    font-weight: 400;
+    line-height: 1.25;
+    color: var(--cream);
+  }
+
+  .t-script {
+    font-family: var(--font-script);
+    font-weight: 500;
+    color: var(--angie-orange);
+  }
+
+  .t-body {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.65;
+    color: rgba(255, 247, 236, 0.78);
+  }
+  .t-body--lg { font-size: 1.125rem; }
+
+  .t-micro {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    color: rgba(255, 247, 236, 0.55);
+  }
+
+  /* ============ MARQUEE — TOP ============ */
+  .marquee {
+    position: relative;
+    top: 0;
+    background: var(--angie-orange);
+    color: var(--charcoal);
+    overflow: hidden;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    z-index: 60;
+  }
+  .marquee__track {
+    display: flex;
+    gap: 3rem;
+    padding: 0.7rem 0;
+    width: max-content;
+    animation: marquee 38s linear infinite;
+    white-space: nowrap;
+  }
+  .marquee__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 1.2rem;
+    font-family: var(--font-sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+  }
+  .marquee__item svg { flex-shrink: 0; }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* ============ NAV ============ */
+  nav.editorial {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    width: 100%;
+    background: rgba(6, 11, 20, 0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  .nav__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 3vw, 2.25rem);
+    height: var(--nav-h);
+  }
+  .nav__brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .nav__brand img {
+    height: 2.5rem;
+    width: auto;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  }
+  .nav__brand-text {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-variation-settings: "SOFT" 100;
+    font-size: 1.15rem;
+    font-weight: 500;
+    color: var(--cream);
+    letter-spacing: -0.01em;
+  }
+  .nav__links {
+    display: none;
+    gap: 2.25rem;
+    list-style: none;
+  }
+  @media (min-width: 880px) {
+    .nav__links { display: flex; }
+  }
+  .nav__links a {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(255, 247, 236, 0.7);
+    text-decoration: none;
+    position: relative;
+    padding: 0.5rem 0;
+    transition: color 0.2s ease;
+  }
+  .nav__links a::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 1px;
+    background: var(--gold);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .nav__links a:hover { color: var(--cream); }
+  .nav__links a:hover::after { transform: scaleX(1); }
+  .nav__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--angie-orange);
+    color: var(--cream);
+    padding: 0.65rem 1.4rem;
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.25s ease;
+    box-shadow: 0 8px 20px -8px rgba(247, 84, 45, 0.55);
+  }
+  .nav__cta:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 14px 28px -8px rgba(247, 84, 45, 0.7);
+  }
+  .nav__cta-dot {
+    width: 6px; height: 6px;
+    background: var(--cream);
+    border-radius: 50%;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50%      { opacity: 1;   transform: scale(1.4); }
+  }
+
+  /* ============ HERO ============ */
+  .hero {
+    position: relative;
+    min-height: calc(100vh - var(--nav-h));
+    background: var(--charcoal);
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .hero__slides {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+  }
+  .hero__slide {
+    position: absolute;
+    inset: 0;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 1.6s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: kenburns 24s ease-in-out infinite alternate;
+  }
+  .hero__slide.is-active { opacity: 0.55; }
+  @keyframes kenburns {
+    from { transform: scale(1.06) translate(0, 0); }
+    to   { transform: scale(1.15) translate(-1.5%, 1%); }
+  }
+  .hero__veil {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background:
+      radial-gradient(80% 60% at 20% 30%, rgba(247, 84, 45, 0.18), transparent 60%),
+      radial-gradient(60% 50% at 85% 80%, rgba(246, 162, 26, 0.15), transparent 60%),
+      linear-gradient(180deg, rgba(16, 17, 20, 0.55) 0%, rgba(16, 17, 20, 0.85) 60%, rgba(16, 17, 20, 0.95) 100%);
+  }
+
+  .hero__content {
+    position: relative;
+    z-index: 3;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: clamp(3rem, 8vw, 6rem) clamp(1.25rem, 3vw, 2.25rem) clamp(4rem, 9vw, 7rem);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+    align-items: end;
+  }
+  @media (min-width: 980px) {
+    .hero__content {
+      grid-template-columns: 1.6fr 1fr;
+      gap: 4rem;
+    }
+  }
+
+  .hero__lead { max-width: 760px; }
+  .hero__kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 1.75rem;
+    opacity: 0;
+    animation: rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+  }
+  .hero__kicker-dot {
+    width: 8px; height: 8px;
+    background: var(--accent-green);
+    border-radius: 50%;
+    position: relative;
+    box-shadow: 0 0 0 0 rgba(69, 184, 46, 0.6);
+    animation: ringPulse 2s ease-out infinite;
+  }
+  @keyframes ringPulse {
+    0%   { box-shadow: 0 0 0 0   rgba(69, 184, 46, 0.55); }
+    70%  { box-shadow: 0 0 0 14px rgba(69, 184, 46, 0);     }
+    100% { box-shadow: 0 0 0 0   rgba(69, 184, 46, 0);     }
+  }
+  .hero__title {
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: rise 1s cubic-bezier(0.16, 1, 0.3, 1) 0.25s forwards;
+  }
+  .hero__sub {
+    max-width: 540px;
+    color: rgba(255, 247, 236, 0.82);
+    margin-bottom: 2.25rem;
+    opacity: 0;
+    animation: rise 1s cubic-bezier(0.16, 1, 0.3, 1) 0.45s forwards;
+  }
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    opacity: 0;
+    animation: rise 1s cubic-bezier(0.16, 1, 0.3, 1) 0.6s forwards;
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.95rem 1.85rem;
+    border-radius: 999px;
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+  }
+  .btn--primary {
+    background: var(--angie-orange);
+    color: var(--cream);
+    box-shadow: 0 12px 24px -10px rgba(247, 84, 45, 0.65);
+  }
+  .btn--primary:hover {
+    background: #ff6a47;
+    transform: translateY(-2px);
+    box-shadow: 0 18px 32px -10px rgba(247, 84, 45, 0.75);
+  }
+  .btn--ghost {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--cream);
+    border-color: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(8px);
+  }
+  .btn--ghost:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .btn__arrow {
+    display: inline-block;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .btn:hover .btn__arrow { transform: translateX(4px); }
+
+  /* Hero side panel — circular spinning text + logo */
+  .hero__badge {
+    position: relative;
+    width: clamp(220px, 28vw, 320px);
+    aspect-ratio: 1;
+    justify-self: end;
+    align-self: end;
+    opacity: 0;
+    animation: rise 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.7s forwards;
+  }
+  .hero__badge-ring {
+    position: absolute;
+    inset: 0;
+    animation: spin 28s linear infinite;
+  }
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  .hero__badge-ring text {
+    font-family: var(--font-sans);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.4em;
+    text-transform: uppercase;
+    fill: var(--gold);
+  }
+  .hero__badge-logo {
+    position: absolute;
+    inset: 18%;
+    background-image: url('https://www.angieskc.com/images/brand/site-logo.webp');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: drop-shadow(0 0 24px rgba(247, 84, 45, 0.35));
+    animation: bob 6s ease-in-out infinite;
+  }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
+  }
+
+  /* Floating decoration — cilantro leaves drifting up */
+  .hero__decor {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .leaf {
+    position: absolute;
+    width: 18px;
+    height: 22px;
+    opacity: 0.25;
+    animation: drift 14s linear infinite;
+  }
+  .leaf path { fill: var(--accent-green); }
+  .leaf:nth-child(1) { left: 8%;  animation-duration: 16s; animation-delay: 0s; }
+  .leaf:nth-child(2) { left: 22%; animation-duration: 19s; animation-delay: -4s; transform: scale(0.7); }
+  .leaf:nth-child(3) { left: 38%; animation-duration: 14s; animation-delay: -9s; transform: scale(1.1); }
+  .leaf:nth-child(4) { left: 55%; animation-duration: 22s; animation-delay: -2s; transform: scale(0.85); }
+  .leaf:nth-child(5) { left: 72%; animation-duration: 17s; animation-delay: -11s; transform: scale(0.6); }
+  .leaf:nth-child(6) { left: 88%; animation-duration: 20s; animation-delay: -6s; transform: scale(0.9); }
+  @keyframes drift {
+    0%   { bottom: -10%; transform: translateX(0) rotate(0deg); opacity: 0; }
+    10%  { opacity: 0.3; }
+    50%  { transform: translateX(30px) rotate(180deg); }
+    90%  { opacity: 0.3; }
+    100% { bottom: 110%; transform: translateX(-30px) rotate(360deg); opacity: 0; }
+  }
+
+  /* Hero slide dots */
+  .hero__dots {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.5rem;
+    z-index: 4;
+  }
+  .hero__dot {
+    width: 8px; height: 8px;
+    background: rgba(255, 247, 236, 0.3);
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 0;
+  }
+  .hero__dot.is-active {
+    width: 32px;
+    background: var(--gold);
+  }
+
+  /* ============ FIXED WATERMARK ============ */
+  .watermark {
+    position: fixed;
+    inset: var(--nav-h) 0 0 0;
+    z-index: 0;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .watermark__logo {
+    width: 68vmin;
+    height: 68vmin;
+    background-image: url('https://www.angieskc.com/images/brand/site-logo.webp');
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.06;
+    transform: translateY(-4%);
+    filter: saturate(1.15) contrast(1.05);
+  }
+
+  /* ============ SECTION SHELL ============ */
+  section.band {
+    position: relative;
+    z-index: 10;
+    padding: var(--pad-section) clamp(1.25rem, 3vw, 2.25rem);
+    background: rgba(16, 17, 20, 0.45);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+  }
+  .band__inner {
+    max-width: 1240px;
+    margin: 0 auto;
+  }
+
+  .section-head {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    max-width: 720px;
+    margin-bottom: 3.5rem;
+  }
+
+  /* ============ PROLOGUE ============ */
+  section.prologue {
+    background: transparent;
+    padding: var(--pad-section) clamp(1.25rem, 3vw, 2.25rem);
+    position: relative;
+    z-index: 10;
+  }
+  .prologue__card {
+    max-width: 980px;
+    margin: 0 auto;
+    background: rgba(16, 17, 20, 0.92);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: clamp(2.5rem, 5vw, 4rem);
+    text-align: center;
+    position: relative;
+  }
+  .prologue__card::before {
+    content: "";
+    position: absolute;
+    top: -1px; left: -1px; right: -1px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 0%, var(--gold) 50%, transparent 100%);
+    border-radius: 24px 24px 0 0;
+  }
+  .prologue__script {
+    font-family: var(--font-script);
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    color: var(--angie-orange);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    transform: rotate(-3deg);
+    display: inline-block;
+  }
+
+  /* ============ STORY ============ */
+  .story__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    align-items: center;
+  }
+  @media (min-width: 880px) {
+    .story__grid {
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+    }
+  }
+  .story__quote {
+    position: relative;
+    padding-left: 1.5rem;
+    border-left: 2px solid var(--gold);
+  }
+  .story__quote-mark {
+    font-family: var(--font-display);
+    font-size: 4rem;
+    color: var(--gold);
+    line-height: 0.5;
+    margin-bottom: 0.5rem;
+  }
+  .story__attrib {
+    margin-top: 1.5rem;
+    color: rgba(255, 247, 236, 0.55);
+    font-size: 0.85rem;
+  }
+  .story__image-wrap {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    aspect-ratio: 4 / 5;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .story__image {
+    position: absolute;
+    inset: 0;
+    background-image: url('https://www.angieskc.com/gallery/truck1.jpg');
+    background-size: cover;
+    background-position: center;
+    transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .story__image-wrap:hover .story__image { transform: scale(1.05); }
+  .story__image-wrap::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 30%, rgba(16, 17, 20, 0.7) 100%);
+  }
+  .story__image-tag {
+    position: absolute;
+    bottom: 1.25rem;
+    left: 1.25rem;
+    z-index: 2;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--gold);
+    font-family: var(--font-sans);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    padding: 0.45rem 0.85rem;
+    border-radius: 999px;
+  }
+
+  /* ============ MENU PREVIEW ============ */
+  .menu__tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 2.5rem;
+  }
+  .menu__tab {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    padding: 0.7rem 1.3rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 999px;
+    color: var(--cream);
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .menu__tab:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+  }
+  .menu__tab.is-active {
+    background: var(--cream);
+    color: var(--charcoal);
+    border-color: var(--cream);
+  }
+  .menu__tab-num {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-style: italic;
+    letter-spacing: 0;
+  }
+
+  .menu__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+  }
+  .menu__card {
+    background: rgba(16, 17, 20, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 1.5rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .menu__card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .menu__card:hover {
+    transform: translateY(-4px) rotate(-0.4deg);
+    border-color: rgba(255, 255, 255, 0.18);
+    background: rgba(16, 17, 20, 0.7);
+  }
+  .menu__card:hover::before { transform: scaleX(1); }
+
+  .menu__card[data-cat="tacos"]     { --accent: #f87171; }
+  .menu__card[data-cat="burritos"]  { --accent: #facc15; }
+  .menu__card[data-cat="quesa"]     { --accent: #ff8a3d; }
+  .menu__card[data-cat="classics"]  { --accent: #fb7185; }
+
+  .menu__card-cat {
+    color: var(--accent);
+    font-family: var(--font-sans);
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    margin-bottom: 0.85rem;
+  }
+  .menu__card-name {
+    font-family: var(--font-display);
+    font-variation-settings: "SOFT" 80, "opsz" 48;
+    font-size: 1.55rem;
+    font-weight: 500;
+    line-height: 1.1;
+    color: var(--cream);
+    margin-bottom: 0.45rem;
+    letter-spacing: -0.01em;
+  }
+  .menu__card-desc {
+    font-size: 0.85rem;
+    color: rgba(255, 247, 236, 0.65);
+    line-height: 1.5;
+    margin-bottom: 1.25rem;
+  }
+  .menu__card-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .menu__card-price {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--cream);
+  }
+  .menu__card-tag {
+    font-family: var(--font-sans);
+    font-size: 0.6rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: rgba(255, 247, 236, 0.5);
+    padding: 0.3rem 0.7rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+  }
+
+  /* ============ LOCATION ============ */
+  .loc__card {
+    background: rgba(16, 17, 20, 0.55);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: clamp(2rem, 4vw, 3rem);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+  @media (min-width: 880px) {
+    .loc__card {
+      grid-template-columns: 1.2fr 1fr;
+      gap: 3.5rem;
+      align-items: center;
+    }
+  }
+  .loc__truck-name {
+    font-family: var(--font-display);
+    font-variation-settings: "SOFT" 60, "opsz" 96;
+    font-size: clamp(2rem, 3.5vw, 2.75rem);
+    font-weight: 480;
+    letter-spacing: -0.015em;
+    color: var(--cream);
+    margin: 1rem 0 1.25rem;
+    line-height: 1;
+  }
+  .loc__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.45rem 0.95rem;
+    background: rgba(69, 184, 46, 0.1);
+    border: 1px solid rgba(69, 184, 46, 0.3);
+    border-radius: 999px;
+    font-family: var(--font-sans);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--accent-green);
+  }
+  .loc__status-dot {
+    width: 7px; height: 7px;
+    background: var(--accent-green);
+    border-radius: 50%;
+    animation: pulse 1.6s ease-in-out infinite;
+  }
+  .loc__address {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin: 1.5rem 0;
+    font-size: 1.05rem;
+    color: rgba(255, 247, 236, 0.92);
+  }
+  .loc__pin {
+    color: var(--gold);
+    flex-shrink: 0;
+    animation: bob 3s ease-in-out infinite;
+  }
+  .loc__hours {
+    list-style: none;
+    padding: 1.25rem 0 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .loc__hours li {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0.5rem 0;
+    font-size: 0.92rem;
+    color: rgba(255, 247, 236, 0.78);
+  }
+  .loc__hours li span:last-child {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    color: rgba(255, 247, 236, 0.6);
+  }
+  .loc__map {
+    position: relative;
+    aspect-ratio: 4 / 5;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background:
+      radial-gradient(circle at 50% 50%, rgba(247, 84, 45, 0.18), transparent 50%),
+      linear-gradient(135deg, #1a1d24 0%, #0d0f13 100%);
+  }
+  .loc__map-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  .loc__map-pin {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -100%);
+  }
+  .loc__map-pin-icon {
+    color: var(--angie-orange);
+    filter: drop-shadow(0 4px 12px rgba(247, 84, 45, 0.6));
+    animation: bob 2s ease-in-out infinite;
+  }
+  .loc__map-pin::after {
+    content: "";
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 18px;
+    height: 6px;
+    background: rgba(0, 0, 0, 0.4);
+    border-radius: 50%;
+    filter: blur(3px);
+    animation: shadowPulse 2s ease-in-out infinite;
+  }
+  @keyframes shadowPulse {
+    0%, 100% { transform: translateX(-50%) scale(1); opacity: 0.5; }
+    50%      { transform: translateX(-50%) scale(0.7); opacity: 0.3; }
+  }
+  .loc__map-rings {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .loc__map-ring {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    border: 1px solid var(--angie-orange);
+    border-radius: 50%;
+    opacity: 0;
+    animation: radarPing 3s ease-out infinite;
+  }
+  .loc__map-ring:nth-child(2) { animation-delay: 1s; }
+  .loc__map-ring:nth-child(3) { animation-delay: 2s; }
+  @keyframes radarPing {
+    0%   { width: 0;     height: 0;     opacity: 0.6; }
+    100% { width: 220px; height: 220px; opacity: 0; }
+  }
+
+  /* ============ SOCIAL EXCEPTION CARD ============ */
+  .social__card {
+    background: linear-gradient(135deg, rgba(11, 23, 38, 0.7) 0%, rgba(16, 17, 20, 1) 100%);
+    border: 1px solid rgba(246, 162, 26, 0.25);
+    border-radius: 24px;
+    padding: clamp(2.5rem, 5vw, 4rem);
+    position: relative;
+    overflow: hidden;
+  }
+  .social__card::before {
+    content: "@";
+    position: absolute;
+    top: -2rem;
+    right: 2rem;
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 14rem;
+    color: rgba(246, 162, 26, 0.08);
+    line-height: 1;
+    pointer-events: none;
+  }
+  .social__pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+  .social__pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 1.4rem;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: var(--cream);
+    text-decoration: none;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .social__pill:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(246, 162, 26, 0.5);
+    transform: translateY(-2px);
+  }
+
+  /* ============ FINAL CTA ============ */
+  .final {
+    text-align: center;
+    padding: var(--pad-section) clamp(1.25rem, 3vw, 2.25rem);
+  }
+  .final__title {
+    font-family: var(--font-display);
+    font-variation-settings: "SOFT" 50, "opsz" 144;
+    font-size: clamp(2.75rem, 8vw, 6rem);
+    font-weight: 460;
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    margin: 1.5rem auto 2.5rem;
+    max-width: 14ch;
+  }
+  .final__title em {
+    font-style: italic;
+    font-variation-settings: "SOFT" 100;
+    color: var(--angie-orange);
+  }
+  .final__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    justify-content: center;
+  }
+  .final__deco {
+    margin-top: 4rem;
+    opacity: 0.5;
+  }
+
+  /* ============ FOOTER ============ */
+  footer.site {
+    position: relative;
+    z-index: 10;
+    background: rgba(16, 17, 20, 0.78);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 4rem clamp(1.25rem, 3vw, 2.25rem) 2rem;
+  }
+  .footer__inner {
+    max-width: 1240px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+  @media (min-width: 760px) {
+    .footer__inner {
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 2.5rem;
+    }
+  }
+  .footer__brand img {
+    height: 3.5rem;
+    margin-bottom: 1rem;
+  }
+  .footer__col-label {
+    font-family: var(--font-sans);
+    font-size: 0.65rem;
+    font-weight: 600;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+    color: rgba(255, 247, 236, 0.5);
+    margin-bottom: 1rem;
+  }
+  .footer__col ul { list-style: none; }
+  .footer__col li {
+    padding: 0.35rem 0;
+    font-size: 0.9rem;
+    color: rgba(255, 247, 236, 0.82);
+  }
+  .footer__col a {
+    color: inherit;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  .footer__col a:hover { color: var(--gold); }
+  .footer__bottom {
+    max-width: 1240px;
+    margin: 3rem auto 0;
+    padding-top: 2rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem;
+    font-size: 0.75rem;
+    color: rgba(255, 247, 236, 0.4);
+  }
+
+  /* ============ SCROLL REVEAL ============ */
+  .reveal {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal.is-in {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-stagger > * {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal-stagger.is-in > *:nth-child(1) { transition-delay: 0s;    opacity: 1; transform: translateY(0); }
+  .reveal-stagger.is-in > *:nth-child(2) { transition-delay: 0.08s; opacity: 1; transform: translateY(0); }
+  .reveal-stagger.is-in > *:nth-child(3) { transition-delay: 0.16s; opacity: 1; transform: translateY(0); }
+  .reveal-stagger.is-in > *:nth-child(4) { transition-delay: 0.24s; opacity: 1; transform: translateY(0); }
+  .reveal-stagger.is-in > *:nth-child(5) { transition-delay: 0.32s; opacity: 1; transform: translateY(0); }
+  .reveal-stagger.is-in > *:nth-child(6) { transition-delay: 0.4s;  opacity: 1; transform: translateY(0); }
+  .reveal-stagger.is-in > *:nth-child(7) { transition-delay: 0.48s; opacity: 1; transform: translateY(0); }
+  .reveal-stagger.is-in > *:nth-child(8) { transition-delay: 0.56s; opacity: 1; transform: translateY(0); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ TOP MARQUEE ============ -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee__track">
+    <span class="marquee__item">Fresh tacos <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8 5.8 21.3l2.4-7.4L2 9.4h7.6z"/></svg> Birria <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/></svg> Burritos <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8 5.8 21.3l2.4-7.4L2 9.4h7.6z"/></svg> Aguas frescas <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/></svg> Daily specials <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8 5.8 21.3l2.4-7.4L2 9.4h7.6z"/></svg> Kansas City local <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/></svg></span>
+    <span class="marquee__item">Fresh tacos <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8 5.8 21.3l2.4-7.4L2 9.4h7.6z"/></svg> Birria <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/></svg> Burritos <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8 5.8 21.3l2.4-7.4L2 9.4h7.6z"/></svg> Aguas frescas <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/></svg> Daily specials <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8 5.8 21.3l2.4-7.4L2 9.4h7.6z"/></svg> Kansas City local <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/></svg></span>
+  </div>
+</div>
+
+<!-- ============ NAV ============ -->
+<nav class="editorial">
+  <div class="nav__inner">
+    <a href="#" class="nav__brand">
+      <img src="https://www.angieskc.com/images/brand/site-logo.webp" alt="Angie's Food Truck" />
+      <span class="nav__brand-text">Angie's</span>
+    </a>
+    <ul class="nav__links">
+      <li><a href="#story">Story</a></li>
+      <li><a href="#menu">Menu</a></li>
+      <li><a href="#location">Location</a></li>
+      <li><a href="#catering">Catering</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <button class="nav__cta">
+      <span class="nav__cta-dot"></span>
+      Order menu
+    </button>
+  </div>
+</nav>
+
+<!-- ============ FIXED WATERMARK ============ -->
+<div class="watermark" aria-hidden="true">
+  <div class="watermark__logo"></div>
+</div>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="hero__slides">
+    <div class="hero__slide is-active" style="background-image: url('https://www.angieskc.com/gallery/truck.png');"></div>
+    <div class="hero__slide" style="background-image: url('https://www.angieskc.com/gallery/truck1.jpg');"></div>
+    <div class="hero__slide" style="background-image: url('https://www.angieskc.com/gallery/truck2.png');"></div>
+    <div class="hero__slide" style="background-image: url('https://www.angieskc.com/gallery/truck3.jpg');"></div>
+    <div class="hero__slide" style="background-image: url('https://www.angieskc.com/gallery/truck4.jpg');"></div>
+  </div>
+  <div class="hero__veil"></div>
+
+  <div class="hero__decor" aria-hidden="true">
+    <svg class="leaf" viewBox="0 0 18 22"><path d="M9 0C4 4 0 8 0 14c0 5 4 8 9 8s9-3 9-8c0-6-4-10-9-14zM9 4c3 3 6 6 6 10 0 3-3 6-6 6s-6-3-6-6c0-4 3-7 6-10z"/></svg>
+    <svg class="leaf" viewBox="0 0 18 22"><path d="M9 0C4 4 0 8 0 14c0 5 4 8 9 8s9-3 9-8c0-6-4-10-9-14zM9 4c3 3 6 6 6 10 0 3-3 6-6 6s-6-3-6-6c0-4 3-7 6-10z"/></svg>
+    <svg class="leaf" viewBox="0 0 18 22"><path d="M9 0C4 4 0 8 0 14c0 5 4 8 9 8s9-3 9-8c0-6-4-10-9-14zM9 4c3 3 6 6 6 10 0 3-3 6-6 6s-6-3-6-6c0-4 3-7 6-10z"/></svg>
+    <svg class="leaf" viewBox="0 0 18 22"><path d="M9 0C4 4 0 8 0 14c0 5 4 8 9 8s9-3 9-8c0-6-4-10-9-14zM9 4c3 3 6 6 6 10 0 3-3 6-6 6s-6-3-6-6c0-4 3-7 6-10z"/></svg>
+    <svg class="leaf" viewBox="0 0 18 22"><path d="M9 0C4 4 0 8 0 14c0 5 4 8 9 8s9-3 9-8c0-6-4-10-9-14zM9 4c3 3 6 6 6 10 0 3-3 6-6 6s-6-3-6-6c0-4 3-7 6-10z"/></svg>
+    <svg class="leaf" viewBox="0 0 18 22"><path d="M9 0C4 4 0 8 0 14c0 5 4 8 9 8s9-3 9-8c0-6-4-10-9-14zM9 4c3 3 6 6 6 10 0 3-3 6-6 6s-6-3-6-6c0-4 3-7 6-10z"/></svg>
+  </div>
+
+  <div class="hero__content">
+    <div class="hero__lead">
+      <div class="hero__kicker">
+        <span class="hero__kicker-dot"></span>
+        <span class="t-kicker">Mexican food truck · Kansas City</span>
+      </div>
+      <h1 class="t-hero hero__title">
+        Bold Tex-Mex flavor,<br>
+        <em>served fresh</em> across<br>
+        Kansas City.
+      </h1>
+      <p class="t-body t-body--lg hero__sub">
+        Find Angie's near Linwood and all around KC. Follow today's pin, order from the window, or book the truck for your next event.
+      </p>
+      <div class="hero__actions">
+        <a href="#menu" class="btn btn--primary">
+          See the menu
+          <span class="btn__arrow">→</span>
+        </a>
+        <a href="#location" class="btn btn--ghost">
+          Where's the truck?
+        </a>
+      </div>
+    </div>
+
+    <div class="hero__badge">
+      <svg class="hero__badge-ring" viewBox="0 0 200 200">
+        <defs>
+          <path id="circlePath" d="M 100,100 m -85,0 a 85,85 0 1,1 170,0 a 85,85 0 1,1 -170,0" />
+        </defs>
+        <text>
+          <textPath href="#circlePath">Angies Fresh Food · Kansas City · Tex-Mex · Open the window ·</textPath>
+        </text>
+      </svg>
+      <div class="hero__badge-logo"></div>
+    </div>
+  </div>
+
+  <div class="hero__dots" role="tablist" aria-label="Hero slides">
+    <button class="hero__dot is-active" data-slide="0" aria-label="Slide 1"></button>
+    <button class="hero__dot" data-slide="1" aria-label="Slide 2"></button>
+    <button class="hero__dot" data-slide="2" aria-label="Slide 3"></button>
+    <button class="hero__dot" data-slide="3" aria-label="Slide 4"></button>
+    <button class="hero__dot" data-slide="4" aria-label="Slide 5"></button>
+  </div>
+</section>
+
+<!-- ============ PROLOGUE ============ -->
+<section class="prologue reveal">
+  <div class="prologue__card">
+    <span class="prologue__script">¡Bienvenidos!</span>
+    <div class="t-kicker t-kicker--gold" style="margin-bottom: 1rem;">A warm welcome</div>
+    <h2 class="t-section" style="margin-bottom: 1.25rem;">Welcome to <em>Angie's Food Truck.</em></h2>
+    <p class="t-body t-body--lg" style="max-width: 620px; margin: 0 auto;">
+      Fresh Mexican plates from the window — tacos, birria, burritos, aguas frescas, and daily specials. Follow the pin for today's stop, or book us for your next event.
+    </p>
+  </div>
+</section>
+
+<!-- ============ STORY ============ -->
+<section class="band" id="story">
+  <div class="band__inner">
+    <div class="story__grid">
+      <div class="reveal">
+        <div class="t-kicker t-kicker--gold" style="margin-bottom: 1.25rem;">Our story</div>
+        <h2 class="t-section" style="margin-bottom: 2rem;">Mexican flavor, <em>rolling through</em> Kansas City.</h2>
+        <blockquote class="story__quote">
+          <div class="story__quote-mark">"</div>
+          <p class="t-quote">You will experience bold Tex-Mex flavor without leaving Kansas City. Over 100 guests raved about the food at our event…</p>
+          <div class="story__attrib t-micro">— Local business owner · KC Crossroads</div>
+        </blockquote>
+      </div>
+      <div class="reveal story__image-wrap">
+        <div class="story__image"></div>
+        <div class="story__image-tag">Bright truck · fresh masa</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MENU ============ -->
+<section class="band" id="menu">
+  <div class="band__inner">
+    <div class="section-head reveal">
+      <div class="t-kicker t-kicker--gold">Menu</div>
+      <h2 class="t-section">Fresh Tex-Mex plates, <em>drinks,</em> and daily specials.</h2>
+      <p class="t-body t-body--lg">Everything is built at the window. Tap a category — prices flex with daily ingredients and weekend specials.</p>
+    </div>
+
+    <div class="menu__tabs reveal" role="tablist">
+      <button class="menu__tab is-active" data-cat="tacos">
+        <span class="menu__tab-num">01</span> Tacos
+      </button>
+      <button class="menu__tab" data-cat="burritos">
+        <span class="menu__tab-num">02</span> Burritos
+      </button>
+      <button class="menu__tab" data-cat="quesa">
+        <span class="menu__tab-num">03</span> Quesadillas
+      </button>
+      <button class="menu__tab" data-cat="classics">
+        <span class="menu__tab-num">04</span> Classics
+      </button>
+    </div>
+
+    <div class="menu__grid reveal reveal-stagger" id="menu-grid">
+      <!-- Tacos -->
+      <div class="menu__card" data-cat="tacos">
+        <div class="menu__card-cat">Taco</div>
+        <h3 class="menu__card-name">Birria</h3>
+        <p class="menu__card-desc">Slow-braised beef, melted cheese, dipping consomé.</p>
+        <div class="menu__card-foot">
+          <span class="menu__card-price">$4.50</span>
+          <span class="menu__card-tag">Signature</span>
+        </div>
+      </div>
+      <div class="menu__card" data-cat="tacos">
+        <div class="menu__card-cat">Taco</div>
+        <h3 class="menu__card-name">Al pastor</h3>
+        <p class="menu__card-desc">Marinated pork, pineapple, cilantro, onion.</p>
+        <div class="menu__card-foot">
+          <span class="menu__card-price">$3.75</span>
+          <span class="menu__card-tag">Classic</span>
+        </div>
+      </div>
+      <div class="menu__card" data-cat="tacos">
+        <div class="menu__card-cat">Taco</div>
+        <h3 class="menu__card-name">Carne asada</h3>
+        <p class="menu__card-desc">Grilled steak, onion, cilantro, lime, salsa verde.</p>
+        <div class="menu__card-foot">
+          <span class="menu__card-price">$4.25</span>
+          <span class="menu__card-tag">Hand cut</span>
+        </div>
+      </div>
+      <div class="menu__card" data-cat="tacos">
+        <div class="menu__card-cat">Taco</div>
+        <h3 class="menu__card-name">Pollo</h3>
+        <p class="menu__card-desc">Adobo-grilled chicken, fresh pico, queso fresco.</p>
+        <div class="menu__card-foot">
+          <span class="menu__card-price">$3.75</span>
+          <span class="menu__card-tag">Crowd pick</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LOCATION ============ -->
+<section class="band" id="location">
+  <div class="band__inner">
+    <div class="section-head reveal">
+      <div class="t-kicker t-kicker--gold">Today on the curb</div>
+      <h2 class="t-section">Find us — <em>pin updates</em> from the road.</h2>
+      <p class="t-body t-body--lg">The truck moves daily. Address, hours, and notes update here when they are published.</p>
+    </div>
+
+    <div class="loc__card reveal">
+      <div>
+        <span class="loc__status">
+          <span class="loc__status-dot"></span>
+          Open now
+        </span>
+        <h3 class="loc__truck-name">Angie's Food Truck</h3>
+        <div class="loc__address">
+          <svg class="loc__pin" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+          </svg>
+          <span>Linwood Blvd · Kansas City, MO</span>
+        </div>
+        <ul class="loc__hours">
+          <li><span>Mon — Tue</span><span>10:00 AM — 2:00 PM</span></li>
+          <li><span>Wed — Fri</span><span>10:00 AM — 8:00 PM</span></li>
+          <li><span>Saturday</span><span>10:00 AM — 4:00 PM</span></li>
+          <li><span>Sunday</span><span>Closed</span></li>
+        </ul>
+        <div style="display: flex; flex-wrap: wrap; gap: 0.7rem; margin-top: 1.75rem;">
+          <a href="#" class="btn btn--ghost">Google Maps</a>
+          <a href="#" class="btn btn--ghost">Call / text</a>
+        </div>
+      </div>
+
+      <div class="loc__map" aria-hidden="true">
+        <div class="loc__map-grid"></div>
+        <div class="loc__map-rings">
+          <div class="loc__map-ring"></div>
+          <div class="loc__map-ring"></div>
+          <div class="loc__map-ring"></div>
+        </div>
+        <div class="loc__map-pin">
+          <svg class="loc__map-pin-icon" width="44" height="44" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2C7.6 2 4 5.6 4 10c0 6 8 12 8 12s8-6 8-12c0-4.4-3.6-8-8-8zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SOCIAL ============ -->
+<section class="band">
+  <div class="band__inner">
+    <div class="social__card reveal">
+      <div class="t-kicker t-kicker--gold" style="margin-bottom: 1rem;">Follow along</div>
+      <h2 class="t-section" style="max-width: 18ch;">Follow the truck — <em>same-day</em> updates.</h2>
+      <p class="t-body t-body--lg" style="max-width: 540px; margin-top: 1.5rem;">
+        Facebook and Instagram carry the live pin, specials, and catering highlights. Tag us when you order — we love resharing KC neighborhoods enjoying Angie's.
+      </p>
+      <div class="social__pills">
+        <a href="https://www.instagram.com/angiesfoodtruck/" class="social__pill">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="2" width="20" height="20" rx="5"/>
+            <circle cx="12" cy="12" r="4"/>
+            <circle cx="17.5" cy="6.5" r="1" fill="currentColor"/>
+          </svg>
+          @angiesfoodtruck
+        </a>
+        <a href="https://www.facebook.com/p/Angies-food-truck-100066851974098/" class="social__pill">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M22 12a10 10 0 1 0-11.6 9.9V14.9H7.9V12h2.5V9.8c0-2.5 1.5-3.9 3.8-3.9 1.1 0 2.2.2 2.2.2v2.5h-1.3c-1.2 0-1.6.8-1.6 1.6V12h2.8l-.4 2.9h-2.3V22a10 10 0 0 0 8.4-10z"/>
+          </svg>
+          Angie's on Facebook
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FINAL CTA ============ -->
+<section class="final reveal" id="contact">
+  <div class="t-kicker t-kicker--gold">Ready</div>
+  <h2 class="final__title">Ready to <em>eat</em>?</h2>
+  <div class="final__actions">
+    <a href="#menu" class="btn btn--primary">
+      See the menu
+      <span class="btn__arrow">→</span>
+    </a>
+    <a href="#" class="btn btn--ghost">Checkout</a>
+    <a href="#catering" class="btn btn--ghost">Catering request</a>
+  </div>
+  <div class="final__deco">
+    <svg width="120" height="24" viewBox="0 0 120 24" fill="none" stroke="rgba(246, 162, 26, 0.4)" stroke-width="1.5" stroke-linecap="round">
+      <path d="M2 12 Q 30 2, 60 12 T 118 12"/>
+    </svg>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="site">
+  <div class="footer__inner">
+    <div class="footer__brand">
+      <img src="https://www.angieskc.com/images/brand/site-logo.webp" alt="Angie's Food Truck" />
+      <p class="t-body" style="font-size: 0.9rem; max-width: 32ch;">
+        Family-run Mexican food truck rolling through Kansas City since 2019.
+      </p>
+    </div>
+    <div class="footer__col">
+      <div class="footer__col-label">Visit</div>
+      <ul>
+        <li>Linwood Blvd</li>
+        <li>Kansas City, MO</li>
+        <li><a href="#">Today's pin →</a></li>
+      </ul>
+    </div>
+    <div class="footer__col">
+      <div class="footer__col-label">Hours</div>
+      <ul>
+        <li>Mon — Tue · 10–2</li>
+        <li>Wed — Fri · 10–8</li>
+        <li>Saturday · 10–4</li>
+      </ul>
+    </div>
+    <div class="footer__col">
+      <div class="footer__col-label">Contact</div>
+      <ul>
+        <li><a href="tel:+19134331732">(913) 433-1732</a></li>
+        <li><a href="tel:+19139548745">(913) 954-8745</a></li>
+        <li><a href="mailto:angiesfoodtruck83@gmail.com">Email us →</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer__bottom">
+    <span>© 2026 Angie's Food Truck · Kansas City</span>
+    <span style="font-family: var(--font-script); font-size: 1.1rem; color: var(--gold); transform: rotate(-2deg); display: inline-block;">Hecho con cariño</span>
+  </div>
+</footer>
+
+<script>
+  // Hero slide rotation
+  (function() {
+    const slides = document.querySelectorAll('.hero__slide');
+    const dots = document.querySelectorAll('.hero__dot');
+    let current = 0;
+    let timer;
+
+    function go(idx) {
+      slides[current].classList.remove('is-active');
+      dots[current].classList.remove('is-active');
+      current = idx;
+      slides[current].classList.add('is-active');
+      dots[current].classList.add('is-active');
+    }
+
+    function next() {
+      go((current + 1) % slides.length);
+    }
+
+    function reset() {
+      clearInterval(timer);
+      timer = setInterval(next, 5500);
+    }
+
+    dots.forEach((dot, i) => {
+      dot.addEventListener('click', () => { go(i); reset(); });
+    });
+
+    reset();
+  })();
+
+  // Scroll reveal
+  (function() {
+    const opts = { threshold: 0.12, rootMargin: '0px 0px -8% 0px' };
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-in');
+          io.unobserve(entry.target);
+        }
+      });
+    }, opts);
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+  })();
+
+  // Menu tab switching (visual only — filters cards)
+  (function() {
+    const tabs = document.querySelectorAll('.menu__tab');
+    const grid = document.getElementById('menu-grid');
+    const allCards = grid.querySelectorAll('.menu__card');
+
+    // Demo content for other categories
+    const data = {
+      tacos: [
+        { name: 'Birria',       desc: 'Slow-braised beef, melted cheese, dipping consomé.', price: '$4.50', tag: 'Signature' },
+        { name: 'Al pastor',    desc: 'Marinated pork, pineapple, cilantro, onion.',         price: '$3.75', tag: 'Classic' },
+        { name: 'Carne asada',  desc: 'Grilled steak, onion, cilantro, lime, salsa verde.',  price: '$4.25', tag: 'Hand cut' },
+        { name: 'Pollo',        desc: 'Adobo-grilled chicken, fresh pico, queso fresco.',    price: '$3.75', tag: 'Crowd pick' }
+      ],
+      burritos: [
+        { name: 'Carne asada',  desc: 'Rice, beans, steak, cheese, pico, salsa.',            price: '$12.50', tag: 'Signature' },
+        { name: 'Chicken',      desc: 'Adobo chicken, rice, beans, fresh salsa, lime.',      price: '$11.00', tag: 'Classic' },
+        { name: 'Bean & cheese',desc: 'Refried beans, queso, rice, salsa fresca.',           price: '$9.50',  tag: 'Veggie' },
+        { name: 'Wet birria',   desc: 'Birria-style, smothered, side of consomé.',           price: '$13.75', tag: 'House style' }
+      ],
+      quesa: [
+        { name: 'Birria quesa', desc: 'Beef, oaxaca cheese, dipping consomé on the side.',   price: '$11.50', tag: 'Signature' },
+        { name: 'Chicken',      desc: 'Grilled chicken, mixed cheese, pico, sour cream.',    price: '$10.50', tag: 'Classic' },
+        { name: 'Mushroom',     desc: 'Sautéed mushrooms, oaxaca, fresh herbs.',             price: '$10.00', tag: 'Veggie' },
+        { name: 'Carne asada',  desc: 'Steak, melted cheese, salsa verde.',                  price: '$11.50', tag: 'Hand cut' }
+      ],
+      classics: [
+        { name: 'Aguas frescas',desc: 'Horchata, jamaica, or tamarindo. House-made daily.',  price: '$4.00',  tag: 'Refresher' },
+        { name: 'Elote',        desc: 'Grilled corn, lime, crema, cotija, chile.',           price: '$5.00',  tag: 'Street style' },
+        { name: 'Chips & salsa',desc: 'Fresh tortilla chips, salsa roja or verde.',          price: '$4.50',  tag: 'Side' },
+        { name: 'Tres leches',  desc: 'Soaked sponge cake, whipped cream, cinnamon.',        price: '$5.50',  tag: 'Dessert' }
+      ]
+    };
+
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('is-active'));
+        tab.classList.add('is-active');
+        const cat = tab.dataset.cat;
+        const items = data[cat];
+
+        // Fade out
+        grid.style.opacity = '0';
+        grid.style.transform = 'translateY(8px)';
+        grid.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+
+        setTimeout(() => {
+          grid.innerHTML = items.map(item => `
+            <div class="menu__card" data-cat="${cat}">
+              <div class="menu__card-cat">${cat === 'quesa' ? 'Quesadilla' : cat.charAt(0).toUpperCase() + cat.slice(1, -1)}</div>
+              <h3 class="menu__card-name">${item.name}</h3>
+              <p class="menu__card-desc">${item.desc}</p>
+              <div class="menu__card-foot">
+                <span class="menu__card-price">${item.price}</span>
+                <span class="menu__card-tag">${item.tag}</span>
+              </div>
+            </div>
+          `).join('');
+          grid.style.opacity = '1';
+          grid.style.transform = 'translateY(0)';
+        }, 250);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>

@@ -12,6 +12,8 @@ import { cn } from "@/lib/utils/cn";
 import { useScrollLock } from "@/lib/utils/use-scroll-lock";
 import { createSquarePayments, getSquareConfig, loadSquareSdk } from "@/lib/square/loadSquare";
 import type { SquareCard } from "@/lib/square/types";
+import { OrderConfirmation } from "@/components/order/OrderConfirmation";
+import type { CartLine, FulfillmentType, PickupLocationId } from "@/lib/types/order";
 
 /** Card field styling (dark charcoal theme) */
 const SQUARE_CARD_STYLE = {
@@ -107,6 +109,16 @@ export function OrderDrawer() {
   const [cardBusy, setCardBusy] = useState(false);
   const { configured } = getSquareConfig();
 
+  // Snapshot order details for confirmation view (before cart is cleared)
+  const [orderSnapshot, setOrderSnapshot] = useState<{
+    items: CartLine[];
+    email: string;
+    requestedTime: string;
+    pickupLocation: PickupLocationId | undefined;
+    fulfillment: FulfillmentType;
+    totalCents: number;
+  } | null>(null);
+
   useScrollLock(orderDrawerOpen);
 
   // Initialize Square card fields when user taps "Pay with card"
@@ -189,6 +201,32 @@ export function OrderDrawer() {
     }
   }, [orderDrawerOpen]);
 
+  // Reset card fields when order is confirmed (security: clear sensitive data)
+  // Also snapshot order details for confirmation view
+  useEffect(() => {
+    if (confirmationId) {
+      // Snapshot order before cart is cleared
+      setOrderSnapshot({
+        items: [...cart],
+        email: customer.email || "",
+        requestedTime,
+        pickupLocation: undefined, // TODO: Get from order context
+        fulfillment,
+        totalCents,
+      });
+
+      // Clear card fields
+      setShowCardFields(false);
+      setCardReady(false);
+      setCardMessage(null);
+      setCardBusy(false);
+      if (cardRef.current) {
+        cardRef.current.destroy();
+        cardRef.current = null;
+      }
+    }
+  }, [confirmationId, cart, customer.email, requestedTime, fulfillment, totalCents]);
+
   if (!mounted) return null;
 
   return createPortal(
@@ -220,25 +258,42 @@ export function OrderDrawer() {
             aria-modal="true"
             aria-label="Order and checkout"
           >
-            <header className="flex shrink-0 items-start justify-between gap-3 border-b border-white/10 px-4 pb-3 pt-[max(12px,env(safe-area-inset-top))] sm:px-5 sm:pb-4 sm:pt-4">
-              <div className="flex min-w-0 items-center gap-3">
-                <BrandLogo width={48} height={48} />
-                <div className="min-w-0">
-                  <p className="text-xs uppercase tracking-editorial text-cream/60">
-                    Live order
-                  </p>
-                  <p className="font-display text-xl text-cream">Your cart</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/5 text-cream hover:bg-white/10 sm:h-10 sm:w-10"
-                onClick={() => setOrderDrawerOpen(false)}
-                aria-label="Close cart"
-              >
-                <X className="h-6 w-6 sm:h-5 sm:w-5" />
-              </button>
-            </header>
+            {/* Show confirmation view if order is confirmed */}
+            {confirmationId && orderSnapshot ? (
+              <OrderConfirmation
+                orderId={confirmationId}
+                customerEmail={orderSnapshot.email}
+                requestedTime={orderSnapshot.requestedTime}
+                pickupLocation={orderSnapshot.pickupLocation}
+                fulfillment={orderSnapshot.fulfillment}
+                items={orderSnapshot.items}
+                totalCents={orderSnapshot.totalCents}
+                onClose={() => {
+                  setOrderSnapshot(null);
+                  setOrderDrawerOpen(false);
+                }}
+              />
+            ) : (
+              <>
+                <header className="flex shrink-0 items-start justify-between gap-3 border-b border-white/10 px-4 pb-3 pt-[max(12px,env(safe-area-inset-top))] sm:px-5 sm:pb-4 sm:pt-4">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <BrandLogo width={48} height={48} />
+                    <div className="min-w-0">
+                      <p className="text-xs uppercase tracking-editorial text-cream/60">
+                        Live order
+                      </p>
+                      <p className="font-display text-xl text-cream">Your cart</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/5 text-cream hover:bg-white/10 sm:h-10 sm:w-10"
+                    onClick={() => setOrderDrawerOpen(false)}
+                    aria-label="Close cart"
+                  >
+                    <X className="h-6 w-6 sm:h-5 sm:w-5" />
+                  </button>
+                </header>
 
             <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain p-3 sm:gap-6 sm:px-5 sm:py-5">
               {confirmationId ? (
@@ -584,7 +639,7 @@ export function OrderDrawer() {
                     className="flex w-full items-center justify-center gap-2 rounded-full bg-angie-orange py-3 text-sm font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-angie-orange/90 disabled:cursor-not-allowed disabled:opacity-40"
                     onClick={() => setShowCardFields(true)}
                   >
-                    Pay with card
+                    Checkout with Square
                   </button>
                   {!canOpenPayment && (
                     <p className="text-center text-xs text-cream/50">
@@ -652,6 +707,8 @@ export function OrderDrawer() {
                 </>
               )}
             </footer>
+              </>
+            )}
           </motion.aside>
         </>
       ) : null}
