@@ -13,6 +13,7 @@ import { useScrollLock } from "@/lib/utils/use-scroll-lock";
 import { createSquarePayments, getSquareConfig, loadSquareSdk } from "@/lib/square/loadSquare";
 import type { SquareCard } from "@/lib/square/types";
 import { OrderConfirmation } from "@/components/order/OrderConfirmation";
+import { SwipeToConfirm } from "@/components/order/SwipeToConfirm";
 import type { CartLine, FulfillmentType, PickupLocationId } from "@/lib/types/order";
 
 /** Card field styling (dark charcoal theme) */
@@ -118,6 +119,27 @@ export function OrderDrawer() {
     fulfillment: FulfillmentType;
     totalCents: number;
   } | null>(null);
+
+  // Time picker mode
+  const [timeMode, setTimeMode] = useState<"earliest" | "custom">("earliest");
+
+  // Calculate earliest available time (30 min from now)
+  const earliestTime = (() => {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 30);
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    const period = hours >= 12 ? "PM" : "AM";
+    const displayHours = hours % 12 || 12;
+    const displayMinutes = minutes.toString().padStart(2, "0");
+    return `${displayHours}:${displayMinutes} ${period}`;
+  })();
+
+  // Handle earliest time selection
+  const handleEarliestTime = useCallback(() => {
+    setTimeMode("earliest");
+    setRequestedTime(earliestTime);
+  }, [earliestTime, setRequestedTime]);
 
   useScrollLock(orderDrawerOpen);
 
@@ -517,21 +539,49 @@ export function OrderDrawer() {
                     autoComplete="email"
                   />
                 </label>
-                <label className="text-xs text-cream/60 sm:col-span-2">
-                  {fulfillment === "delivery"
-                    ? "Requested delivery time"
-                    : "Requested pickup time"}
-                  <input
-                    className="mt-1 w-full rounded-xl border border-white/10 bg-charcoal px-3 py-2 text-sm text-cream"
-                    value={requestedTime}
-                    onChange={(e) => setRequestedTime(e.target.value)}
-                    placeholder={
-                      fulfillment === "delivery"
-                        ? "Requested delivery time"
-                        : "Requested pickup time"
-                    }
-                  />
-                </label>
+                <div className="sm:col-span-2">
+                  <label className="text-xs text-cream/60">
+                    {fulfillment === "delivery"
+                      ? "Requested delivery time"
+                      : "Requested pickup time"}
+                  </label>
+                  <div className="mt-2 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleEarliestTime}
+                      className={cn(
+                        "flex-1 rounded-xl border px-4 py-2 text-sm font-medium transition",
+                        timeMode === "earliest"
+                          ? "border-angie-orange bg-angie-orange/10 text-angie-orange"
+                          : "border-white/10 bg-charcoal text-cream/70 hover:bg-white/5",
+                      )}
+                    >
+                      Earliest
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTimeMode("custom")}
+                      className={cn(
+                        "flex-1 rounded-xl border px-4 py-2 text-sm font-medium transition",
+                        timeMode === "custom"
+                          ? "border-angie-orange bg-angie-orange/10 text-angie-orange"
+                          : "border-white/10 bg-charcoal text-cream/70 hover:bg-white/5",
+                      )}
+                    >
+                      Custom
+                    </button>
+                  </div>
+                  {timeMode === "custom" ? (
+                    <input
+                      type="time"
+                      className="mt-2 w-full rounded-xl border border-white/10 bg-charcoal px-3 py-2 text-sm text-cream"
+                      value={requestedTime}
+                      onChange={(e) => setRequestedTime(e.target.value)}
+                    />
+                  ) : (
+                    <p className="mt-2 text-sm text-cream/80">{earliestTime}</p>
+                  )}
+                </div>
                 <label className="text-xs text-cream/60 sm:col-span-2">
                   Order notes (optional)
                   <textarea
@@ -685,25 +735,44 @@ export function OrderDrawer() {
                     </p>
                   )}
 
-                  <div className="flex gap-3">
+                  {/* Swipe to confirm on mobile, tap button on desktop */}
+                  {cardReady && !cardBusy ? (
+                    <>
+                      {/* Mobile: Swipe to confirm */}
+                      <div className="sm:hidden">
+                        <SwipeToConfirm
+                          onConfirm={() => void handleSquarePay()}
+                          disabled={cardBusy}
+                          label={`Swipe to pay ${formatMoney(totalCents)}`}
+                        />
+                      </div>
+
+                      {/* Desktop: Regular button */}
+                      <button
+                        type="button"
+                        onClick={() => void handleSquarePay()}
+                        className="hidden sm:flex w-full items-center justify-center gap-2 rounded-full bg-angie-orange py-3 text-sm font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-angie-orange/90"
+                      >
+                        Pay {formatMoney(totalCents)}
+                      </button>
+                    </>
+                  ) : (
                     <button
                       type="button"
-                      disabled={cardBusy || orderStatus === "submitting" || !cardReady}
-                      onClick={() => void handleSquarePay()}
-                      className="flex-1 rounded-full bg-angie-orange py-3 text-sm font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-angie-orange/90 disabled:cursor-not-allowed disabled:opacity-40"
+                      disabled
+                      className="w-full rounded-full bg-angie-orange/40 py-3 text-sm font-semibold uppercase tracking-editorial text-cream/50"
                     >
-                      {cardBusy || orderStatus === "submitting"
-                        ? "Processing…"
-                        : `Pay ${formatMoney(totalCents)}`}
+                      {cardBusy ? "Processing…" : "Enter card details"}
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowCardFields(false)}
-                      className="rounded-full border border-white/15 px-5 py-3 text-sm text-cream/85 transition hover:bg-white/5"
-                    >
-                      Cancel
-                    </button>
-                  </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => setShowCardFields(false)}
+                    className="w-full rounded-full border border-white/15 py-2.5 text-sm text-cream/85 transition hover:bg-white/5"
+                  >
+                    Cancel
+                  </button>
                 </>
               )}
             </footer>
