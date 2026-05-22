@@ -547,33 +547,45 @@ export function OrderDrawer() {
                     <label className="text-xs text-cream/60 sm:col-span-2">
                       Street
                       <input
+                        id="checkout-address-line1"
+                        name="address-line1"
                         className="mt-1 w-full rounded-xl border border-white/10 bg-charcoal px-3 py-2 text-sm text-cream"
                         value={customer.addressLine1 ?? ""}
                         onChange={(e) => setCustomer({ addressLine1: e.target.value })}
+                        autoComplete="street-address"
                       />
                     </label>
                     <label className="text-xs text-cream/60">
                       City
                       <input
+                        id="checkout-address-city"
+                        name="address-city"
                         className="mt-1 w-full rounded-xl border border-white/10 bg-charcoal px-3 py-2 text-sm text-cream"
                         value={customer.city ?? ""}
                         onChange={(e) => setCustomer({ city: e.target.value })}
+                        autoComplete="address-level2"
                       />
                     </label>
                     <label className="text-xs text-cream/60">
                       State
                       <input
+                        id="checkout-address-state"
+                        name="address-state"
                         className="mt-1 w-full rounded-xl border border-white/10 bg-charcoal px-3 py-2 text-sm text-cream"
                         value={customer.state ?? ""}
                         onChange={(e) => setCustomer({ state: e.target.value })}
+                        autoComplete="address-level1"
                       />
                     </label>
                     <label className="text-xs text-cream/60 sm:col-span-2">
                       ZIP
                       <input
+                        id="checkout-address-postal"
+                        name="address-postal"
                         className="mt-1 w-full rounded-xl border border-white/10 bg-charcoal px-3 py-2 text-sm text-cream"
                         value={customer.postalCode ?? ""}
                         onChange={(e) => setCustomer({ postalCode: e.target.value })}
+                        autoComplete="postal-code"
                       />
                     </label>
                   </div>
@@ -584,6 +596,8 @@ export function OrderDrawer() {
                 <label className="text-xs text-cream/60">
                   Name
                   <input
+                    id="checkout-customer-name"
+                    name="customer-name"
                     className="mt-1 w-full rounded-xl border border-white/10 bg-charcoal px-3 py-2 text-sm text-cream"
                     value={customer.name}
                     onChange={(e) => setCustomer({ name: e.target.value })}
@@ -593,6 +607,8 @@ export function OrderDrawer() {
                 <label className="text-xs text-cream/60">
                   Phone
                   <input
+                    id="checkout-customer-phone"
+                    name="customer-phone"
                     className="mt-1 w-full rounded-xl border border-white/10 bg-charcoal px-3 py-2 text-sm text-cream"
                     value={customer.phone}
                     onChange={(e) => setCustomer({ phone: e.target.value })}
@@ -603,6 +619,9 @@ export function OrderDrawer() {
                 <label className="text-xs text-cream/60 sm:col-span-2">
                   Email (optional)
                   <input
+                    id="checkout-customer-email"
+                    name="customer-email"
+                    type="email"
                     className="mt-1 w-full rounded-xl border border-white/10 bg-charcoal px-3 py-2 text-sm text-cream"
                     value={customer.email ?? ""}
                     onChange={(e) => setCustomer({ email: e.target.value })}
