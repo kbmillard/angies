@@ -71,6 +71,6 @@ app/page.tsx
 - `app/admin/page.tsx` — unified admin portal
 - `app/api/admin/*` — catalog, photos, site settings, import
 
-## URL for this doc
+## Repo reference only
 
-After deploy: **https://angieskc.com/site-stack** (noindex reference page)
+This file is for developers in the repo — not published as a public route.
