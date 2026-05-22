@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { buildSquareContentSecurityPolicy } from "./lib/square/csp";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -25,6 +26,19 @@ const nextConfig: NextConfig = {
       hostname,
       pathname: "/**",
     })),
+  },
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: buildSquareContentSecurityPolicy(),
+          },
+        ],
+      },
+    ];
   },
 };
 

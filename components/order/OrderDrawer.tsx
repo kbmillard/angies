@@ -15,6 +15,11 @@ import {
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { cn } from "@/lib/utils/cn";
 import { useScrollLock } from "@/lib/utils/use-scroll-lock";
+import {
+  bindSquareCardListeners,
+  formatSquareTokenizeMessage,
+  waitForSquareMountVisible,
+} from "@/lib/square/card-helpers";
 import { createSquarePayments, getSquareConfig, loadSquareSdk } from "@/lib/square/loadSquare";
 import type { SquareCard } from "@/lib/square/types";
 import { OrderConfirmation } from "@/components/order/OrderConfirmation";
@@ -122,10 +127,11 @@ export function OrderDrawer() {
   const [cardMountKey, setCardMountKey] = useState(0);
   const mountRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<SquareCard | null>(null);
-  const [cardReady, setCardReady] = useState(false);
+  const [cardMounted, setCardMounted] = useState(false);
+  const [cardPayable, setCardPayable] = useState(false);
   const [cardMessage, setCardMessage] = useState<string | null>(null);
   const [cardBusy, setCardBusy] = useState(false);
-  const { configured } = getSquareConfig();
+  const { configured, environment: squareEnvironment } = getSquareConfig();
 
   // Time picker mode
   const [timeMode, setTimeMode] = useState<"earliest" | "custom">("earliest");
@@ -154,7 +160,8 @@ export function OrderDrawer() {
       mountRef.current.innerHTML = "";
     }
     setShowCardFields(false);
-    setCardReady(false);
+    setCardMounted(false);
+    setCardPayable(false);
     setCardMessage(null);
     setCardBusy(false);
   }, []);
@@ -177,7 +184,8 @@ export function OrderDrawer() {
 
     // Clear any existing content
     mountElement.innerHTML = "";
-    setCardReady(false);
+    setCardMounted(false);
+    setCardPayable(false);
     setCardMessage(null);
 
     // Wait for next frame to ensure DOM is fully painted
@@ -186,7 +194,6 @@ export function OrderDrawer() {
 
       (async () => {
         try {
-          // Verify mount element still exists and is in DOM
           if (!mountElement || !document.body.contains(mountElement)) {
             throw new Error("Mount element not found in DOM");
           }
@@ -208,27 +215,54 @@ export function OrderDrawer() {
             return;
           }
 
-          // Attach using CSS selector - verify element has ID
-          const elementId = mountElement.id || "square-card-mount-fallback";
+          const elementId = mountElement.id || "square-card-mount";
           if (!mountElement.id) {
             mountElement.id = elementId;
           }
 
           await card.attach(`#${elementId}`);
-          
+
           if (cancelled) {
             card.destroy();
             return;
           }
 
+          const visible = await waitForSquareMountVisible(mountElement);
+          if (cancelled) {
+            card.destroy();
+            return;
+          }
+
+          if (!visible) {
+            console.error("Square card mount: iframe not visible", {
+              mountKey: cardMountKey,
+              environment: squareEnvironment,
+            });
+            card.destroy();
+            setCardMessage(
+              "Payment fields didn't load. Tap Cancel, then Checkout with Square again.",
+            );
+            return;
+          }
+
+          bindSquareCardListeners(card, (payable) => {
+            if (!cancelled) setCardPayable(payable);
+          });
+
           cardRef.current = card;
-          setCardReady(true);
+          setCardMounted(true);
+          setCardPayable(false);
           setCardMessage(null);
         } catch (err) {
           if (!cancelled) {
-            console.error("Square card mount failed:", err);
+            console.error("Square card mount failed:", err, {
+              mountKey: cardMountKey,
+              environment: squareEnvironment,
+            });
             setCardMessage(
-              err instanceof Error ? err.message : "Could not initialize Square card fields. Try refreshing the page."
+              err instanceof Error
+                ? err.message
+                : "Could not initialize Square card fields. Try refreshing the page.",
             );
           }
         }
@@ -245,13 +279,14 @@ export function OrderDrawer() {
         }
         cardRef.current = null;
       }
-      setCardReady(false);
+      setCardMounted(false);
+      setCardPayable(false);
     };
-  }, [showCardFields, cardMountKey]);
+  }, [showCardFields, cardMountKey, squareEnvironment]);
 
   // Handle Square payment submission
   const handleSquarePay = useCallback(async () => {
-    if (!cardRef.current || cardBusy) return;
+    if (!cardRef.current || cardBusy || !cardPayable) return;
     setCardBusy(true);
     setCardMessage(null);
 
@@ -259,8 +294,8 @@ export function OrderDrawer() {
       const result = await cardRef.current.tokenize();
 
       if (result.status !== "OK" || !result.token) {
-        const errMsg = result.errors?.[0]?.message ?? "Card tokenization failed";
-        setCardMessage(errMsg);
+        const raw = result.errors?.[0]?.message;
+        setCardMessage(formatSquareTokenizeMessage(raw, cardPayable));
         setCardBusy(false);
         return;
       }
@@ -268,11 +303,15 @@ export function OrderDrawer() {
       setSquareToken(result.token);
       await submitOrder(result.token);
     } catch (err) {
-      setCardMessage(err instanceof Error ? err.message : "Payment error");
+      setCardMessage(
+        err instanceof Error
+          ? formatSquareTokenizeMessage(err.message, cardPayable)
+          : "Payment error",
+      );
     } finally {
       setCardBusy(false);
     }
-  }, [cardBusy, setSquareToken, submitOrder]);
+  }, [cardBusy, cardPayable, setSquareToken, submitOrder]);
 
   // Reset card fields when drawer closes
   useEffect(() => {
@@ -755,10 +794,11 @@ export function OrderDrawer() {
                     key={`mount-${cardMountKey}`}
                     className={cn(
                       "min-h-[72px] rounded-xl border border-white/15 bg-black/40 p-3",
-                      !cardReady && "flex items-center justify-center text-sm text-cream/50",
+                      !cardMounted &&
+                        "flex items-center justify-center text-sm text-cream/50",
                     )}
                   >
-                    {!cardReady && !cardMessage && "Loading card fields…"}
+                    {!cardMounted && !cardMessage && "Loading card fields…"}
                   </div>
 
                   {!configured && (
@@ -777,7 +817,7 @@ export function OrderDrawer() {
                   )}
 
                   {/* Swipe to confirm on mobile, tap button on desktop */}
-                  {cardReady && !cardBusy ? (
+                  {cardPayable && !cardBusy ? (
                     <>
                       {/* Mobile: Swipe to confirm */}
                       <div className="sm:hidden">
@@ -803,7 +843,11 @@ export function OrderDrawer() {
                       disabled
                       className="w-full rounded-full bg-angie-orange/40 py-3 text-sm font-semibold uppercase tracking-editorial text-cream/50"
                     >
-                      {cardBusy ? "Processing…" : "Enter card details"}
+                      {cardBusy
+                        ? "Processing…"
+                        : cardMounted
+                          ? "Enter card details"
+                          : "Loading card fields…"}
                     </button>
                   )}
 
