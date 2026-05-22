@@ -18,7 +18,8 @@ import { useScrollLock } from "@/lib/utils/use-scroll-lock";
 import {
   bindSquareCardListeners,
   formatSquareTokenizeMessage,
-  waitForSquareMountVisible,
+  squareMountFailureMessage,
+  waitForSquareCardReady,
 } from "@/lib/square/card-helpers";
 import { createSquarePayments, getSquareConfig, loadSquareSdk } from "@/lib/square/loadSquare";
 import type { SquareCard } from "@/lib/square/types";
@@ -227,21 +228,19 @@ export function OrderDrawer() {
             return;
           }
 
-          const visible = await waitForSquareMountVisible(mountElement);
+          const ready = await waitForSquareCardReady(card, mountElement);
           if (cancelled) {
             card.destroy();
             return;
           }
 
-          if (!visible) {
-            console.error("Square card mount: iframe not visible", {
+          if (!ready) {
+            console.error("Square card mount: fields did not become interactive", {
               mountKey: cardMountKey,
               environment: squareEnvironment,
             });
             card.destroy();
-            setCardMessage(
-              "Payment fields didn't load. Tap Cancel, then Checkout with Square again.",
-            );
+            setCardMessage(squareMountFailureMessage(squareEnvironment));
             return;
           }
 

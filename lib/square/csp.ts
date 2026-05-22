@@ -1,5 +1,7 @@
 /**
- * Content-Security-Policy for Square Web Payments SDK.
+ * Optional Content-Security-Policy for Square Web Payments SDK.
+ * Not applied site-wide today — sandbox card iframe uses its own CSP.
+ * Wire into next.config headers() when going to production if needed.
  * @see https://developer.squareup.com/docs/web-payments/content-security-policy
  */
 export function buildSquareContentSecurityPolicy(): string {
