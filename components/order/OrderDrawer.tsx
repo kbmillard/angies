@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useOrder } from "@/context/OrderContext";
 import { useMenuCatalog } from "@/context/MenuCatalogContext";
@@ -10,6 +10,36 @@ import { formatOptionLine } from "@/lib/menu/option-groups";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { cn } from "@/lib/utils/cn";
 import { useScrollLock } from "@/lib/utils/use-scroll-lock";
+import { createSquarePayments, getSquareConfig, loadSquareSdk } from "@/lib/square/loadSquare";
+import type { SquareCard } from "@/lib/square/types";
+
+/** Card field styling (dark charcoal theme) */
+const SQUARE_CARD_STYLE = {
+  ".input-container": {
+    borderColor: "rgba(255, 255, 255, 0.15)",
+    borderRadius: "12px",
+  },
+  ".input-container.is-focus": {
+    borderColor: "rgba(255, 255, 255, 0.35)",
+  },
+  ".input-container.is-error": {
+    borderColor: "#f87171",
+  },
+  input: {
+    backgroundColor: "#1a1a1a",
+    color: "#f5f0e8",
+    fontSize: "16px",
+  },
+  "input::placeholder": {
+    color: "rgba(245, 240, 232, 0.40)",
+  },
+  ".message-text": {
+    color: "#f87171",
+  },
+  ".message-icon": {
+    color: "#f87171",
+  },
+};
 
 function formatMoney(cents: number) {
   return new Intl.NumberFormat("en-US", {
@@ -56,7 +86,6 @@ export function OrderDrawer() {
     totalCents,
     orderDrawerOpen,
     setOrderDrawerOpen,
-    setPaymentModalOpen,
     canOpenPayment,
     canSendOrderRequest,
     cartHasUnpricedItems,
@@ -65,9 +94,100 @@ export function OrderDrawer() {
     confirmationId,
     successMessage,
     submitOrderRequest,
+    setSquareToken,
+    submitOrder,
   } = useOrder();
 
+  // Square card payment state
+  const [showCardFields, setShowCardFields] = useState(false);
+  const mountRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<SquareCard | null>(null);
+  const [cardReady, setCardReady] = useState(false);
+  const [cardMessage, setCardMessage] = useState<string | null>(null);
+  const [cardBusy, setCardBusy] = useState(false);
+  const { configured } = getSquareConfig();
+
   useScrollLock(orderDrawerOpen);
+
+  // Initialize Square card fields when user taps "Pay with card"
+  useEffect(() => {
+    if (!showCardFields || !mountRef.current) return;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        await loadSquareSdk();
+        if (cancelled) return;
+
+        const payments = await createSquarePayments();
+        if (!payments || cancelled) {
+          setCardMessage(
+            "Square is not configured — add application ID and location ID to environment variables.",
+          );
+          return;
+        }
+
+        const card = await payments.card({ style: SQUARE_CARD_STYLE });
+        if (cancelled) {
+          card.destroy();
+          return;
+        }
+
+        await card.attach("#square-card-mount");
+        cardRef.current = card;
+        setCardReady(true);
+        setCardMessage(null);
+      } catch {
+        if (!cancelled) {
+          setCardMessage("Could not initialize Square card fields. Check your connection and keys.");
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      if (cardRef.current) {
+        cardRef.current.destroy();
+        cardRef.current = null;
+      }
+      setCardReady(false);
+    };
+  }, [showCardFields]);
+
+  // Handle Square payment submission
+  const handleSquarePay = useCallback(async () => {
+    if (!cardRef.current || cardBusy) return;
+    setCardBusy(true);
+    setCardMessage(null);
+
+    try {
+      const result = await cardRef.current.tokenize();
+
+      if (result.status !== "OK" || !result.token) {
+        const errMsg = result.errors?.[0]?.message ?? "Card tokenization failed";
+        setCardMessage(errMsg);
+        setCardBusy(false);
+        return;
+      }
+
+      setSquareToken(result.token);
+      await submitOrder(result.token);
+    } catch (err) {
+      setCardMessage(err instanceof Error ? err.message : "Payment error");
+    } finally {
+      setCardBusy(false);
+    }
+  }, [cardBusy, setSquareToken, submitOrder]);
+
+  // Reset card fields when drawer closes
+  useEffect(() => {
+    if (!orderDrawerOpen) {
+      setShowCardFields(false);
+      setCardReady(false);
+      setCardMessage(null);
+      setCardBusy(false);
+    }
+  }, [orderDrawerOpen]);
 
   if (!mounted) return null;
 
@@ -120,7 +240,7 @@ export function OrderDrawer() {
               </button>
             </header>
 
-            <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto overscroll-contain px-4 py-4 sm:px-5 sm:py-5">
+            <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain p-3 sm:gap-6 sm:px-5 sm:py-5">
               {confirmationId ? (
                 <div className="rounded-2xl border border-agave/40 bg-agave/10 p-4 text-cream">
                   <p className="font-display text-2xl">You are in.</p>
@@ -438,33 +558,99 @@ export function OrderDrawer() {
               {/* TODO: Wire SMS, email, Toast, Square, or POS when replacing mock order routes. */}
             </div>
 
-            <footer className="shrink-0 space-y-3 border-t border-white/10 p-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:p-5 sm:pb-5">
-              {/* TODO: Replace null prices with confirmed restaurant pricing before enabling real payment checkout. */}
+            <footer className="shrink-0 space-y-3 border-t border-white/10 p-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:space-y-4 sm:p-4 sm:pb-4">
               {cartHasUnpricedItems ? (
-                <button
-                  type="button"
-                  disabled={!canSendOrderRequest}
-                  className="flex w-full items-center justify-center gap-2 rounded-full bg-angie-orange py-3 text-sm font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-angie-orange/90 disabled:cursor-not-allowed disabled:opacity-40"
-                  onClick={() => submitOrderRequest()}
-                >
-                  Send Order Request
-                </button>
+                <>
+                  <button
+                    type="button"
+                    disabled={!canSendOrderRequest}
+                    className="flex w-full items-center justify-center gap-2 rounded-full bg-angie-orange py-3 text-sm font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-angie-orange/90 disabled:cursor-not-allowed disabled:opacity-40"
+                    onClick={() => submitOrderRequest()}
+                  >
+                    Send Order Request
+                  </button>
+                  {!canSendOrderRequest && (
+                    <p className="text-center text-xs text-cream/50">
+                      Add items, name, phone, requested time
+                      {fulfillment === "delivery" ? ", and delivery address" : ""} to continue.
+                    </p>
+                  )}
+                </>
+              ) : !showCardFields ? (
+                <>
+                  <button
+                    type="button"
+                    disabled={!canOpenPayment}
+                    className="flex w-full items-center justify-center gap-2 rounded-full bg-angie-orange py-3 text-sm font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-angie-orange/90 disabled:cursor-not-allowed disabled:opacity-40"
+                    onClick={() => setShowCardFields(true)}
+                  >
+                    Pay with card
+                  </button>
+                  {!canOpenPayment && (
+                    <p className="text-center text-xs text-cream/50">
+                      Add items, name, phone, requested time
+                      {fulfillment === "delivery" ? ", and delivery address" : ""} to continue.
+                    </p>
+                  )}
+                </>
               ) : (
-                <button
-                  type="button"
-                  disabled={!canOpenPayment}
-                  className="flex w-full items-center justify-center gap-2 rounded-full bg-angie-orange py-3 text-sm font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-angie-orange/90 disabled:cursor-not-allowed disabled:opacity-40"
-                  onClick={() => setPaymentModalOpen(true)}
-                >
-                  Pay with card
-                </button>
+                <>
+                  {/* Square branding */}
+                  <div className="flex items-center justify-center gap-2 text-xs text-cream/60">
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M4.01 8.54C4.01 6.19 5.9 4.3 8.26 4.3c1.06 0 2.04.38 2.79 1.05l.76.69.76-.69C13.32 4.68 14.3 4.3 15.36 4.3c2.36 0 4.25 1.89 4.25 4.24 0 4.59-4.87 8.02-7.87 9.84-3-1.82-7.73-5.25-7.73-9.84z"/>
+                    </svg>
+                    <span>Secure checkout with Square</span>
+                  </div>
+
+                  {/* Card mount */}
+                  <div
+                    id="square-card-mount"
+                    ref={mountRef}
+                    className={cn(
+                      "min-h-[72px] rounded-xl border border-white/15 bg-black/40 p-3",
+                      !cardReady && "flex items-center justify-center text-sm text-cream/50",
+                    )}
+                  >
+                    {!cardReady && !cardMessage && "Loading card fields…"}
+                  </div>
+
+                  {!configured && (
+                    <p className="text-xs text-cream/55">
+                      Set{" "}
+                      <code className="rounded bg-black/40 px-1">NEXT_PUBLIC_SQUARE_APPLICATION_ID</code>{" "}
+                      and <code className="rounded bg-black/40 px-1">NEXT_PUBLIC_SQUARE_LOCATION_ID</code>{" "}
+                      and reload to mount live Square fields.
+                    </p>
+                  )}
+
+                  {cardMessage && (
+                    <p className="rounded-xl border border-salsa/35 bg-salsa/10 px-4 py-2 text-sm text-salsa">
+                      {cardMessage}
+                    </p>
+                  )}
+
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      disabled={cardBusy || orderStatus === "submitting" || !cardReady}
+                      onClick={() => void handleSquarePay()}
+                      className="flex-1 rounded-full bg-angie-orange py-3 text-sm font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-angie-orange/90 disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      {cardBusy || orderStatus === "submitting"
+                        ? "Processing…"
+                        : `Pay ${formatMoney(totalCents)}`}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowCardFields(false)}
+                      className="rounded-full border border-white/15 px-5 py-3 text-sm text-cream/85 transition hover:bg-white/5"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </>
               )}
-              {!canSendOrderRequest ? (
-                <p className="text-center text-xs text-cream/50">
-                  Add items, name, phone, requested time
-                  {fulfillment === "delivery" ? ", and delivery address" : ""} to continue.
-                </p>
-              ) : null}
             </footer>
           </motion.aside>
         </>

@@ -62,8 +62,6 @@ type OrderContextValue = {
   setSquareToken: (t: string | null) => void;
   orderDrawerOpen: boolean;
   setOrderDrawerOpen: (v: boolean) => void;
-  paymentModalOpen: boolean;
-  setPaymentModalOpen: (v: boolean) => void;
   orderStatus: OrderStatus;
   orderError: string | null;
   confirmationId: string | null;
@@ -116,12 +114,6 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
   const [customTipCents, setCustomTipCents] = useState(0);
   const [squareToken, setSquareToken] = useState<string | null>(null);
   const [orderDrawerOpen, setOrderDrawerOpen] = useState(false);
-  const [paymentModalOpen, setPaymentModalOpenState] = useState(false);
-
-  const setPaymentModalOpen = useCallback((open: boolean) => {
-    if (open) setOrderDrawerOpen(false);
-    setPaymentModalOpenState(open);
-  }, []);
   const [orderStatus, setOrderStatus] = useState<OrderStatus>("idle");
   const [orderError, setOrderError] = useState<string | null>(null);
   const [confirmationId, setConfirmationId] = useState<string | null>(null);
@@ -404,7 +396,6 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
         setConfirmationId(data.orderId ?? null);
         setSuccessMessage(data.message ?? "Payment recorded.");
         setOrderStatus("confirmed");
-        setPaymentModalOpen(false);
         setCart([]);
         setSquareToken(null);
       } catch (e) {
@@ -454,8 +445,6 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       setSquareToken,
       orderDrawerOpen,
       setOrderDrawerOpen,
-      paymentModalOpen,
-      setPaymentModalOpen,
       orderStatus,
       orderError,
       confirmationId,
@@ -496,8 +485,6 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       orderError,
       orderNotes,
       orderStatus,
-      paymentModalOpen,
-      setPaymentModalOpen,
       pickupLocation,
       removeLine,
       requestedTime,

@@ -36,7 +36,6 @@ export function CartTotalFab() {
     totalCents,
     setOrderDrawerOpen,
     orderDrawerOpen,
-    paymentModalOpen,
   } = useOrder();
 
   const itemCount = useMemo(
@@ -55,7 +54,7 @@ export function CartTotalFab() {
       ? "total to be determined"
       : `total ${priceLabel}`;
 
-  if (cart.length === 0 || orderDrawerOpen || paymentModalOpen) {
+  if (cart.length === 0 || orderDrawerOpen) {
     return null;
   }
 

@@ -1,6 +1,5 @@
 "use client";
 
-import { SquarePaymentModal } from "@/components/square/SquarePaymentModal";
 import { CateringSection } from "@/components/catering/CateringSection";
 import { FinalConversion } from "@/components/cta/FinalConversion";
 import { SiteFooter } from "@/components/footer/SiteFooter";
@@ -14,11 +13,8 @@ import { FixedBrandBackdrop } from "@/components/prologue/FixedBrandBackdrop";
 import { Prologue } from "@/components/prologue/Prologue";
 import { SocialPromoSection } from "@/components/social/SocialPromoSection";
 import { StorySection } from "@/components/story/StorySection";
-import { useOrder } from "@/context/OrderContext";
 
 export function HomeView() {
-  const { paymentModalOpen, setPaymentModalOpen } = useOrder();
-
   return (
     <>
       <EditorialNav />
@@ -36,7 +32,6 @@ export function HomeView() {
       </main>
       <CartTotalFab />
       <OrderDrawer />
-      <SquarePaymentModal open={paymentModalOpen} onOpenChange={setPaymentModalOpen} />
     </>
   );
 }
