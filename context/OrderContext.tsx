@@ -16,9 +16,15 @@ import {
   selectionsKey,
 } from "@/lib/menu/option-groups";
 import { useMenuCatalog } from "@/context/MenuCatalogContext";
+import { useScheduleCatalog } from "@/context/ScheduleCatalogContext";
 import { resolveAnchorScrollId, scrollDocumentToAnchor } from "@/lib/utils/scroll-to-anchor";
+import {
+  computeEstimatedPickupAt,
+  resolvePickupLocation,
+} from "@/lib/orders/pickup-time";
 import type {
   CartLine,
+  ConfirmationSnapshot,
   CustomerInfo,
   FulfillmentType,
   PickupLocationId,
@@ -65,6 +71,7 @@ type OrderContextValue = {
   orderStatus: OrderStatus;
   orderError: string | null;
   confirmationId: string | null;
+  confirmationSnapshot: ConfirmationSnapshot | null;
   successMessage: string | null;
   cartHasUnpricedItems: boolean;
   subtotalCents: number;
@@ -83,6 +90,7 @@ type OrderContextValue = {
   submitOrder: (squareTokenOverride?: string | null) => Promise<void>;
   /** Order request when any line is unpriced — no card charge */
   submitOrderRequest: () => Promise<void>;
+  dismissConfirmation: () => void;
 };
 
 const OrderContext = createContext<OrderContextValue | null>(null);
@@ -104,6 +112,8 @@ function normMeat(m?: string) {
 
 export function OrderProvider({ children }: { children: React.ReactNode }) {
   const { itemsById } = useMenuCatalog();
+  const { data: scheduleData } = useScheduleCatalog();
+  const scheduleItems = scheduleData?.items ?? [];
   const [cart, setCart] = useState<CartLine[]>([]);
   const [fulfillment, setFulfillment] = useState<FulfillmentType>("pickup");
   const [pickupLocation, setPickupLocation] = useState<PickupLocationId>("truck");
@@ -117,6 +127,8 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
   const [orderStatus, setOrderStatus] = useState<OrderStatus>("idle");
   const [orderError, setOrderError] = useState<string | null>(null);
   const [confirmationId, setConfirmationId] = useState<string | null>(null);
+  const [confirmationSnapshot, setConfirmationSnapshot] =
+    useState<ConfirmationSnapshot | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const setCustomer = useCallback((c: Partial<CustomerInfo>) => {
@@ -278,6 +290,39 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     return checkoutFormValid && !cartHasUnpricedItems;
   }, [cartHasUnpricedItems, checkoutFormValid]);
 
+  const buildConfirmationSnapshot = useCallback((): ConfirmationSnapshot => {
+    const completedAt = new Date();
+    const pickup = resolvePickupLocation(scheduleItems);
+
+    return {
+      items: cart.map((line) => ({ ...line })),
+      customerEmail: customer.email?.trim() ?? "",
+      customerName: customer.name.trim(),
+      requestedTime,
+      fulfillment,
+      pickupLocation: fulfillment === "pickup" ? pickupLocation : undefined,
+      subtotalCents,
+      taxCents,
+      tipCents,
+      totalCents,
+      estimatedPickupAt: computeEstimatedPickupAt(completedAt),
+      pickupLocationName: pickup.locationName,
+      pickupAddress: pickup.address,
+    };
+  }, [
+    cart,
+    customer.email,
+    customer.name,
+    fulfillment,
+    pickupLocation,
+    requestedTime,
+    scheduleItems,
+    subtotalCents,
+    taxCents,
+    tipCents,
+    totalCents,
+  ]);
+
   const openOrderPanel = useCallback(() => {
     setOrderDrawerOpen(true);
   }, []);
@@ -297,6 +342,14 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
   const focusSchedule = useCallback(() => {
     scrollToSection("schedule");
   }, [scrollToSection]);
+
+  const dismissConfirmation = useCallback(() => {
+    setConfirmationId(null);
+    setConfirmationSnapshot(null);
+    setSuccessMessage(null);
+    setOrderStatus("idle");
+    setOrderError(null);
+  }, []);
 
   const submitOrderRequest = useCallback(async () => {
     if (!canSendOrderRequest) return;
@@ -330,6 +383,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       if (!res.ok || !data.ok) {
         throw new Error(data.error || "Order failed");
       }
+      setConfirmationSnapshot(buildConfirmationSnapshot());
       setConfirmationId(data.orderId ?? null);
       setSuccessMessage(
         data.message ??
@@ -343,6 +397,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       setOrderError(e instanceof Error ? e.message : "Unknown error");
     }
   }, [
+    buildConfirmationSnapshot,
     canSendOrderRequest,
     cart,
     cartHasUnpricedItems,
@@ -393,10 +448,11 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
         if (!res.ok || !data.ok) {
           throw new Error(data.error || "Order failed");
         }
+        setConfirmationSnapshot(buildConfirmationSnapshot());
         setConfirmationId(data.orderId ?? null);
         setSuccessMessage(data.message ?? "Payment recorded.");
         setOrderStatus("confirmed");
-        
+
         // Clear cart and form data
         setCart([]);
         setSquareToken(null);
@@ -411,6 +467,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       }
     },
     [
+      buildConfirmationSnapshot,
       canOpenPayment,
       cart,
       cartHasUnpricedItems,
@@ -455,6 +512,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       orderStatus,
       orderError,
       confirmationId,
+      confirmationSnapshot,
       successMessage,
       cartHasUnpricedItems,
       subtotalCents,
@@ -471,18 +529,22 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       focusSchedule,
       submitOrder,
       submitOrderRequest,
+      dismissConfirmation,
     }),
     [
       addItem,
+      buildConfirmationSnapshot,
       canOpenPayment,
       canSendOrderRequest,
       cart,
       cartHasUnpricedItems,
       squareToken,
       confirmationId,
+      confirmationSnapshot,
       customer,
       customTipCents,
       deliveryFeeCents,
+      dismissConfirmation,
       fulfillment,
       openOrderPanel,
       focusCatering,

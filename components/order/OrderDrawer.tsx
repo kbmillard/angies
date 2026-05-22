@@ -2,11 +2,16 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useOrder } from "@/context/OrderContext";
 import { useMenuCatalog } from "@/context/MenuCatalogContext";
+import { useScheduleCatalog } from "@/context/ScheduleCatalogContext";
 import { formatOptionLine } from "@/lib/menu/option-groups";
+import {
+  PICKUP_READY_MESSAGE,
+  resolveEarliestPickupSlot,
+} from "@/lib/orders/pickup-time";
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { cn } from "@/lib/utils/cn";
 import { useScrollLock } from "@/lib/utils/use-scroll-lock";
@@ -14,7 +19,6 @@ import { createSquarePayments, getSquareConfig, loadSquareSdk } from "@/lib/squa
 import type { SquareCard } from "@/lib/square/types";
 import { OrderConfirmation } from "@/components/order/OrderConfirmation";
 import { SwipeToConfirm } from "@/components/order/SwipeToConfirm";
-import type { CartLine, FulfillmentType, PickupLocationId } from "@/lib/types/order";
 
 /** Card field styling (dark charcoal theme) */
 const SQUARE_CARD_STYLE = {
@@ -66,6 +70,12 @@ export function OrderDrawer() {
   useEffect(() => setMounted(true), []);
 
   const { itemsById } = useMenuCatalog();
+  const { data: scheduleData } = useScheduleCatalog();
+  const scheduleItems = useMemo(
+    () => scheduleData?.items ?? [],
+    [scheduleData?.items],
+  );
+
   const {
     cart,
     updateQty,
@@ -95,14 +105,21 @@ export function OrderDrawer() {
     orderStatus,
     orderError,
     confirmationId,
-    successMessage,
+    confirmationSnapshot,
     submitOrderRequest,
     setSquareToken,
     submitOrder,
+    dismissConfirmation,
   } = useOrder();
+
+  const itemCount = useMemo(
+    () => cart.reduce((sum, line) => sum + line.quantity, 0),
+    [cart],
+  );
 
   // Square card payment state
   const [showCardFields, setShowCardFields] = useState(false);
+  const [cardMountKey, setCardMountKey] = useState(0);
   const mountRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<SquareCard | null>(null);
   const [cardReady, setCardReady] = useState(false);
@@ -110,43 +127,59 @@ export function OrderDrawer() {
   const [cardBusy, setCardBusy] = useState(false);
   const { configured } = getSquareConfig();
 
-  // Snapshot order details for confirmation view (before cart is cleared)
-  const [orderSnapshot, setOrderSnapshot] = useState<{
-    items: CartLine[];
-    email: string;
-    requestedTime: string;
-    pickupLocation: PickupLocationId | undefined;
-    fulfillment: FulfillmentType;
-    totalCents: number;
-  } | null>(null);
-
   // Time picker mode
   const [timeMode, setTimeMode] = useState<"earliest" | "custom">("earliest");
 
-  // Calculate earliest available time (30 min from now)
-  const earliestTime = (() => {
-    const now = new Date();
-    now.setMinutes(now.getMinutes() + 30);
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    const period = hours >= 12 ? "PM" : "AM";
-    const displayHours = hours % 12 || 12;
-    const displayMinutes = minutes.toString().padStart(2, "0");
-    return `${displayHours}:${displayMinutes} ${period}`;
-  })();
+  const earliestSlot = useMemo(
+    () => resolveEarliestPickupSlot(scheduleItems),
+    [scheduleItems],
+  );
 
-  // Handle earliest time selection
   const handleEarliestTime = useCallback(() => {
     setTimeMode("earliest");
-    setRequestedTime(earliestTime);
-  }, [earliestTime, setRequestedTime]);
+    setRequestedTime(earliestSlot);
+  }, [earliestSlot, setRequestedTime]);
+
+  const handleStartCheckout = useCallback(() => {
+    setCardMountKey((key) => key + 1);
+    setShowCardFields(true);
+  }, []);
+
+  const handleCancelPayment = useCallback(() => {
+    if (cardRef.current) {
+      cardRef.current.destroy();
+      cardRef.current = null;
+    }
+    if (mountRef.current) {
+      mountRef.current.innerHTML = "";
+    }
+    setShowCardFields(false);
+    setCardReady(false);
+    setCardMessage(null);
+    setCardBusy(false);
+  }, []);
+
+  useEffect(() => {
+    if (!orderDrawerOpen) return;
+    if (timeMode === "earliest" && !requestedTime.trim()) {
+      setRequestedTime(earliestSlot);
+    }
+  }, [earliestSlot, orderDrawerOpen, requestedTime, setRequestedTime, timeMode]);
 
   useScrollLock(orderDrawerOpen);
 
-  // Initialize Square card fields when user taps "Pay with card"
-  useEffect(() => {
-    if (!showCardFields || !mountRef.current) return;
+  const cardMountId = `square-card-mount-${cardMountKey}`;
+
+  // Initialize Square card fields when user taps Checkout with Square
+  useLayoutEffect(() => {
+    if (!showCardFields) return;
     let cancelled = false;
+
+    if (mountRef.current) {
+      mountRef.current.innerHTML = "";
+    }
+    setCardReady(false);
+    setCardMessage(null);
 
     (async () => {
       try {
@@ -167,7 +200,7 @@ export function OrderDrawer() {
           return;
         }
 
-        await card.attach("#square-card-mount");
+        await card.attach(`#${cardMountId}`);
         cardRef.current = card;
         setCardReady(true);
         setCardMessage(null);
@@ -186,7 +219,7 @@ export function OrderDrawer() {
       }
       setCardReady(false);
     };
-  }, [showCardFields]);
+  }, [showCardFields, cardMountKey, cardMountId]);
 
   // Handle Square payment submission
   const handleSquarePay = useCallback(async () => {
@@ -216,38 +249,16 @@ export function OrderDrawer() {
   // Reset card fields when drawer closes
   useEffect(() => {
     if (!orderDrawerOpen) {
-      setShowCardFields(false);
-      setCardReady(false);
-      setCardMessage(null);
-      setCardBusy(false);
+      handleCancelPayment();
     }
-  }, [orderDrawerOpen]);
+  }, [handleCancelPayment, orderDrawerOpen]);
 
-  // Reset card fields when order is confirmed (security: clear sensitive data)
-  // Also snapshot order details for confirmation view
+  // Clear card fields when order is confirmed (security)
   useEffect(() => {
     if (confirmationId) {
-      // Snapshot order before cart is cleared
-      setOrderSnapshot({
-        items: [...cart],
-        email: customer.email || "",
-        requestedTime,
-        pickupLocation: undefined, // TODO: Get from order context
-        fulfillment,
-        totalCents,
-      });
-
-      // Clear card fields
-      setShowCardFields(false);
-      setCardReady(false);
-      setCardMessage(null);
-      setCardBusy(false);
-      if (cardRef.current) {
-        cardRef.current.destroy();
-        cardRef.current = null;
-      }
+      handleCancelPayment();
     }
-  }, [confirmationId, cart, customer.email, requestedTime, fulfillment, totalCents]);
+  }, [confirmationId, handleCancelPayment]);
 
   if (!mounted) return null;
 
@@ -281,17 +292,12 @@ export function OrderDrawer() {
             aria-label="Order and checkout"
           >
             {/* Show confirmation view if order is confirmed */}
-            {confirmationId && orderSnapshot ? (
+            {confirmationId && confirmationSnapshot ? (
               <OrderConfirmation
                 orderId={confirmationId}
-                customerEmail={orderSnapshot.email}
-                requestedTime={orderSnapshot.requestedTime}
-                pickupLocation={orderSnapshot.pickupLocation}
-                fulfillment={orderSnapshot.fulfillment}
-                items={orderSnapshot.items}
-                totalCents={orderSnapshot.totalCents}
+                snapshot={confirmationSnapshot}
                 onClose={() => {
-                  setOrderSnapshot(null);
+                  dismissConfirmation();
                   setOrderDrawerOpen(false);
                 }}
               />
@@ -318,25 +324,23 @@ export function OrderDrawer() {
                 </header>
 
             <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-contain p-3 sm:gap-6 sm:px-5 sm:py-5">
-              {confirmationId ? (
-                <div className="rounded-2xl border border-agave/40 bg-agave/10 p-4 text-cream">
-                  <p className="font-display text-2xl">You are in.</p>
-                  <p className="mt-2 text-sm text-cream/80">
-                    Reference{" "}
-                    <span className="font-mono text-cream">{confirmationId}</span>
-                  </p>
-                  {successMessage ? (
-                    <p className="mt-2 text-sm text-cream/90">{successMessage}</p>
-                  ) : null}
-                </div>
-              ) : null}
-
               {orderStatus === "error" && orderError ? (
                 <p className="rounded-xl border border-angie-orange/35 bg-angie-orange/10 p-3 text-sm text-cream">
                   {orderError}
                 </p>
               ) : null}
 
+              {showCardFields ? (
+                <section className="rounded-2xl border border-white/10 bg-black/25 p-3 text-sm">
+                  <p className="font-medium text-cream">
+                    {itemCount} item{itemCount === 1 ? "" : "s"} · {formatMoney(totalCents)}
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-cream/65">
+                    {PICKUP_READY_MESSAGE}
+                  </p>
+                </section>
+              ) : (
+                <>
               {cartHasUnpricedItems && cart.length > 0 ? (
                 <p className="rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-cream/80">
                   Final price is confirmed at pickup for items marked pending. You can still send an
@@ -560,7 +564,12 @@ export function OrderDrawer() {
                     </button>
                     <button
                       type="button"
-                      onClick={() => setTimeMode("custom")}
+                      onClick={() => {
+                        setTimeMode("custom");
+                        if (requestedTime.includes("·") || !requestedTime.includes(":")) {
+                          setRequestedTime("");
+                        }
+                      }}
                       className={cn(
                         "flex-1 rounded-xl border px-4 py-2 text-sm font-medium transition",
                         timeMode === "custom"
@@ -578,9 +587,10 @@ export function OrderDrawer() {
                       value={requestedTime}
                       onChange={(e) => setRequestedTime(e.target.value)}
                     />
-                  ) : (
-                    <p className="mt-2 text-sm text-cream/80">{earliestTime}</p>
-                  )}
+                  ) : null}
+                  <p className="mt-2 text-sm leading-relaxed text-cream/70">
+                    {PICKUP_READY_MESSAGE}
+                  </p>
                 </div>
                 <label className="text-xs text-cream/60 sm:col-span-2">
                   Order notes (optional)
@@ -659,11 +669,13 @@ export function OrderDrawer() {
                   </>
                 )}
               </section>
+                </>
+              )}
 
               {/* TODO: Wire SMS, email, Toast, Square, or POS when replacing mock order routes. */}
             </div>
 
-            <footer className="shrink-0 space-y-3 border-t border-white/10 p-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:space-y-4 sm:p-4 sm:pb-4">
+            <footer className="shrink-0 space-y-2 border-t border-white/10 p-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:space-y-3 sm:p-4 sm:pb-4">
               {cartHasUnpricedItems ? (
                 <>
                   <button
@@ -687,9 +699,9 @@ export function OrderDrawer() {
                     type="button"
                     disabled={!canOpenPayment}
                     className="flex w-full items-center justify-center gap-2 rounded-full bg-angie-orange py-3 text-sm font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-angie-orange/90 disabled:cursor-not-allowed disabled:opacity-40"
-                    onClick={() => setShowCardFields(true)}
+                    onClick={handleStartCheckout}
                   >
-                    Checkout with Square
+                    Checkout with Square ({formatMoney(totalCents)})
                   </button>
                   {!canOpenPayment && (
                     <p className="text-center text-xs text-cream/50">
@@ -710,7 +722,7 @@ export function OrderDrawer() {
 
                   {/* Card mount */}
                   <div
-                    id="square-card-mount"
+                    id={cardMountId}
                     ref={mountRef}
                     className={cn(
                       "min-h-[72px] rounded-xl border border-white/15 bg-black/40 p-3",
@@ -768,7 +780,7 @@ export function OrderDrawer() {
 
                   <button
                     type="button"
-                    onClick={() => setShowCardFields(false)}
+                    onClick={handleCancelPayment}
                     className="w-full rounded-full border border-white/15 py-2.5 text-sm text-cream/85 transition hover:bg-white/5"
                   >
                     Cancel

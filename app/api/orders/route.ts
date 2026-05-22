@@ -211,18 +211,20 @@ export async function POST(req: Request) {
 
   // 5. Send Telegram notification to Angie (fire and forget)
   sendTelegramOrderNotification(orderId, orderPayload).catch((err) => {
-    console.error("Failed to send Telegram notification:", err);
+    console.error("[TELEGRAM ERROR]", orderId, err?.message || err);
   });
 
-  // 5b. Merchant email backup (same inbox as catering by default)
-  sendMerchantOrderEmail(orderId, orderPayload).catch((err) => {
-    console.error("Failed to send merchant order email:", err);
-  });
+  // 5b. Merchant email backup
+  const merchantEmailResult = await sendMerchantOrderEmail(orderId, orderPayload);
+  if (!merchantEmailResult.success) {
+    console.error("[MERCHANT EMAIL ERROR]", orderId, merchantEmailResult.error);
+  }
 
-  // 6. Send customer email confirmation (fire and forget)
-  sendCustomerOrderEmail(orderId, orderPayload).catch((err) => {
-    console.error("Failed to send customer email:", err);
-  });
+  // 6. Customer email confirmation
+  const customerEmailResult = await sendCustomerOrderEmail(orderId, orderPayload);
+  if (!customerEmailResult.success) {
+    console.error("[CUSTOMER EMAIL ERROR]", orderId, customerEmailResult.error);
+  }
 
   // 7. Return success
   if (paymentMode === "request") {
@@ -231,6 +233,8 @@ export async function POST(req: Request) {
       orderId,
       paymentMode: "request",
       message: "Order request received. We'll confirm pricing and pickup time.",
+      merchantEmailSent: merchantEmailResult.success,
+      customerEmailSent: customerEmailResult.success,
     });
   }
 
@@ -240,5 +244,7 @@ export async function POST(req: Request) {
     paymentMode: "square",
     message: "Payment recorded. You'll receive a confirmation email shortly.",
     receiptUrl: squareReceiptUrl,
+    merchantEmailSent: merchantEmailResult.success,
+    customerEmailSent: customerEmailResult.success,
   });
 }

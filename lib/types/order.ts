@@ -43,6 +43,23 @@ export type CustomerInfo = {
 
 export type TipPreset = "none" | "15" | "18" | "20" | "custom";
 
+/** Snapshot captured at order success, before cart/form is cleared. */
+export type ConfirmationSnapshot = {
+  items: CartLine[];
+  customerEmail: string;
+  customerName: string;
+  requestedTime: string;
+  fulfillment: FulfillmentType;
+  pickupLocation?: PickupLocationId;
+  subtotalCents: number;
+  taxCents: number;
+  tipCents: number;
+  totalCents: number;
+  estimatedPickupAt: string;
+  pickupLocationName: string;
+  pickupAddress: string;
+};
+
 export type OrderPayload = {
   paymentMode: PaymentMode;
   fulfillment: FulfillmentType;

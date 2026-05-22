@@ -2,16 +2,12 @@
 
 import { Check, MapPin, Mail, Clock } from "lucide-react";
 import { motion } from "framer-motion";
-import type { CartLine, FulfillmentType, PickupLocationId } from "@/lib/types/order";
+import { formatLineDetailLines, stripOptionPrice } from "@/lib/orders/format-line-details";
+import type { ConfirmationSnapshot } from "@/lib/types/order";
 
 type OrderConfirmationProps = {
   orderId: string;
-  customerEmail?: string;
-  requestedTime: string;
-  pickupLocation?: PickupLocationId;
-  fulfillment: FulfillmentType;
-  items: CartLine[];
-  totalCents: number;
+  snapshot: ConfirmationSnapshot;
   onClose: () => void;
 };
 
@@ -22,31 +18,28 @@ function formatMoney(cents: number) {
   }).format(cents / 100);
 }
 
-export function OrderConfirmation({
-  orderId,
-  customerEmail,
-  requestedTime,
-  pickupLocation,
-  fulfillment,
-  items,
-  totalCents,
-  onClose,
-}: OrderConfirmationProps) {
-  // Get pickup location text
-  const locationText =
+export function OrderConfirmation({ orderId, snapshot, onClose }: OrderConfirmationProps) {
+  const {
+    customerEmail,
+    customerName,
+    fulfillment,
+    items,
+    subtotalCents,
+    taxCents,
+    tipCents,
+    totalCents,
+    estimatedPickupAt,
+    pickupLocationName,
+    pickupAddress,
+  } = snapshot;
+
+  const locationTitle =
     fulfillment === "delivery"
       ? "Delivery to your address"
-      : pickupLocation === "restaurant"
-        ? "Pickup at Restaurant"
-        : "Pickup at the Truck";
-
-  // Format estimated time (add 30 min buffer to requested time for now)
-  // TODO: Pull from schedule when schedule API is integrated
-  const estimatedTime = requestedTime;
+      : pickupLocationName || "Pickup at the truck";
 
   return (
     <div className="flex h-full flex-col">
-      {/* Success Hero */}
       <div className="flex-shrink-0 bg-gradient-to-br from-agave/20 to-agave/5 px-4 py-8 text-center sm:px-6">
         <motion.div
           initial={{ scale: 0 }}
@@ -56,16 +49,16 @@ export function OrderConfirmation({
         >
           <Check className="h-10 w-10 text-charcoal" strokeWidth={3} />
         </motion.div>
-        
+
         <motion.h2
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
           className="font-display text-3xl text-cream sm:text-4xl"
         >
-          You&apos;re all set!
+          You&apos;re all set{customerName ? `, ${customerName.split(" ")[0]}` : ""}!
         </motion.h2>
-        
+
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -76,39 +69,33 @@ export function OrderConfirmation({
         </motion.p>
       </div>
 
-      {/* Details */}
-      <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:space-y-6 sm:p-6">
-        {/* Email Confirmation */}
-        {customerEmail && (
+      <div className="flex-1 space-y-4 overflow-y-auto p-4 sm:space-y-5 sm:p-6">
+        {customerEmail ? (
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.25 }}
             className="flex items-start gap-3 rounded-2xl border border-agave/30 bg-agave/5 p-4"
           >
             <Mail className="mt-0.5 h-5 w-5 flex-shrink-0 text-agave" />
             <div>
-              <p className="font-semibold text-cream">Confirmation sent</p>
+              <p className="font-semibold text-cream">Confirmation email sent</p>
               <p className="mt-1 text-sm text-cream/70">{customerEmail}</p>
             </div>
           </motion.div>
-        )}
+        ) : null}
 
-        {/* Pickup Location & Time */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.35 }}
           className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4"
         >
           <div className="flex items-start gap-3">
             <MapPin className="mt-0.5 h-5 w-5 flex-shrink-0 text-angie-orange" />
             <div>
-              <p className="font-semibold text-cream">{locationText}</p>
-              <p className="mt-1 text-sm text-cream/70">
-                {/* TODO: Pull actual address from schedule based on requestedTime */}
-                Use the Current Truck Location on the site for today&apos;s address
-              </p>
+              <p className="font-semibold text-cream">{locationTitle}</p>
+              <p className="mt-1 text-sm text-cream/70">{pickupAddress}</p>
             </div>
           </div>
 
@@ -116,54 +103,77 @@ export function OrderConfirmation({
             <Clock className="mt-0.5 h-5 w-5 flex-shrink-0 text-angie-orange" />
             <div>
               <p className="font-semibold text-cream">Estimated pickup</p>
-              <p className="mt-1 text-sm text-cream/70">{estimatedTime}</p>
+              <p className="mt-1 text-sm text-cream/70">{estimatedPickupAt}</p>
             </div>
           </div>
         </motion.div>
 
-        {/* Order Summary */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
+          transition={{ delay: 0.45 }}
           className="rounded-2xl border border-white/10 bg-white/5 p-4"
         >
           <h3 className="mb-3 font-semibold text-cream">Your order</h3>
-          <ul className="space-y-2">
-            {items.map((item) => (
-              <li key={item.id} className="flex justify-between text-sm">
-                <span className="text-cream/80">
-                  {item.quantity}x {item.name}
-                  {item.selectedMeat && (
-                    <span className="text-cream/60"> ({item.selectedMeat})</span>
-                  )}
-                </span>
-                <span className="text-cream">
-                  {item.unitPriceCents !== null
-                    ? formatMoney(item.unitPriceCents * item.quantity)
-                    : "TBD"}
-                </span>
-              </li>
-            ))}
+          <ul className="space-y-3">
+            {items.map((item) => {
+              const details = formatLineDetailLines(item);
+              return (
+                <li key={item.id} className="text-sm">
+                  <div className="flex justify-between gap-3">
+                    <span className="font-medium text-cream">
+                      {item.quantity}x {item.name}
+                    </span>
+                    <span className="shrink-0 text-cream">
+                      {item.unitPriceCents !== null
+                        ? formatMoney(item.unitPriceCents * item.quantity)
+                        : "TBD"}
+                    </span>
+                  </div>
+                  {details.length > 0 ? (
+                    <ul className="mt-1 space-y-0.5 pl-3 text-xs text-cream/65">
+                      {details.map((detail) => (
+                        <li key={detail}>• {stripOptionPrice(detail.replace(/^Meat: /, ""))}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </li>
+              );
+            })}
           </ul>
-          <div className="mt-3 flex justify-between border-t border-white/10 pt-3 font-semibold">
-            <span className="text-cream">Total</span>
-            <span className="text-cream">{formatMoney(totalCents)}</span>
+
+          <div className="mt-4 space-y-1 border-t border-white/10 pt-3 text-sm">
+            <div className="flex justify-between text-cream/70">
+              <span>Subtotal</span>
+              <span>{formatMoney(subtotalCents)}</span>
+            </div>
+            <div className="flex justify-between text-cream/70">
+              <span>Tax</span>
+              <span>{formatMoney(taxCents)}</span>
+            </div>
+            {tipCents > 0 ? (
+              <div className="flex justify-between text-cream/70">
+                <span>Tip</span>
+                <span>{formatMoney(tipCents)}</span>
+              </div>
+            ) : null}
+            <div className="flex justify-between pt-1 font-semibold text-cream">
+              <span>Total</span>
+              <span>{formatMoney(totalCents)}</span>
+            </div>
           </div>
         </motion.div>
 
-        {/* Thank You Message */}
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
+          transition={{ delay: 0.55 }}
           className="text-center text-sm text-cream/60"
         >
           Thank you for your order! We&apos;ll have it ready for you soon.
         </motion.p>
       </div>
 
-      {/* Close Button */}
       <div className="flex-shrink-0 border-t border-white/10 p-4 sm:p-6">
         <button
           type="button"

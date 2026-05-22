@@ -1,10 +1,15 @@
 import { Resend } from "resend";
 import { CATERING_REQUEST_EMAILS } from "@/lib/data/catering-requests";
-import type { CartLine, OrderPayload } from "@/lib/types/order";
+import {
+  formatLineItemHtml,
+  formatMerchantLineItemHtml,
+} from "@/lib/orders/format-line-details";
+import type { OrderPayload } from "@/lib/types/order";
 
 export type ResendResult = {
   success: boolean;
   error?: string;
+  messageId?: string;
 };
 
 const ORDER_FROM = "Angie's KC <onboarding@resend.dev>";
@@ -20,32 +25,6 @@ function getMerchantOrderEmails(): string[] {
   return [...CATERING_REQUEST_EMAILS];
 }
 
-function formatMerchantLineItem(line: CartLine): string {
-  let text = `${line.quantity}x ${line.name}`;
-  if (line.selectedMeat) text += ` (${line.selectedMeat})`;
-  
-  // Add modifiers
-  if (line.modifiers && line.modifiers.length > 0) {
-    const mods = line.modifiers.map(m => m.label).join(', ');
-    text += `<br />&nbsp;&nbsp;+ ${mods}`;
-  }
-  
-  // Add selected options
-  if (line.selectedOptions) {
-    for (const [, value] of Object.entries(line.selectedOptions)) {
-      const vals = Array.isArray(value) ? value.join(', ') : value;
-      text += `<br />&nbsp;&nbsp;• ${vals}`;
-    }
-  }
-  
-  if (line.includesFries) {
-    text += `<br />&nbsp;&nbsp;+ Includes fries`;
-  }
-  
-  if (line.notes) text += `<br />&nbsp;&nbsp;→ ${line.notes}`;
-  return `<li style="margin-bottom: 8px;">${text}</li>`;
-}
-
 function formatMerchantFulfillmentHtml(payload: OrderPayload): string {
   if (payload.fulfillment === "delivery") {
     const addr = payload.customer;
@@ -57,45 +36,6 @@ function formatMerchantFulfillmentHtml(payload: OrderPayload): string {
   return `<strong>Pickup:</strong> ${location}`;
 }
 
-function formatLineItem(line: CartLine): string {
-  const unitPrice = ((line.unitPriceCents ?? 0) / 100).toFixed(2);
-  const lineTotal = ((line.unitPriceCents ?? 0) * line.quantity / 100).toFixed(2);
-  
-  let text = `${line.quantity}x ${line.name}`;
-  
-  if (line.selectedMeat) {
-    text += ` (${line.selectedMeat})`;
-  }
-  
-  // Add modifiers
-  if (line.modifiers && line.modifiers.length > 0) {
-    const mods = line.modifiers.map(m => m.label).join(', ');
-    text += `<br />&nbsp;&nbsp;&nbsp;&nbsp;+ Add-ons: ${mods}`;
-  }
-  
-  // Add selected options
-  if (line.selectedOptions) {
-    for (const [, value] of Object.entries(line.selectedOptions)) {
-      const vals = Array.isArray(value) ? value.join(', ') : value;
-      text += `<br />&nbsp;&nbsp;&nbsp;&nbsp;• ${vals}`;
-    }
-  }
-  
-  if (line.includesFries) {
-    text += `<br />&nbsp;&nbsp;&nbsp;&nbsp;+ Includes fries`;
-  }
-  
-  if (line.notes) {
-    text += `<br />&nbsp;&nbsp;&nbsp;&nbsp;→ Notes: ${line.notes}`;
-  }
-  
-  return `<li style="margin-bottom: 8px;">
-    ${text}
-    <br />
-    <span style="color: #666; font-size: 14px;">$${unitPrice} each = $${lineTotal}</span>
-  </li>`;
-}
-
 function formatFulfillmentHtml(payload: OrderPayload): string {
   if (payload.fulfillment === "delivery") {
     const addr = payload.customer;
@@ -105,7 +45,7 @@ function formatFulfillmentHtml(payload: OrderPayload): string {
     const cityState = [addr.city, addr.state].filter(Boolean).join(", ");
     return `<strong>🚚 Delivery to:</strong><br />${parts}<br />${cityState} ${addr.postalCode || ""}`;
   }
-  
+
   const location = payload.pickupLocation === "restaurant" ? "Restaurant" : "Truck";
   return `<strong>📍 Pickup at:</strong> ${location}`;
 }
@@ -120,19 +60,19 @@ export async function sendMerchantOrderEmail(
   const apiKey = process.env.RESEND_API_KEY;
 
   if (!apiKey) {
-    console.warn("RESEND_API_KEY not configured, skipping merchant order email");
+    console.warn("[MERCHANT EMAIL]", orderId, "RESEND_API_KEY not configured");
     return { success: false, error: "Resend API key not configured" };
   }
 
   const to = getMerchantOrderEmails();
   if (to.length === 0) {
-    console.warn("No merchant order emails configured, skipping");
+    console.warn("[MERCHANT EMAIL]", orderId, "No merchant recipients configured");
     return { success: false, error: "No merchant recipients" };
   }
 
   const resend = new Resend(apiKey);
   const total = ((payload.totalCents ?? 0) / 100).toFixed(2);
-  const items = payload.items.map(formatMerchantLineItem).join("");
+  const items = payload.items.map(formatMerchantLineItemHtml).join("");
   const { customer } = payload;
 
   const customerLines = [
@@ -167,15 +107,22 @@ export async function sendMerchantOrderEmail(
   `.trim();
 
   try {
-    await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: ORDER_FROM,
       to,
       subject: `New order #${orderId} — $${total}`,
       html,
     });
-    return { success: true };
+
+    if (error) {
+      console.error("[MERCHANT EMAIL]", orderId, error);
+      return { success: false, error: error.message ?? "Resend error" };
+    }
+
+    console.log("[MERCHANT EMAIL]", orderId, "sent to", to.join(", "), data?.id);
+    return { success: true, messageId: data?.id };
   } catch (error) {
-    console.error("Failed to send merchant order email:", error);
+    console.error("[MERCHANT EMAIL]", orderId, error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return { success: false, error: errorMessage };
   }
@@ -191,12 +138,12 @@ export async function sendCustomerOrderEmail(
   const apiKey = process.env.RESEND_API_KEY;
 
   if (!apiKey) {
-    console.warn("RESEND_API_KEY not configured, skipping customer email");
+    console.warn("[CUSTOMER EMAIL]", orderId, "RESEND_API_KEY not configured");
     return { success: false, error: "Resend API key not configured" };
   }
 
   if (!payload.customer.email) {
-    console.warn("Customer email not provided, skipping confirmation email");
+    console.warn("[CUSTOMER EMAIL]", orderId, "Customer email not provided");
     return { success: false, error: "Customer email not provided" };
   }
 
@@ -208,7 +155,7 @@ export async function sendCustomerOrderEmail(
   const deliveryFee = ((payload.deliveryFeeCents ?? 0) / 100).toFixed(2);
   const total = ((payload.totalCents ?? 0) / 100).toFixed(2);
 
-  const items = payload.items.map(formatLineItem).join("");
+  const items = payload.items.map(formatLineItemHtml).join("");
 
   const html = `
 <!DOCTYPE html>
@@ -279,16 +226,22 @@ export async function sendCustomerOrderEmail(
   `.trim();
 
   try {
-    await resend.emails.send({
+    const { data, error } = await resend.emails.send({
       from: ORDER_FROM,
       to: payload.customer.email,
       subject: `Order Confirmation - #${orderId}`,
       html,
     });
 
-    return { success: true };
+    if (error) {
+      console.error("[CUSTOMER EMAIL]", orderId, error);
+      return { success: false, error: error.message ?? "Resend error" };
+    }
+
+    console.log("[CUSTOMER EMAIL]", orderId, "sent to", payload.customer.email, data?.id);
+    return { success: true, messageId: data?.id };
   } catch (error) {
-    console.error("Failed to send customer email:", error);
+    console.error("[CUSTOMER EMAIL]", orderId, error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
     return { success: false, error: errorMessage };
   }

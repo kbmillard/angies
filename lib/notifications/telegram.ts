@@ -1,55 +1,24 @@
-import type { CartLine, CustomerInfo, OrderPayload } from "@/lib/types/order";
+import type { CustomerInfo, OrderPayload } from "@/lib/types/order";
+import { formatLineItemTelegram } from "@/lib/orders/format-line-details";
 
 export type TelegramNotificationResult = {
   success: boolean;
   error?: string;
 };
 
-function formatLineItem(line: CartLine): string {
-  let text = `• ${line.quantity}x ${line.name}`;
-  
-  if (line.selectedMeat) {
-    text += ` (${line.selectedMeat})`;
-  }
-  
-  // Add modifiers
-  if (line.modifiers && line.modifiers.length > 0) {
-    const mods = line.modifiers.map(m => `${m.label}`).join(', ');
-    text += `\n  + Add-ons: ${mods}`;
-  }
-  
-  // Add selected options
-  if (line.selectedOptions) {
-    for (const [, value] of Object.entries(line.selectedOptions)) {
-      const vals = Array.isArray(value) ? value.join(', ') : value;
-      text += `\n  • ${vals}`;
-    }
-  }
-  
-  if (line.includesFries) {
-    text += `\n  + Includes fries`;
-  }
-  
-  if (line.notes) {
-    text += `\n  → Notes: ${line.notes}`;
-  }
-  
-  return text;
-}
-
 function formatCustomerInfo(customer: CustomerInfo): string {
   const parts: string[] = [];
-  
+
   parts.push(`👤 Customer: ${customer.name}`);
-  
+
   if (customer.email) {
     parts.push(`📧 ${customer.email}`);
   }
-  
+
   if (customer.phone) {
     parts.push(`📱 ${customer.phone}`);
   }
-  
+
   return parts.join("\n");
 }
 
@@ -62,7 +31,7 @@ function formatFulfillment(payload: OrderPayload): string {
     const cityState = [addr.city, addr.state].filter(Boolean).join(", ");
     return `🚚 Delivery to:\n${parts}\n${cityState} ${addr.postalCode || ""}`.trim();
   }
-  
+
   const location = payload.pickupLocation === "restaurant" ? "Restaurant" : "Truck";
   return `📍 Pickup at ${location}`;
 }
@@ -88,9 +57,9 @@ export async function sendTelegramOrderNotification(
   }
 
   const totalDollars = ((payload.totalCents ?? 0) / 100).toFixed(2);
-  
-  const items = payload.items.map(formatLineItem).join("\n");
-  
+
+  const items = payload.items.map(formatLineItemTelegram).join("\n");
+
   const message = `
 🚨 NEW ORDER #${orderId} 🚨
 
@@ -114,7 +83,6 @@ ${payload.orderNotes ? `\n💬 Notes: "${payload.orderNotes}"` : ""}
         body: JSON.stringify({
           chat_id: chatId,
           text: message,
-          parse_mode: "HTML",
         }),
       },
     );
