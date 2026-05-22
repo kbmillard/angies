@@ -18,9 +18,9 @@ export function buildSquareContentSecurityPolicy(): string {
     "default-src 'self'",
     `script-src 'self' 'unsafe-inline' 'unsafe-eval' ${squareCdn}`,
     `frame-src 'self' ${squareCdn} https://www.google.com https://maps.googleapis.com`,
-    `connect-src 'self' ${squareCdn} ${pciConnect} https://*.public.blob.vercel-storage.com https://vitals.vercel-insights.com`,
+    `connect-src 'self' ${squareCdn} ${pciConnect} https://o160250.ingest.sentry.io https://*.public.blob.vercel-storage.com https://vitals.vercel-insights.com`,
     `style-src 'self' 'unsafe-inline' ${squareCdn}`,
-    "font-src 'self' data: https://square-fonts-production-f.squarecdn.com https://d1g145x70srn7h.cloudfront.net",
+    "font-src 'self' data: https://square-fonts-production-f.squarecdn.com https://d1g145x70srn7h.cloudfront.net https://cash-f.squarecdn.com",
     "img-src 'self' data: blob: https:",
   ].join("; ");
 }
