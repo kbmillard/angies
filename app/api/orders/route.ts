@@ -2,17 +2,14 @@ import { NextResponse } from "next/server";
 import type { CartLine, CustomerInfo, FulfillmentType, PickupLocationId, OrderPayload } from "@/lib/types/order";
 import { ensureOrderTables } from "@/lib/orders/ensure-tables";
 import { upsertCustomer, insertOrder } from "@/lib/orders/db";
-import { createSquarePayment } from "@/lib/square/create-payment";
 import { sendTelegramOrderNotification } from "@/lib/notifications/telegram";
 import {
   sendCustomerOrderEmail,
   sendMerchantOrderEmail,
 } from "@/lib/notifications/resend";
 
-type PaymentMode = "request" | "square";
-
 type Body = {
-  paymentMode?: PaymentMode;
+  paymentMode?: string;
   fulfillment?: FulfillmentType;
   pickupLocation?: PickupLocationId;
   items?: CartLine[];
@@ -24,14 +21,7 @@ type Body = {
   tipCents?: number | null;
   deliveryFeeCents?: number | null;
   totalCents?: number | null;
-  squareToken?: string;
 };
-
-function resolvePaymentMode(body: Body): PaymentMode {
-  if (body.paymentMode === "square") return "square";
-  if (body.paymentMode === "request") return "request";
-  return "request";
-}
 
 function isCartLine(x: unknown): x is CartLine {
   if (!x || typeof x !== "object") return false;
@@ -67,8 +57,6 @@ export async function POST(req: Request) {
   } catch {
     return NextResponse.json({ ok: false, error: "Invalid JSON" }, { status: 400 });
   }
-
-  const paymentMode = resolvePaymentMode(body);
 
   if (!body.items || !Array.isArray(body.items) || body.items.length === 0) {
     return NextResponse.json({ ok: false, error: "Cart is empty" }, { status: 400 });
@@ -107,38 +95,10 @@ export async function POST(req: Request) {
     }
   }
 
-  if (paymentMode === "square") {
-    const token = body.squareToken;
-    if (!token || typeof token !== "string" || token.length < 8) {
-      return NextResponse.json(
-        { ok: false, error: "Missing or invalid Square token" },
-        { status: 400 },
-      );
-    }
-    const hasNull = body.items.some((i) => i.unitPriceCents === null);
-    if (hasNull) {
-      return NextResponse.json(
-        { ok: false, error: "Cannot charge while any item has pending pricing" },
-        { status: 400 },
-      );
-    }
-    const nums =
-      typeof body.subtotalCents === "number" &&
-      typeof body.taxCents === "number" &&
-      typeof body.tipCents === "number" &&
-      typeof body.deliveryFeeCents === "number" &&
-      typeof body.totalCents === "number";
-    if (!nums) {
-      return NextResponse.json({ ok: false, error: "Invalid totals" }, { status: 400 });
-    }
-  }
-
-  // Ensure database tables exist
   await ensureOrderTables();
 
-  // Build order payload
   const orderPayload: OrderPayload = {
-    paymentMode,
+    paymentMode: "request",
     fulfillment: body.fulfillment!,
     pickupLocation: body.pickupLocation,
     items: body.items!,
@@ -150,10 +110,8 @@ export async function POST(req: Request) {
     tipCents: body.tipCents ?? 0,
     deliveryFeeCents: body.deliveryFeeCents ?? 0,
     totalCents: body.totalCents ?? 0,
-    squareToken: body.squareToken,
   };
 
-  // 1. Upsert customer
   const customer = await upsertCustomer(
     orderPayload.customer,
     orderPayload.totalCents ?? 0,
@@ -165,43 +123,9 @@ export async function POST(req: Request) {
     );
   }
 
-  // 2. Charge Square if payment mode is square
-  let squarePaymentId: string | undefined;
-  let squareReceiptUrl: string | undefined;
+  const orderId = `REQ-${Date.now()}`;
 
-  if (paymentMode === "square") {
-    const paymentResult = await createSquarePayment(
-      body.squareToken!,
-      orderPayload.totalCents ?? 0,
-      orderPayload.customer.email,
-    );
-
-    if (!paymentResult.success) {
-      return NextResponse.json(
-        { ok: false, error: `Payment failed: ${paymentResult.error}` },
-        { status: 400 },
-      );
-    }
-
-    squarePaymentId = paymentResult.paymentId;
-    squareReceiptUrl = paymentResult.receiptUrl;
-  }
-
-  // 3. Generate order ID
-  const orderId =
-    paymentMode === "request"
-      ? `REQ-${Date.now()}`
-      : `ANG-${Date.now().toString(36).toUpperCase()}`;
-
-  // 4. Insert order into database
-  const orderInserted = await insertOrder(
-    orderId,
-    customer.customer_id,
-    orderPayload,
-    squarePaymentId,
-    squareReceiptUrl,
-  );
-
+  const orderInserted = await insertOrder(orderId, customer.customer_id, orderPayload);
   if (!orderInserted) {
     return NextResponse.json(
       { ok: false, error: "Failed to save order" },
@@ -209,42 +133,30 @@ export async function POST(req: Request) {
     );
   }
 
-  // 5. Send Telegram notification to Angie (fire and forget)
   sendTelegramOrderNotification(orderId, orderPayload).catch((err) => {
     console.error("[TELEGRAM ERROR]", orderId, err?.message || err);
   });
 
-  // 5b. Merchant email backup
-  const merchantEmailResult = await sendMerchantOrderEmail(orderId, orderPayload);
-  if (!merchantEmailResult.success) {
-    console.error("[MERCHANT EMAIL ERROR]", orderId, merchantEmailResult.error);
+  let merchantEmailSent = false;
+  if (process.env.MERCHANT_ORDER_EMAILS?.trim()) {
+    const merchantEmailResult = await sendMerchantOrderEmail(orderId, orderPayload);
+    merchantEmailSent = merchantEmailResult.success;
+    if (!merchantEmailResult.success) {
+      console.error("[MERCHANT EMAIL ERROR]", orderId, merchantEmailResult.error);
+    }
   }
 
-  // 6. Customer email confirmation
   const customerEmailResult = await sendCustomerOrderEmail(orderId, orderPayload);
   if (!customerEmailResult.success) {
     console.error("[CUSTOMER EMAIL ERROR]", orderId, customerEmailResult.error);
   }
 
-  // 7. Return success
-  if (paymentMode === "request") {
-    return NextResponse.json({
-      ok: true,
-      orderId,
-      paymentMode: "request",
-      message: "Order request received. We'll confirm pricing and pickup time.",
-      merchantEmailSent: merchantEmailResult.success,
-      customerEmailSent: customerEmailResult.success,
-    });
-  }
-
   return NextResponse.json({
     ok: true,
     orderId,
-    paymentMode: "square",
-    message: "Payment recorded. You'll receive a confirmation email shortly.",
-    receiptUrl: squareReceiptUrl,
-    merchantEmailSent: merchantEmailResult.success,
+    paymentMode: "request",
+    message: "Order request received. We'll confirm pricing and pickup time.",
+    merchantEmailSent,
     customerEmailSent: customerEmailResult.success,
   });
 }

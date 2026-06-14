@@ -37,7 +37,7 @@ export async function ensureOrderTables(): Promise<boolean> {
     CREATE TABLE IF NOT EXISTS orders (
       order_id TEXT PRIMARY KEY,
       customer_id BIGINT NOT NULL REFERENCES customers (customer_id) ON DELETE RESTRICT,
-      payment_mode TEXT NOT NULL CHECK (payment_mode IN ('request', 'square')),
+      payment_mode TEXT NOT NULL CHECK (payment_mode IN ('request', 'square', 'checkout_link')),
       fulfillment_type TEXT NOT NULL CHECK (fulfillment_type IN ('pickup', 'delivery')),
       pickup_location TEXT,
       requested_time TEXT NOT NULL,
@@ -58,6 +58,15 @@ export async function ensureOrderTables(): Promise<boolean> {
     )
   `;
 
+  // Migrate existing DBs created before checkout_link payment mode
+  await sql`
+    ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_payment_mode_check
+  `;
+  await sql`
+    ALTER TABLE orders ADD CONSTRAINT orders_payment_mode_check
+    CHECK (payment_mode IN ('request', 'square', 'checkout_link'))
+  `;
+
   await sql`
     CREATE INDEX IF NOT EXISTS orders_customer_id_idx 
     ON orders (customer_id)
@@ -66,6 +75,43 @@ export async function ensureOrderTables(): Promise<boolean> {
   await sql`
     CREATE INDEX IF NOT EXISTS orders_created_at_idx 
     ON orders (created_at DESC)
+  `;
+
+  await sql`
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_status TEXT
+  `;
+  await sql`
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS square_payment_link_id TEXT
+  `;
+  await sql`
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS square_order_id TEXT
+  `;
+  await sql`
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS square_checkout_url TEXT
+  `;
+
+  await sql`
+    ALTER TABLE orders DROP CONSTRAINT IF EXISTS orders_payment_status_check
+  `;
+  await sql`
+    ALTER TABLE orders ADD CONSTRAINT orders_payment_status_check
+    CHECK (
+      payment_status IS NULL
+      OR payment_status IN ('pending', 'paid', 'failed', 'abandoned')
+    )
+  `;
+
+  await sql`
+    CREATE INDEX IF NOT EXISTS orders_square_order_id_idx
+    ON orders (square_order_id)
+    WHERE square_order_id IS NOT NULL
+  `;
+
+  await sql`
+    UPDATE orders
+    SET payment_status = 'paid'
+    WHERE payment_status IS NULL
+      AND payment_mode IN ('square', 'request')
   `;
 
   await sql`

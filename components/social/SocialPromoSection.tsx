@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Instagram, Facebook } from "lucide-react";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
+import { CONTACT } from "@/lib/data/locations";
 import { SOCIAL_LINKS } from "@/lib/data/social";
 
 export function SocialPromoSection() {
@@ -45,6 +46,31 @@ export function SocialPromoSection() {
               <span>{s.facebookHandle ?? SOCIAL_LINKS.facebook.label}</span>
             </a>
           </div>
+          <p className="mt-8 text-sm text-cream/80">
+            Call or text{" "}
+            {CONTACT.phones.map((p, i) => (
+              <span key={p.tel}>
+                {i > 0 ? " · " : null}
+                <a className="underline-offset-4 hover:underline" href={`tel:${p.tel}`}>
+                  {p.display}
+                </a>
+              </span>
+            ))}
+            {CONTACT.emails.length > 0 ? (
+              <>
+                {" "}
+                ·{" "}
+                {CONTACT.emails.map((email, i) => (
+                  <span key={email}>
+                    {i > 0 ? " · " : null}
+                    <a className="underline-offset-4 hover:underline" href={`mailto:${email}`}>
+                      {email}
+                    </a>
+                  </span>
+                ))}
+              </>
+            ) : null}
+          </p>
         </motion.div>
       </div>
     </section>

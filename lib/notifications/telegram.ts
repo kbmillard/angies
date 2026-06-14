@@ -36,6 +36,10 @@ function formatFulfillment(payload: OrderPayload): string {
   return `📍 Pickup at ${location}`;
 }
 
+function displayOrderNumber(orderId: string): string {
+  return orderId.replace(/^(ANG|REQ)-/i, "");
+}
+
 /**
  * Send order notification to Telegram bot chat (personal or group).
  */
@@ -57,11 +61,12 @@ export async function sendTelegramOrderNotification(
   }
 
   const totalDollars = ((payload.totalCents ?? 0) / 100).toFixed(2);
-
   const items = payload.items.map(formatLineItemTelegram).join("\n");
+  const num = displayOrderNumber(orderId);
 
   const message = `
-🚨 NEW ORDER #${orderId} 🚨
+#NEWORDER
+${num}
 
 ${formatCustomerInfo(payload.customer)}
 

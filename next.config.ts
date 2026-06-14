@@ -26,8 +26,7 @@ const nextConfig: NextConfig = {
       pathname: "/**",
     })),
   },
-  // Site-wide CSP removed: merged policy still blocked card mount for some users.
-  // lib/square/csp.ts remains if PCI/compliance needs headers later.
+  // CSP can be added here if a future payment gateway requires it.
 };
 
 export default nextConfig;

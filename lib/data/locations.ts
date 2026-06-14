@@ -1,4 +1,15 @@
+import { CONTACT as CONTACT_BASE, CONTACT_PHONES } from "@/lib/data/contact";
 import { SOCIAL_LINKS } from "@/lib/data/social";
+
+export { CONTACT_PHONES };
+
+/** Public site contact + social links */
+export const CONTACT = {
+  ...CONTACT_BASE,
+  socialHandle: SOCIAL_LINKS.instagram.handle,
+  socialUrl: SOCIAL_LINKS.instagram.href,
+  facebookUrl: SOCIAL_LINKS.facebook.href,
+} as const;
 
 /** Public footer hours - dynamic from schedule. */
 export const PUBLIC_HOURS_LINES = [
@@ -23,20 +34,6 @@ export const FOOTER_HOURS_LINES = [
 
 export const FOOTER_BRAND_BLURB =
   "Family-run Mexican food truck rolling through Kansas City since 2019.";
-
-/** Public catering / contact lines (both numbers). */
-export const CONTACT_PHONES = [
-  { display: "(913) 433-1732", tel: "+19134331732" },
-  { display: "(913) 954-8745", tel: "+19139548745" },
-] as const;
-
-export const CONTACT = {
-  phones: CONTACT_PHONES,
-  email: "angiesfoodtruck83@gmail.com",
-  socialHandle: SOCIAL_LINKS.instagram.handle,
-  socialUrl: SOCIAL_LINKS.instagram.href,
-  facebookUrl: SOCIAL_LINKS.facebook.href,
-} as const;
 
 export const TRUCK_STATUS_OPTIONS = [
   "open",

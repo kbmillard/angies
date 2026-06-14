@@ -12,9 +12,7 @@ type NavLink = { label: string; id: string; disabled?: boolean };
 
 const LINKS: NavLink[] = [
   { label: "Menu", id: "menu" },
-  { label: "Location", id: "locations" },
-  /** Schedule lives inside the location card until a dedicated feed ships. */
-  { label: "Schedule", id: "schedule", disabled: true },
+  { label: "Schedule & Location", id: "locations" },
   { label: "Story", id: "story" },
   { label: "Catering", id: "catering" },
   { label: "Contact", id: "contact" },
@@ -201,8 +199,8 @@ export function EditorialNav() {
       document.body,
     );
 
-  const left = LINKS.slice(0, 3);
-  const right = LINKS.slice(3);
+  const left = LINKS.slice(0, 2);
+  const right = LINKS.slice(2);
 
   return (
     <header className="fixed top-0 z-50 w-full border-b border-white/10 bg-midnight/85 backdrop-blur-md">

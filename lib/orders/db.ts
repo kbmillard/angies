@@ -15,7 +15,8 @@ export type Customer = {
 export type OrderRecord = {
   order_id: string;
   customer_id: number;
-  payment_mode: "request" | "square";
+  payment_mode: "request" | "square" | "checkout_link";
+  payment_status: string | null;
   fulfillment_type: "pickup" | "delivery";
   pickup_location?: string;
   requested_time: string;
@@ -26,12 +27,22 @@ export type OrderRecord = {
   delivery_fee_cents: number;
   total_cents: number;
   square_payment_id?: string;
+  square_payment_link_id?: string;
+  square_order_id?: string;
   square_receipt_url?: string;
+  square_checkout_url?: string;
   delivery_address_line1?: string;
   delivery_address_line2?: string;
   delivery_city?: string;
   delivery_state?: string;
   delivery_postal_code?: string;
+};
+
+export type InsertOrderMeta = {
+  paymentStatus?: string | null;
+  squarePaymentLinkId?: string;
+  squareOrderId?: string;
+  squareCheckoutUrl?: string;
 };
 
 /**
@@ -118,16 +129,19 @@ export async function insertOrder(
   payload: OrderPayload,
   squarePaymentId?: string,
   squareReceiptUrl?: string,
+  meta?: InsertOrderMeta,
 ): Promise<boolean> {
   const sql = getSql();
   if (!sql) return false;
 
-  // Insert order
+  const paymentStatus = meta?.paymentStatus ?? null;
+
   await sql`
     INSERT INTO orders (
       order_id,
       customer_id,
       payment_mode,
+      payment_status,
       fulfillment_type,
       pickup_location,
       requested_time,
@@ -138,7 +152,10 @@ export async function insertOrder(
       delivery_fee_cents,
       total_cents,
       square_payment_id,
+      square_payment_link_id,
+      square_order_id,
       square_receipt_url,
+      square_checkout_url,
       delivery_address_line1,
       delivery_address_line2,
       delivery_city,
@@ -149,6 +166,7 @@ export async function insertOrder(
       ${orderId},
       ${customerId},
       ${payload.paymentMode},
+      ${paymentStatus},
       ${payload.fulfillment},
       ${payload.pickupLocation ?? null},
       ${payload.requestedTime},
@@ -159,7 +177,10 @@ export async function insertOrder(
       ${payload.deliveryFeeCents ?? 0},
       ${payload.totalCents ?? 0},
       ${squarePaymentId ?? null},
+      ${meta?.squarePaymentLinkId ?? null},
+      ${meta?.squareOrderId ?? null},
       ${squareReceiptUrl ?? null},
+      ${meta?.squareCheckoutUrl ?? null},
       ${payload.customer.addressLine1 ?? null},
       ${payload.customer.addressLine2 ?? null},
       ${payload.customer.city ?? null},

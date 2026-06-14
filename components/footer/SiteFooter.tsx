@@ -1,7 +1,7 @@
 "use client";
 
 import { BrandLogo } from "@/components/ui/BrandLogo";
-import { PUBLIC_HOURS_LINES } from "@/lib/data/locations";
+import { CONTACT, PUBLIC_HOURS_LINES } from "@/lib/data/locations";
 import { useLocationsCatalog } from "@/context/LocationsCatalogContext";
 import { footerTruckVisit } from "@/lib/locations/footer-visit-from-catalog";
 
@@ -19,7 +19,7 @@ export function SiteFooter() {
         <div className="shrink-0">
           <BrandLogo width={56} height={56} />
         </div>
-        <div className="grid gap-6 sm:grid-cols-2 sm:gap-10">
+        <div className="grid gap-6 sm:grid-cols-3 sm:gap-10">
           <div>
             <p className="text-xs uppercase tracking-editorial text-cream/50">Visit</p>
             {visitTruck.address?.trim() ? (
@@ -42,6 +42,25 @@ export function SiteFooter() {
             <ul className="mt-2 space-y-1 text-sm text-cream/80">
               {PUBLIC_HOURS_LINES.map((h) => (
                 <li key={h}>{h}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-editorial text-cream/50">Contact</p>
+            <ul className="mt-2 space-y-1 text-sm text-cream/80">
+              {CONTACT.phones.map((p) => (
+                <li key={p.tel}>
+                  <a className="hover:text-cream" href={`tel:${p.tel}`}>
+                    {p.display}
+                  </a>
+                </li>
+              ))}
+              {CONTACT.emails.map((email) => (
+                <li key={email}>
+                  <a className="hover:text-cream" href={`mailto:${email}`}>
+                    {email}
+                  </a>
+                </li>
               ))}
             </ul>
           </div>

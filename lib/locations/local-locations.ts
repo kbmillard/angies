@@ -19,7 +19,7 @@ export const localLocationItems: LocationItem[] = [
     zip: "64109",
     hours: ANGIES_TRUCK_HOURS_DISPLAY,
     phone: "(913) 954-8745",
-    email: "angiesfoodtruck83@gmail.com",
+    email: "foodtruck83@icloud.com · angiesfoodtruck83@gmail.com",
     status: "Open",
     statusNote: "Linwood location",
     mapsUrl: "https://www.google.com/maps/search/?api=1&query=Angie%27s%20food%20truck%20400%20E%20Linwood%20Blvd%20Kansas%20City%20MO",

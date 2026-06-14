@@ -1,5 +1,4 @@
 import { Resend } from "resend";
-import { CATERING_REQUEST_EMAILS } from "@/lib/data/catering-requests";
 import {
   formatLineItemHtml,
   formatMerchantLineItemHtml,
@@ -12,17 +11,21 @@ export type ResendResult = {
   messageId?: string;
 };
 
-const ORDER_FROM = "Angie's KC <onboarding@resend.dev>";
+/** Requires angieskc.com verified in Resend — override with RESEND_ORDER_FROM */
+function getOrderFrom(): string {
+  const from = process.env.RESEND_ORDER_FROM?.trim();
+  if (from) return from;
+  return "Angie's KC <orders@angieskc.com>";
+}
 
+/** Only sends when MERCHANT_ORDER_EMAILS is set — otherwise Telegram is the kitchen alert. */
 function getMerchantOrderEmails(): string[] {
   const raw = process.env.MERCHANT_ORDER_EMAILS?.trim();
-  if (raw) {
-    return raw
-      .split(",")
-      .map((e) => e.trim())
-      .filter(Boolean);
-  }
-  return [...CATERING_REQUEST_EMAILS];
+  if (!raw) return [];
+  return raw
+    .split(",")
+    .map((e) => e.trim())
+    .filter(Boolean);
 }
 
 function formatMerchantFulfillmentHtml(payload: OrderPayload): string {
@@ -57,17 +60,15 @@ export async function sendMerchantOrderEmail(
   orderId: string,
   payload: OrderPayload,
 ): Promise<ResendResult> {
-  const apiKey = process.env.RESEND_API_KEY;
+  const to = getMerchantOrderEmails();
+  if (to.length === 0) {
+    return { success: true };
+  }
 
+  const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     console.warn("[MERCHANT EMAIL]", orderId, "RESEND_API_KEY not configured");
     return { success: false, error: "Resend API key not configured" };
-  }
-
-  const to = getMerchantOrderEmails();
-  if (to.length === 0) {
-    console.warn("[MERCHANT EMAIL]", orderId, "No merchant recipients configured");
-    return { success: false, error: "No merchant recipients" };
   }
 
   const resend = new Resend(apiKey);
@@ -108,7 +109,7 @@ export async function sendMerchantOrderEmail(
 
   try {
     const { data, error } = await resend.emails.send({
-      from: ORDER_FROM,
+      from: getOrderFrom(),
       to,
       subject: `New order #${orderId} — $${total}`,
       html,
@@ -227,7 +228,7 @@ export async function sendCustomerOrderEmail(
 
   try {
     const { data, error } = await resend.emails.send({
-      from: ORDER_FROM,
+      from: getOrderFrom(),
       to: payload.customer.email,
       subject: `Order Confirmation - #${orderId}`,
       html,

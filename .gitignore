@@ -16,6 +16,7 @@
 
 # misc
 .DS_Store
+.cursor/
 angies_fresh_food_logo_web_assets.zip
 gringos_cubanos_logo_web_assets.zip
 *.pem

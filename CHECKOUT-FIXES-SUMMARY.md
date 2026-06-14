@@ -71,12 +71,12 @@
 ### 🔧 1. Update Environment Variable
 Set in Vercel dashboard:
 ```
-MERCHANT_ORDER_EMAILS=kylemillard@recyclicbravery.com
+MERCHANT_ORDER_EMAILS=   # leave empty — Telegram for orders; see lib/data/contact.ts for public emails
 ```
 
 This will:
 - Send merchant order notifications to the new email
-- Override the default `angiesfoodtruck83@gmail.com`
+- Public contact: `lib/data/contact.ts` (iCloud + Gmail + both phones)
 
 ### 🔍 2. Debug Email Delivery
 **If emails still aren't sending**, check Vercel logs:
@@ -128,7 +128,7 @@ This will show the `modifiers_json` and `selected_options_json` columns to verif
 ### Before Going Live
 - [ ] Test order with modifiers → verify Telegram shows all add-ons
 - [ ] Test order with modifiers → verify email shows all add-ons
-- [ ] Verify emails arrive at `kylemillard@recyclicbravery.com`
+- [ ] Verify Telegram order alerts; Resend merchant email optional (MERCHANT_ORDER_EMAILS)
 - [ ] Test "Earliest" time picker → verify auto-fills correct time
 - [ ] Test "Custom" time picker → verify native input works
 - [ ] Test swipe-to-confirm on mobile → smooth animation

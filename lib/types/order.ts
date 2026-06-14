@@ -2,7 +2,7 @@ export type FulfillmentType = "pickup" | "delivery";
 
 export type PickupLocationId = "restaurant" | "truck";
 
-export type PaymentMode = "request" | "square";
+export type PaymentMode = "request";
 
 export type OrderStatus =
   | "idle"
@@ -73,5 +73,4 @@ export type OrderPayload = {
   tipCents: number | null;
   deliveryFeeCents: number | null;
   totalCents: number | null;
-  squareToken?: string | null;
 };

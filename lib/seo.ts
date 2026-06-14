@@ -1,3 +1,4 @@
+import { CONTACT_EMAILS, CONTACT_PHONES } from "@/lib/data/contact";
 import { SOCIAL_LINKS } from "@/lib/data/social";
 
 export const SITE_NAME = "Angie's Food Truck";
@@ -12,8 +13,8 @@ export const LOCAL_BUSINESS_SCHEMA = {
   "@type": "FoodEstablishment",
   name: "Angie's food truck",
   alternateName: "Angie's Food Truck",
-  telephone: "+1-913-433-1732, +1-913-954-8745",
-  email: "angiesfoodtruck83@gmail.com",
+  telephone: CONTACT_PHONES.map((p) => p.tel).join(", "),
+  email: CONTACT_EMAILS.join(", "),
   servesCuisine: "Mexican",
   priceRange: "$$",
   address: {

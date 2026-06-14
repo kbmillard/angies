@@ -16,7 +16,7 @@ Use this list to confirm content before locking public copy, prices, and hours.
 
 ## Published contacts (current)
 
-- Phone: (913) 954-8745
-- Email: angiesfoodtruck83@gmail.com
+- Phones: (913) 433-1732 · (913) 954-8745
+- Email: foodtruck83@icloud.com · angiesfoodtruck83@gmail.com
 - Facebook: https://www.facebook.com/p/Angies-food-truck-100066851974098/
 - Instagram: https://www.instagram.com/angiesfoodtruck/

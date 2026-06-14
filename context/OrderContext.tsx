@@ -64,8 +64,6 @@ type OrderContextValue = {
   setTipPreset: (t: TipPreset) => void;
   customTipCents: number;
   setCustomTipCents: (n: number) => void;
-  squareToken: string | null;
-  setSquareToken: (t: string | null) => void;
   orderDrawerOpen: boolean;
   setOrderDrawerOpen: (v: boolean) => void;
   orderStatus: OrderStatus;
@@ -79,17 +77,14 @@ type OrderContextValue = {
   deliveryFeeCents: number;
   tipCents: number;
   totalCents: number;
-  canOpenPayment: boolean;
-  canSendOrderRequest: boolean;
+  canSubmitOrder: boolean;
   openOrderPanel: () => void;
   scrollToSection: (id: string, options?: { offset?: number }) => void;
   focusMenu: () => void;
   focusCatering: () => void;
   focusSchedule: () => void;
-  /** Square checkout — requires all lines priced */
-  submitOrder: (squareTokenOverride?: string | null) => Promise<void>;
-  /** Order request when any line is unpriced — no card charge */
-  submitOrderRequest: () => Promise<void>;
+  clearCart: () => void;
+  submitOrder: () => Promise<void>;
   dismissConfirmation: () => void;
 };
 
@@ -122,7 +117,6 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
   const [orderNotes, setOrderNotes] = useState("");
   const [tipPreset, setTipPreset] = useState<TipPreset>("18");
   const [customTipCents, setCustomTipCents] = useState(0);
-  const [squareToken, setSquareToken] = useState<string | null>(null);
   const [orderDrawerOpen, setOrderDrawerOpen] = useState(false);
   const [orderStatus, setOrderStatus] = useState<OrderStatus>("idle");
   const [orderError, setOrderError] = useState<string | null>(null);
@@ -213,7 +207,6 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       setOrderStatus("idle");
       setConfirmationId(null);
       setSuccessMessage(null);
-      setSquareToken(null);
     },
     [itemsById],
   );
@@ -226,13 +219,11 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     setCart((prev) =>
       prev.map((l) => (l.id === lineId ? { ...l, quantity: qty } : l)),
     );
-    setSquareToken(null);
     setSuccessMessage(null);
   }, []);
 
   const removeLine = useCallback((lineId: string) => {
     setCart((prev) => prev.filter((l) => l.id !== lineId));
-    setSquareToken(null);
     setSuccessMessage(null);
   }, []);
 
@@ -274,7 +265,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
         customer.postalCode?.trim(),
     );
 
-  const checkoutFormValid = useMemo(() => {
+  const canSubmitOrder = useMemo(() => {
     return (
       cart.length > 0 &&
       customer.name.trim().length > 1 &&
@@ -283,12 +274,6 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       deliveryFieldsOk
     );
   }, [cart.length, customer, deliveryFieldsOk, requestedTime]);
-
-  const canSendOrderRequest = checkoutFormValid;
-
-  const canOpenPayment = useMemo(() => {
-    return checkoutFormValid && !cartHasUnpricedItems;
-  }, [cartHasUnpricedItems, checkoutFormValid]);
 
   const buildConfirmationSnapshot = useCallback((): ConfirmationSnapshot => {
     const completedAt = new Date();
@@ -340,7 +325,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
   }, [scrollToSection]);
 
   const focusSchedule = useCallback(() => {
-    scrollToSection("schedule");
+    scrollToSection("locations");
   }, [scrollToSection]);
 
   const dismissConfirmation = useCallback(() => {
@@ -351,8 +336,22 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     setOrderError(null);
   }, []);
 
-  const submitOrderRequest = useCallback(async () => {
-    if (!canSendOrderRequest) return;
+  const clearCart = useCallback(() => {
+    setCart([]);
+    setCustomerState(initialCustomer);
+    setRequestedTime("");
+    setOrderNotes("");
+    setTipPreset("18");
+    setCustomTipCents(0);
+    setOrderStatus("idle");
+    setOrderError(null);
+    setConfirmationId(null);
+    setConfirmationSnapshot(null);
+    setSuccessMessage(null);
+  }, []);
+
+  const submitOrder = useCallback(async () => {
+    if (!canSubmitOrder) return;
     setOrderStatus("submitting");
     setOrderError(null);
     try {
@@ -387,18 +386,17 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       setConfirmationId(data.orderId ?? null);
       setSuccessMessage(
         data.message ??
-          "Order request received. We’ll confirm pricing and pickup time.",
+          "Order request received. We'll confirm pricing and pickup time.",
       );
       setOrderStatus("confirmed");
       setCart([]);
-      setSquareToken(null);
     } catch (e) {
       setOrderStatus("error");
       setOrderError(e instanceof Error ? e.message : "Unknown error");
     }
   }, [
     buildConfirmationSnapshot,
-    canSendOrderRequest,
+    canSubmitOrder,
     cart,
     cartHasUnpricedItems,
     customer,
@@ -412,78 +410,6 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     tipCents,
     totalCents,
   ]);
-
-  const submitOrder = useCallback(
-    async (squareTokenOverride?: string | null) => {
-      const token = squareTokenOverride ?? squareToken;
-      if (cartHasUnpricedItems || !token || !canOpenPayment) return;
-      setOrderStatus("submitting");
-      setOrderError(null);
-      try {
-        const res = await fetch("/api/orders", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            paymentMode: "square",
-            fulfillment,
-            pickupLocation: fulfillment === "pickup" ? pickupLocation : undefined,
-            items: cart,
-            customer,
-            requestedTime,
-            orderNotes,
-            subtotalCents,
-            taxCents,
-            tipCents,
-            deliveryFeeCents,
-            totalCents,
-            squareToken: token,
-          }),
-        });
-        const data = (await res.json()) as {
-          ok?: boolean;
-          orderId?: string;
-          error?: string;
-          message?: string;
-        };
-        if (!res.ok || !data.ok) {
-          throw new Error(data.error || "Order failed");
-        }
-        setConfirmationSnapshot(buildConfirmationSnapshot());
-        setConfirmationId(data.orderId ?? null);
-        setSuccessMessage(data.message ?? "Payment recorded.");
-        setOrderStatus("confirmed");
-
-        // Clear cart and form data
-        setCart([]);
-        setSquareToken(null);
-        setCustomerState(initialCustomer);
-        setRequestedTime("");
-        setOrderNotes("");
-        setTipPreset("18");
-        setCustomTipCents(0);
-      } catch (e) {
-        setOrderStatus("error");
-        setOrderError(e instanceof Error ? e.message : "Unknown error");
-      }
-    },
-    [
-      buildConfirmationSnapshot,
-      canOpenPayment,
-      cart,
-      cartHasUnpricedItems,
-      squareToken,
-      customer,
-      deliveryFeeCents,
-      fulfillment,
-      orderNotes,
-      pickupLocation,
-      requestedTime,
-      subtotalCents,
-      taxCents,
-      tipCents,
-      totalCents,
-    ],
-  );
 
   const value = useMemo<OrderContextValue>(
     () => ({
@@ -505,8 +431,6 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       setTipPreset,
       customTipCents,
       setCustomTipCents,
-      squareToken,
-      setSquareToken,
       orderDrawerOpen,
       setOrderDrawerOpen,
       orderStatus,
@@ -520,25 +444,22 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       deliveryFeeCents,
       tipCents,
       totalCents,
-      canOpenPayment,
-      canSendOrderRequest,
+      canSubmitOrder,
       openOrderPanel,
       scrollToSection,
       focusMenu,
       focusCatering,
       focusSchedule,
+      clearCart,
       submitOrder,
-      submitOrderRequest,
       dismissConfirmation,
     }),
     [
       addItem,
-      buildConfirmationSnapshot,
-      canOpenPayment,
-      canSendOrderRequest,
+      canSubmitOrder,
       cart,
       cartHasUnpricedItems,
-      squareToken,
+      clearCart,
       confirmationId,
       confirmationSnapshot,
       customer,
@@ -561,7 +482,6 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
       setCustomer,
       subtotalCents,
       submitOrder,
-      submitOrderRequest,
       successMessage,
       taxCents,
       tipCents,

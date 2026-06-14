@@ -73,21 +73,26 @@ export function CateringSection() {
                   </a>
                 </span>
               ))}
-              {CONTACT.email ? (
+              {CONTACT.emails.length > 0 ? (
                 <>
                   {" "}
                   ·{" "}
-                  <a
-                    className="text-cream underline-offset-4 hover:underline"
-                    href={`mailto:${CONTACT.email}?subject=Catering%20request`}
-                  >
-                    {CONTACT.email}
-                  </a>
+                  {CONTACT.emails.map((email, i) => (
+                    <span key={email}>
+                      {i > 0 ? " · " : null}
+                      <a
+                        className="text-cream underline-offset-4 hover:underline"
+                        href={`mailto:${email}?subject=Catering%20request`}
+                      >
+                        {email}
+                      </a>
+                    </span>
+                  ))}
                 </>
               ) : null}
             </p>
             {(c.quotes ?? []).length > 0 ? (
-              <blockquote className="mt-6 border-l-2 border-gold/55 pl-5">
+              <blockquote className="mt-6 border-l-2 border-gold/55 pl-6">
                 {(c.quotes ?? []).map((q, i) => (
                   <div key={i} className={i > 0 ? "mt-4" : ""}>
                     <p className="text-sm italic leading-relaxed text-cream/85">
@@ -114,7 +119,13 @@ export function CateringSection() {
                 <p>
                   Your email app should open with <strong>To:</strong>{" "}
                   {CATERING_REQUEST_EMAILS.join(" · ")} — tap <strong>Send</strong> to deliver the
-                  request. Text <strong>(913) 433-1732</strong> or <strong>(913) 954-8745</strong>{" "}
+                  request. Text{" "}
+                  {CONTACT.phones.map((p, i) => (
+                    <span key={p.tel}>
+                      {i > 0 ? " or " : null}
+                      <strong>{p.display}</strong>
+                    </span>
+                  ))}{" "}
                   with the same message if email is not available on this device.
                 </p>
                 <div className="flex flex-wrap gap-2">
