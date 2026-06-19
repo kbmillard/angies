@@ -2,7 +2,7 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useOrder } from "@/context/OrderContext";
 import { useMenuCatalog } from "@/context/MenuCatalogContext";
@@ -15,7 +15,44 @@ import {
 import { BrandLogo } from "@/components/ui/BrandLogo";
 import { cn } from "@/lib/utils/cn";
 import { useScrollLock } from "@/lib/utils/use-scroll-lock";
+import {
+  bindSquareCardListeners,
+  formatSquareTokenizeMessage,
+  squareMountFailureMessage,
+  waitForSquareCardReady,
+} from "@/lib/square/card-helpers";
+import { createSquarePayments, getSquareConfig, loadSquareSdk } from "@/lib/square/loadSquare";
+import type { SquareCard } from "@/lib/square/types";
 import { OrderConfirmation } from "@/components/order/OrderConfirmation";
+import { SwipeToConfirm } from "@/components/order/SwipeToConfirm";
+
+/** Card field styling (dark charcoal theme) */
+const SQUARE_CARD_STYLE = {
+  ".input-container": {
+    borderColor: "rgba(255, 255, 255, 0.15)",
+    borderRadius: "12px",
+  },
+  ".input-container.is-focus": {
+    borderColor: "rgba(255, 255, 255, 0.35)",
+  },
+  ".input-container.is-error": {
+    borderColor: "#f87171",
+  },
+  input: {
+    backgroundColor: "#1a1a1a",
+    color: "#f5f0e8",
+    fontSize: "16px",
+  },
+  "input::placeholder": {
+    color: "rgba(245, 240, 232, 0.40)",
+  },
+  ".message-text": {
+    color: "#f87171",
+  },
+  ".message-icon": {
+    color: "#f87171",
+  },
+};
 
 function formatMoney(cents: number) {
   return new Intl.NumberFormat("en-US", {
@@ -68,15 +105,34 @@ export function OrderDrawer() {
     totalCents,
     orderDrawerOpen,
     setOrderDrawerOpen,
-    canSubmitOrder,
+    canOpenPayment,
+    canSendOrderRequest,
     cartHasUnpricedItems,
     orderStatus,
     orderError,
     confirmationId,
     confirmationSnapshot,
+    submitOrderRequest,
+    setSquareToken,
     submitOrder,
     dismissConfirmation,
   } = useOrder();
+
+  const itemCount = useMemo(
+    () => cart.reduce((sum, line) => sum + line.quantity, 0),
+    [cart],
+  );
+
+  // Square card payment state
+  const [showCardFields, setShowCardFields] = useState(false);
+  const [cardMountKey, setCardMountKey] = useState(0);
+  const mountRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<SquareCard | null>(null);
+  const [cardMounted, setCardMounted] = useState(false);
+  const [cardPayable, setCardPayable] = useState(false);
+  const [cardMessage, setCardMessage] = useState<string | null>(null);
+  const [cardBusy, setCardBusy] = useState(false);
+  const { configured, environment: squareEnvironment } = getSquareConfig();
 
   // Time picker mode
   const [timeMode, setTimeMode] = useState<"earliest" | "custom">("earliest");
@@ -91,6 +147,26 @@ export function OrderDrawer() {
     setRequestedTime(earliestSlot);
   }, [earliestSlot, setRequestedTime]);
 
+  const handleStartCheckout = useCallback(() => {
+    setCardMountKey((key) => key + 1);
+    setShowCardFields(true);
+  }, []);
+
+  const handleCancelPayment = useCallback(() => {
+    if (cardRef.current) {
+      cardRef.current.destroy();
+      cardRef.current = null;
+    }
+    if (mountRef.current) {
+      mountRef.current.innerHTML = "";
+    }
+    setShowCardFields(false);
+    setCardMounted(false);
+    setCardPayable(false);
+    setCardMessage(null);
+    setCardBusy(false);
+  }, []);
+
   useEffect(() => {
     if (!orderDrawerOpen) return;
     if (timeMode === "earliest" && !requestedTime.trim()) {
@@ -99,6 +175,156 @@ export function OrderDrawer() {
   }, [earliestSlot, orderDrawerOpen, requestedTime, setRequestedTime, timeMode]);
 
   useScrollLock(orderDrawerOpen);
+
+  // Initialize Square card fields when user taps Checkout with Square
+  useLayoutEffect(() => {
+    if (!showCardFields || !mountRef.current) return;
+    
+    const mountElement = mountRef.current;
+    let cancelled = false;
+
+    // Clear any existing content
+    mountElement.innerHTML = "";
+    setCardMounted(false);
+    setCardPayable(false);
+    setCardMessage(null);
+
+    // Wait for next frame to ensure DOM is fully painted
+    requestAnimationFrame(() => {
+      if (cancelled) return;
+
+      (async () => {
+        try {
+          if (!mountElement || !document.body.contains(mountElement)) {
+            throw new Error("Mount element not found in DOM");
+          }
+
+          await loadSquareSdk();
+          if (cancelled) return;
+
+          const payments = await createSquarePayments();
+          if (!payments || cancelled) {
+            setCardMessage(
+              "Square is not configured — add application ID and location ID to environment variables.",
+            );
+            return;
+          }
+
+          const card = await payments.card({ style: SQUARE_CARD_STYLE });
+          if (cancelled) {
+            card.destroy();
+            return;
+          }
+
+          const elementId = mountElement.id || "square-card-mount";
+          if (!mountElement.id) {
+            mountElement.id = elementId;
+          }
+
+          await card.attach(`#${elementId}`);
+
+          if (cancelled) {
+            card.destroy();
+            return;
+          }
+
+          const ready = await waitForSquareCardReady(card, mountElement);
+          if (cancelled) {
+            card.destroy();
+            return;
+          }
+
+          if (!ready) {
+            console.error("Square card mount: fields did not become interactive", {
+              mountKey: cardMountKey,
+              environment: squareEnvironment,
+            });
+            card.destroy();
+            setCardMessage(squareMountFailureMessage(squareEnvironment));
+            return;
+          }
+
+          bindSquareCardListeners(card, (payable) => {
+            if (!cancelled) setCardPayable(payable);
+          });
+
+          cardRef.current = card;
+          setCardMounted(true);
+          setCardPayable(false);
+          setCardMessage(null);
+        } catch (err) {
+          if (!cancelled) {
+            console.error("Square card mount failed:", err, {
+              mountKey: cardMountKey,
+              environment: squareEnvironment,
+            });
+            setCardMessage(
+              err instanceof Error
+                ? err.message
+                : "Could not initialize Square card fields. Try refreshing the page.",
+            );
+          }
+        }
+      })();
+    });
+
+    return () => {
+      cancelled = true;
+      if (cardRef.current) {
+        try {
+          cardRef.current.destroy();
+        } catch {
+          // Ignore cleanup errors
+        }
+        cardRef.current = null;
+      }
+      setCardMounted(false);
+      setCardPayable(false);
+    };
+  }, [showCardFields, cardMountKey, squareEnvironment]);
+
+  // Handle Square payment submission
+  const handleSquarePay = useCallback(async () => {
+    if (!cardRef.current || cardBusy || !cardPayable) return;
+    setCardBusy(true);
+    setCardMessage(null);
+
+    try {
+      const result = await cardRef.current.tokenize();
+
+      if (result.status !== "OK" || !result.token) {
+        const raw = result.errors?.[0]?.message;
+        setCardMessage(formatSquareTokenizeMessage(raw, cardPayable));
+        setCardBusy(false);
+        return;
+      }
+
+      setSquareToken(result.token);
+      await submitOrder(result.token);
+    } catch (err) {
+      setCardMessage(
+        err instanceof Error
+          ? formatSquareTokenizeMessage(err.message, cardPayable)
+          : "Payment error",
+      );
+    } finally {
+      setCardBusy(false);
+    }
+  }, [cardBusy, cardPayable, setSquareToken, submitOrder]);
+
+  // Reset card fields when drawer closes
+  useEffect(() => {
+    if (!orderDrawerOpen) {
+      handleCancelPayment();
+    }
+  }, [handleCancelPayment, orderDrawerOpen]);
+
+  // Clear card fields when order is confirmed (security)
+  useEffect(() => {
+    if (confirmationId) {
+      handleCancelPayment();
+    }
+  }, [confirmationId, handleCancelPayment]);
 
   if (!mounted) return null;
 
@@ -170,6 +396,17 @@ export function OrderDrawer() {
                 </p>
               ) : null}
 
+              {showCardFields ? (
+                <section className="rounded-2xl border border-white/10 bg-black/25 p-3 text-sm">
+                  <p className="font-medium text-cream">
+                    {itemCount} item{itemCount === 1 ? "" : "s"} · {formatMoney(totalCents)}
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-cream/65">
+                    {PICKUP_READY_MESSAGE}
+                  </p>
+                </section>
+              ) : (
+                <>
               {cartHasUnpricedItems && cart.length > 0 ? (
                 <p className="rounded-xl border border-white/10 bg-white/5 p-3 text-xs text-cream/80">
                   Final price is confirmed at pickup for items marked pending. You can still send an
@@ -517,26 +754,129 @@ export function OrderDrawer() {
                   </>
                 )}
               </section>
+                </>
+              )}
+
+              {/* TODO: Wire SMS, email, Toast, Square, or POS when replacing mock order routes. */}
             </div>
 
             <footer className="shrink-0 space-y-2 border-t border-white/10 p-3 pb-[max(1rem,env(safe-area-inset-bottom))] sm:space-y-3 sm:p-4 sm:pb-4">
-              <button
-                type="button"
-                disabled={!canSubmitOrder || orderStatus === "submitting"}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-angie-orange py-3 text-sm font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-angie-orange/90 disabled:cursor-not-allowed disabled:opacity-40"
-                onClick={() => void submitOrder()}
-              >
-                {orderStatus === "submitting"
-                  ? "Sending order…"
-                  : cartHasUnpricedItems
-                    ? "Send Order Request"
-                    : `Send Order · ${formatMoney(totalCents)}`}
-              </button>
-              {!canSubmitOrder && (
-                <p className="text-center text-xs text-cream/50">
-                  Add items, name, phone, requested time
-                  {fulfillment === "delivery" ? ", and delivery address" : ""} to continue.
-                </p>
+              {cartHasUnpricedItems ? (
+                <>
+                  <button
+                    type="button"
+                    disabled={!canSendOrderRequest}
+                    className="flex w-full items-center justify-center gap-2 rounded-full bg-angie-orange py-3 text-sm font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-angie-orange/90 disabled:cursor-not-allowed disabled:opacity-40"
+                    onClick={() => submitOrderRequest()}
+                  >
+                    Send Order Request
+                  </button>
+                  {!canSendOrderRequest && (
+                    <p className="text-center text-xs text-cream/50">
+                      Add items, name, phone, requested time
+                      {fulfillment === "delivery" ? ", and delivery address" : ""} to continue.
+                    </p>
+                  )}
+                </>
+              ) : !showCardFields ? (
+                <>
+                  <button
+                    type="button"
+                    disabled={!canOpenPayment}
+                    className="flex w-full items-center justify-center gap-2 rounded-full bg-angie-orange py-3 text-sm font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-angie-orange/90 disabled:cursor-not-allowed disabled:opacity-40"
+                    onClick={handleStartCheckout}
+                  >
+                    Checkout with Square ({formatMoney(totalCents)})
+                  </button>
+                  {!canOpenPayment && (
+                    <p className="text-center text-xs text-cream/50">
+                      Add items, name, phone, requested time
+                      {fulfillment === "delivery" ? ", and delivery address" : ""} to continue.
+                    </p>
+                  )}
+                </>
+              ) : (
+                <>
+                  {/* Square branding */}
+                  <div className="flex items-center justify-center gap-2 text-xs text-cream/60">
+                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M4.01 8.54C4.01 6.19 5.9 4.3 8.26 4.3c1.06 0 2.04.38 2.79 1.05l.76.69.76-.69C13.32 4.68 14.3 4.3 15.36 4.3c2.36 0 4.25 1.89 4.25 4.24 0 4.59-4.87 8.02-7.87 9.84-3-1.82-7.73-5.25-7.73-9.84z"/>
+                    </svg>
+                    <span>Secure checkout with Square</span>
+                  </div>
+
+                  {/* Card mount */}
+                  <div
+                    id="square-card-mount"
+                    ref={mountRef}
+                    key={`mount-${cardMountKey}`}
+                    className={cn(
+                      "min-h-[72px] rounded-xl border border-white/15 bg-black/40 p-3",
+                      !cardMounted &&
+                        "flex items-center justify-center text-sm text-cream/50",
+                    )}
+                  >
+                    {!cardMounted && !cardMessage && "Loading card fields…"}
+                  </div>
+
+                  {!configured && (
+                    <p className="text-xs text-cream/55">
+                      Set{" "}
+                      <code className="rounded bg-black/40 px-1">NEXT_PUBLIC_SQUARE_APPLICATION_ID</code>{" "}
+                      and <code className="rounded bg-black/40 px-1">NEXT_PUBLIC_SQUARE_LOCATION_ID</code>{" "}
+                      and reload to mount live Square fields.
+                    </p>
+                  )}
+
+                  {cardMessage && (
+                    <p className="rounded-xl border border-salsa/35 bg-salsa/10 px-4 py-2 text-sm text-salsa">
+                      {cardMessage}
+                    </p>
+                  )}
+
+                  {/* Swipe to confirm on mobile, tap button on desktop */}
+                  {cardPayable && !cardBusy ? (
+                    <>
+                      {/* Mobile: Swipe to confirm */}
+                      <div className="sm:hidden">
+                        <SwipeToConfirm
+                          onConfirm={() => void handleSquarePay()}
+                          disabled={cardBusy}
+                          label={`Swipe to pay ${formatMoney(totalCents)}`}
+                        />
+                      </div>
+
+                      {/* Desktop: Regular button */}
+                      <button
+                        type="button"
+                        onClick={() => void handleSquarePay()}
+                        className="hidden sm:flex w-full items-center justify-center gap-2 rounded-full bg-angie-orange py-3 text-sm font-semibold uppercase tracking-editorial text-cream shadow-lg transition hover:bg-angie-orange/90"
+                      >
+                        Pay {formatMoney(totalCents)}
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled
+                      className="w-full rounded-full bg-angie-orange/40 py-3 text-sm font-semibold uppercase tracking-editorial text-cream/50"
+                    >
+                      {cardBusy
+                        ? "Processing…"
+                        : cardMounted
+                          ? "Enter card details"
+                          : "Loading card fields…"}
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handleCancelPayment}
+                    className="w-full rounded-full border border-white/15 py-2.5 text-sm text-cream/85 transition hover:bg-white/5"
+                  >
+                    Cancel
+                  </button>
+                </>
               )}
             </footer>
               </>
