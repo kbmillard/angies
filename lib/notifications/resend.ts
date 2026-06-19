@@ -150,6 +150,11 @@ export async function sendCustomerOrderEmail(
 
   const resend = new Resend(apiKey);
 
+  const isPaidOrder = payload.paymentMode === "square";
+  const intro = isPaidOrder
+    ? "Thanks for your order! We've received your payment and will have it ready for you."
+    : "Thanks for your order request! We'll confirm final pricing and pickup time shortly.";
+
   const subtotal = ((payload.subtotalCents ?? 0) / 100).toFixed(2);
   const tax = ((payload.taxCents ?? 0) / 100).toFixed(2);
   const tip = ((payload.tipCents ?? 0) / 100).toFixed(2);
@@ -174,7 +179,7 @@ export async function sendCustomerOrderEmail(
   
   <div style="background: #f9f9f9; padding: 20px; border: 1px solid #ddd; border-top: none;">
     <p>Hi ${payload.customer.name},</p>
-    <p>Thanks for your order! We've received your request and will have it ready for you.</p>
+    <p>${intro}</p>
     
     <div style="background: #fff; padding: 15px; border-radius: 6px; margin: 20px 0;">
       <h2 style="margin: 0 0 10px; font-size: 18px; color: #1a1a1a;">Order #${orderId}</h2>

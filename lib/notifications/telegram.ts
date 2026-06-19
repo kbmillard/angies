@@ -40,12 +40,26 @@ function displayOrderNumber(orderId: string): string {
   return orderId.replace(/^(ANG|REQ)-/i, "");
 }
 
+function formatPaymentLine(
+  payload: OrderPayload,
+  squareReceiptUrl?: string,
+): string {
+  if (payload.paymentMode === "square") {
+    const receipt = squareReceiptUrl?.trim();
+    return receipt
+      ? `💳 PAID via Square\n🧾 ${receipt}`
+      : "💳 PAID via Square";
+  }
+  return "📋 Order request (confirm pricing at pickup)";
+}
+
 /**
  * Send order notification to Telegram bot chat (personal or group).
  */
 export async function sendTelegramOrderNotification(
   orderId: string,
   payload: OrderPayload,
+  options?: { squareReceiptUrl?: string },
 ): Promise<TelegramNotificationResult> {
   const botToken = process.env.TELEGRAM_BOT_TOKEN;
   const chatId = process.env.TELEGRAM_ORDERS_CHAT_ID;
@@ -67,6 +81,8 @@ export async function sendTelegramOrderNotification(
   const message = `
 #NEWORDER
 ${num}
+
+${formatPaymentLine(payload, options?.squareReceiptUrl)}
 
 ${formatCustomerInfo(payload.customer)}
 

@@ -209,10 +209,13 @@ export async function POST(req: Request) {
     );
   }
 
-  // 5. Send Telegram notification to Angie (fire and forget)
-  sendTelegramOrderNotification(orderId, orderPayload).catch((err) => {
-    console.error("[TELEGRAM ERROR]", orderId, err?.message || err);
+  // 5. Telegram alert to Angie's group (primary kitchen notification)
+  const telegramResult = await sendTelegramOrderNotification(orderId, orderPayload, {
+    squareReceiptUrl,
   });
+  if (!telegramResult.success) {
+    console.error("[TELEGRAM ERROR]", orderId, telegramResult.error);
+  }
 
   // 5b. Merchant email backup (optional — Telegram is primary)
   let merchantEmailSent = false;
@@ -237,17 +240,25 @@ export async function POST(req: Request) {
       orderId,
       paymentMode: "request",
       message: "Order request received. We'll confirm pricing and pickup time.",
+      telegramSent: telegramResult.success,
       merchantEmailSent,
       customerEmailSent: customerEmailResult.success,
     });
   }
 
+  const customerMessage = customerEmailResult.success
+    ? "Payment recorded. You'll receive a confirmation email shortly."
+    : orderPayload.customer.email?.trim()
+      ? "Payment recorded. We couldn't send the confirmation email — we'll confirm at pickup."
+      : "Payment recorded. We'll confirm at pickup.";
+
   return NextResponse.json({
     ok: true,
     orderId,
     paymentMode: "square",
-    message: "Payment recorded. You'll receive a confirmation email shortly.",
+    message: customerMessage,
     receiptUrl: squareReceiptUrl,
+    telegramSent: telegramResult.success,
     merchantEmailSent,
     customerEmailSent: customerEmailResult.success,
   });
