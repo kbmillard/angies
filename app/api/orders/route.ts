@@ -3,6 +3,7 @@ import type { CartLine, CustomerInfo, FulfillmentType, PickupLocationId, OrderPa
 import { ensureOrderTables } from "@/lib/orders/ensure-tables";
 import { upsertCustomer, insertOrder } from "@/lib/orders/db";
 import { createSquarePayment } from "@/lib/square/create-payment";
+import { validateAndComputeOrderTotals } from "@/lib/orders/compute-order-totals";
 import { sendTelegramOrderNotification } from "@/lib/notifications/telegram";
 import {
   sendCustomerOrderEmail,
@@ -115,13 +116,6 @@ export async function POST(req: Request) {
         { status: 400 },
       );
     }
-    const hasNull = body.items.some((i) => i.unitPriceCents === null);
-    if (hasNull) {
-      return NextResponse.json(
-        { ok: false, error: "Cannot charge while any item has pending pricing" },
-        { status: 400 },
-      );
-    }
     const nums =
       typeof body.subtotalCents === "number" &&
       typeof body.taxCents === "number" &&
@@ -133,23 +127,45 @@ export async function POST(req: Request) {
     }
   }
 
+  const totalsResult = await validateAndComputeOrderTotals({
+    items: body.items!,
+    fulfillment: body.fulfillment!,
+    tipCents: typeof body.tipCents === "number" ? body.tipCents : 0,
+    requireAllPriced: paymentMode === "square",
+    clientTotals:
+      paymentMode === "square"
+        ? {
+            subtotalCents: body.subtotalCents!,
+            taxCents: body.taxCents!,
+            deliveryFeeCents: body.deliveryFeeCents!,
+            totalCents: body.totalCents!,
+          }
+        : undefined,
+  });
+
+  if (!totalsResult.ok) {
+    return NextResponse.json({ ok: false, error: totalsResult.error }, { status: 400 });
+  }
+
+  const serverTotals = totalsResult.totals;
+
   // Ensure database tables exist
   await ensureOrderTables();
 
-  // Build order payload
+  // Build order payload using server-authoritative totals
   const orderPayload: OrderPayload = {
     paymentMode,
     fulfillment: body.fulfillment!,
     pickupLocation: body.pickupLocation,
-    items: body.items!,
+    items: serverTotals.items,
     customer: body.customer!,
     requestedTime: body.requestedTime!,
     orderNotes: body.orderNotes,
-    subtotalCents: body.subtotalCents ?? 0,
-    taxCents: body.taxCents ?? 0,
-    tipCents: body.tipCents ?? 0,
-    deliveryFeeCents: body.deliveryFeeCents ?? 0,
-    totalCents: body.totalCents ?? 0,
+    subtotalCents: serverTotals.subtotalCents,
+    taxCents: serverTotals.taxCents,
+    tipCents: serverTotals.tipCents,
+    deliveryFeeCents: serverTotals.deliveryFeeCents,
+    totalCents: serverTotals.totalCents,
     squareToken: body.squareToken,
   };
 
@@ -159,8 +175,14 @@ export async function POST(req: Request) {
     orderPayload.totalCents ?? 0,
   );
   if (!customer) {
+    const dbConfigured = Boolean(process.env.DATABASE_URL?.trim());
     return NextResponse.json(
-      { ok: false, error: "Failed to save customer data" },
+      {
+        ok: false,
+        error: dbConfigured
+          ? "Failed to save customer data"
+          : "Database not configured — set DATABASE_URL in .env.local (run npm run dev:sandbox)",
+      },
       { status: 500 },
     );
   }
@@ -172,7 +194,7 @@ export async function POST(req: Request) {
   if (paymentMode === "square") {
     const paymentResult = await createSquarePayment(
       body.squareToken!,
-      orderPayload.totalCents ?? 0,
+      serverTotals.totalCents,
       orderPayload.customer.email,
     );
 

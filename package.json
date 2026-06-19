@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "dev:sandbox": "bash scripts/dev-sandbox.sh",
+    "square:production": "bash scripts/use-square-production.sh",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

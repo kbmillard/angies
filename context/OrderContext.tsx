@@ -22,6 +22,10 @@ import {
   computeEstimatedPickupAt,
   resolvePickupLocation,
 } from "@/lib/orders/pickup-time";
+import {
+  ORDER_DELIVERY_FEE_CENTS,
+  ORDER_TAX_RATE,
+} from "@/lib/orders/pricing-constants";
 import type {
   CartLine,
   ConfirmationSnapshot,
@@ -31,9 +35,6 @@ import type {
   OrderStatus,
   TipPreset,
 } from "@/lib/types/order";
-
-const TAX_RATE = 0.088;
-const DELIVERY_FEE_CENTS = 399;
 
 function newLineId() {
   return `line_${Math.random().toString(36).slice(2, 10)}`;
@@ -245,7 +246,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
     [cart],
   );
 
-  const deliveryFeeCents = fulfillment === "delivery" ? DELIVERY_FEE_CENTS : 0;
+  const deliveryFeeCents = fulfillment === "delivery" ? ORDER_DELIVERY_FEE_CENTS : 0;
 
   const tipCents = useMemo(() => {
     if (cartHasUnpricedItems) return 0;
@@ -257,7 +258,7 @@ export function OrderProvider({ children }: { children: React.ReactNode }) {
 
   const taxCents = useMemo(() => {
     if (cartHasUnpricedItems) return 0;
-    return Math.round((subtotalCents + deliveryFeeCents) * TAX_RATE);
+    return Math.round((subtotalCents + deliveryFeeCents) * ORDER_TAX_RATE);
   }, [cartHasUnpricedItems, deliveryFeeCents, subtotalCents]);
 
   const totalCents = useMemo(() => {
