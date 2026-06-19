@@ -15,20 +15,28 @@ export function getSquareConfig() {
 
 export function loadSquareSdk(): Promise<void> {
   if (typeof window === "undefined") return Promise.reject(new Error("No window"));
-  if (loadPromise) return loadPromise;
   if (window.Square) return Promise.resolve();
+  if (loadPromise) return loadPromise;
 
   const { environment } = getSquareConfig();
   const src = environment === "production" ? PRODUCTION_SDK : SANDBOX_SDK;
 
-  loadPromise = new Promise<void>((resolve, reject) => {
-    const existing = document.querySelector<HTMLScriptElement>(`script[src="${src}"]`);
-    if (existing) {
-      existing.addEventListener("load", () => resolve());
-      existing.addEventListener("error", () => reject(new Error("Square SDK failed")));
-      return;
-    }
+  const existing = document.querySelector<HTMLScriptElement>(`script[src="${src}"]`);
+  if (existing) {
+    loadPromise = new Promise<void>((resolve, reject) => {
+      if (window.Square) {
+        resolve();
+        return;
+      }
+      existing.addEventListener("load", () => resolve(), { once: true });
+      existing.addEventListener("error", () => reject(new Error("Square SDK failed")), {
+        once: true,
+      });
+    });
+    return loadPromise;
+  }
 
+  loadPromise = new Promise<void>((resolve, reject) => {
     const script = document.createElement("script");
     script.src = src;
     script.async = true;
@@ -44,7 +52,7 @@ export async function createSquarePayments(): Promise<SquarePayments | null> {
   if (typeof window === "undefined" || !window.Square) return null;
   const { applicationId, locationId, configured } = getSquareConfig();
   if (!configured) return null;
-  
+
   try {
     return await window.Square.payments(applicationId, locationId);
   } catch {
