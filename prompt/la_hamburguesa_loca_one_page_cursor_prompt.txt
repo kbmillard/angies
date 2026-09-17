@@ -1,0 +1,911 @@
+Build a production-ready one-page website and interactive ordering experience for La Hamburguesa Loca inside this empty local repo:
+
+- Local repo path: /Users/kyle/Desktop/foodtruck
+- GitHub repo name: foodtruck
+- Vercel project name: foodtruck
+- Prompt guide folder path: /Users/kyle/Desktop/foodtruck/prompt
+- Logo asset folder path: /Users/kyle/Desktop/foodtruck/la_hamburguesa_loca_web_assets
+
+The site must be ONE PAGE only.
+Do not build a 5-page website.
+Do not create separate marketing pages for Home, Menu, Locations, Catering, or About.
+
+Instead:
+- build everything on the homepage
+- use a fixed editorial nav that scrolls to sections
+- make every major CTA reveal, expand, swap, open, or focus content on the homepage
+- keep the user on the front page as much as possible
+- make the homepage feel like an interactive hospitality/story/order environment inspired by the design language of https://www.masgirbau.com/en without copying its exact assets, text, or layout
+
+You are acting as:
+- senior product strategist
+- UX architect
+- editorial web designer
+- local SEO strategist
+- conversion copywriter
+- senior Next.js engineer
+
+==================================================
+PROJECT FOUNDATION
+==================================================
+
+Business name
+La Hamburguesa Loca
+
+Business facts to treat as true
+- 16-year family-owned Mexican food business in Kansas City
+- grew from a beloved food truck into a dual-model operation with both a restaurant and food truck presence
+- community-rooted
+- authentic Mexican food
+- trusted, established, and still personal
+- energetic, flavorful, and memorable brand voice
+
+Primary offerings
+- fully loaded Mexican-style burgers
+- tacos
+- tortas
+- quesabirrias
+- flautas
+- gorditas
+- signature Papas Locas
+
+Treat these as core brand-defining categories, especially:
+- Mexican-style burgers
+- Papas Locas
+
+Locations
+Restaurant:
+904 Southwest Blvd, Kansas City, MO 64108
+
+Food Truck:
+3009 Independence Ave, Kansas City, MO 64124
+at Al Halal Grocery Store
+
+Hours
+- Tue–Fri: 5:00 PM – 11:00 PM
+- Sat–Sun: 8:00 AM – 11:00 PM
+- Monday: Closed
+
+Main business goals
+1. Make La Hamburguesa Loca look established, exciting, and trustworthy
+2. Explain the restaurant + truck model clearly
+3. Drive online orders
+4. Drive truck bookings for private events, parties, and catering
+5. Help people find the truck quickly
+6. Improve local discoverability/search visibility
+7. Showcase the 16-year family-owned legacy
+
+==================================================
+TECH STACK
+==================================================
+
+Use:
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
+- Framer Motion
+- Lucide icons
+- shadcn/ui only if useful, not mandatory
+- Vercel-friendly setup
+- Clover integration for payment
+- no Stripe anywhere
+
+Because the repo is empty, create from scratch:
+- package.json
+- .gitignore
+- .env.example
+- README.md
+- app/
+- components/
+- context/
+- lib/
+- public/
+- prompt/
+
+Suggested structure:
+
+app/
+  layout.tsx
+  page.tsx
+  globals.css
+  api/
+    orders/
+      route.ts
+components/
+  nav/
+  hero/
+  prologue/
+  menu/
+  essence/
+  services/
+  locations/
+  catering/
+  story/
+  gallery/
+  order/
+  clover/
+  ui/
+context/
+  OrderContext.tsx
+lib/
+  data/
+  types/
+  utils/
+  clover/
+public/
+  icons/
+prompt/
+  implementation-notes.md
+  content-map.md
+  asset-map.md
+
+==================================================
+CORE PRODUCT RULE
+==================================================
+
+This is not a normal restaurant site.
+This is not a normal food ordering site.
+Build the homepage like an interactive ordering house.
+
+Every major action should happen on the homepage:
+- scroll
+- reveal
+- expand
+- swap
+- open drawer
+- open sheet
+- open modal
+- focus a panel
+- update cart
+- update story/image/state
+
+Do not route users away to separate content pages for menu, about, locations, or catering.
+Use anchor navigation and interactive section behavior instead.
+
+==================================================
+DESIGN LANGUAGE
+==================================================
+
+Translate Mas Girbau’s design language into a restaurant context:
+- fixed editorial navigation
+- cinematic full-screen hero
+- poetic but conversion-friendly headline
+- numbered sections
+- calm luxury hospitality pacing adapted for food
+- image-heavy panels
+- section-based storytelling
+- premium editorial typography
+- soft, elegant transitions
+- dark overlays
+- warm neutrals with bold food color accents
+- right-side drawers and bottom sheets for interactions
+- beautiful front-page state changes
+
+Visual tone:
+- quiet luxury meets late-night food energy
+- bold but not noisy
+- premium but not pretentious
+- appetizing but not cheesy
+- polished, custom, memorable
+- mobile-first
+- high-end interaction feel
+
+Color direction:
+- charcoal
+- cream
+- tortilla beige
+- salsa red
+- grilled orange
+- muted green
+- warm brown accents
+
+Typography direction:
+- uppercase editorial nav labels
+- large serif/editorial-style display headings
+- cleaner sans-serif for body and utility text
+
+==================================================
+LOGO / BRAND ASSET PACKAGE INTEGRATION
+==================================================
+
+A provided La Hamburguesa Loca logo asset package must be integrated into the design, metadata, favicon setup, and branded UI components from the beginning.
+
+Logo asset folder
+- /Users/kyle/Desktop/foodtruck/la_hamburguesa_loca_web_assets
+
+Expected asset types in that folder
+- transparent PNG logo files in multiple sizes
+- WebP logo files
+- favicon.ico
+- site.webmanifest
+- optional head snippet reference/readme files
+
+Implementation requirements
+1. Treat /Users/kyle/Desktop/foodtruck/la_hamburguesa_loca_web_assets as the source-of-truth asset folder.
+2. Use those files directly where practical or copy the needed assets into public/icons while preserving filenames and clear mapping.
+3. Create a simple asset map note in:
+   - /Users/kyle/Desktop/foodtruck/prompt/asset-map.md
+   explaining which source logo file is used for which UI/context.
+4. Use the provided assets throughout the experience:
+   - centered desktop nav logo
+   - mobile header logo
+   - hero brand mark treatment where appropriate
+   - order drawer/order sheet header
+   - footer brand lockup
+   - favicon
+   - Apple touch icon
+   - site web manifest
+   - browser/app icons
+   - metadata/social preview asset if useful
+
+Preferred asset usage
+- Navbar/logo: use a WebP logo such as a 256x256 or 512x512 version if available
+- High-resolution brand/social image: use the largest clean PNG such as 1024x1024 if available
+- Apple touch icon: use 180x180 PNG if available
+- Browser favicon: use favicon.ico
+- Keep transparent backgrounds intact
+
+Metadata integration
+In app/layout.tsx, configure Next.js metadata and icons properly for:
+- favicon.ico
+- PNG icons where needed
+- apple touch icon
+- manifest
+- social preview image if useful
+
+Manifest
+Use the provided site.webmanifest as a base, adapting asset paths if necessary.
+
+Visual rules for logo usage
+- do not stretch or distort the logo
+- preserve transparency
+- preserve clear space
+- do not place it on chaotic backgrounds without support
+- use subtle backplates or contrast zones when needed
+- make the logo feel premium and intentional
+
+Background handling
+Because the logo package is transparent-cutout based:
+- test logo usage on charcoal, cream, tortilla-beige, and warm neutral backgrounds
+- avoid noisy photography behind the logo unless an overlay or pill container improves readability
+
+Performance
+- use WebP where appropriate for runtime display
+- use PNG where needed for clarity or system icon compatibility
+- choose the smallest suitable asset by context
+- avoid oversized runtime assets where unnecessary
+
+Required deliverables related to the assets
+- icons correctly placed in public/icons or mapped cleanly from the provided folder
+- metadata/icons wired up
+- manifest wired up
+- no broken paths
+- favicon working
+- logo visibly used in nav, footer, and ordering UI
+
+==================================================
+PROMPT GUIDE FOLDER REQUIREMENT
+==================================================
+
+In addition to building the app, create a small prompt guide folder at:
+- /Users/kyle/Desktop/foodtruck/prompt
+
+This folder should contain concise helper docs for future editing and prompt-driven changes:
+
+1. implementation-notes.md
+Include:
+- project architecture summary
+- section map of the homepage
+- how the order/cart flow works
+- where Clover is integrated
+- where to replace the mock order API later
+
+2. content-map.md
+Include:
+- which sections hold brand copy
+- where menu data lives
+- where truck location/hours/status data lives
+- where catering copy/form config lives
+
+3. asset-map.md
+Include:
+- which logo/icon files from /Users/kyle/Desktop/foodtruck/la_hamburguesa_loca_web_assets are used
+- where they are wired in the app
+- metadata/icon references
+
+Keep these concise, readable, and useful for future Cursor sessions.
+
+==================================================
+ONE-PAGE SECTION MAP
+==================================================
+
+Build the homepage in this general order:
+
+1. Sticky editorial nav
+2. Cinematic hero
+3. Prologue / intro
+4. Interactive menu carousel
+5. Essence section
+6. Services section
+7. Find Us / Find the Truck section
+8. Popular Orders grid
+9. Family story section
+10. Catering / private events section
+11. Final conversion / order section
+12. Footer
+
+Everything must live on this one page.
+
+==================================================
+1. STICKY EDITORIAL NAV
+==================================================
+
+Desktop nav should feel boutique and editorial, not SaaS.
+
+Suggested nav labels:
+MENU
+STORY
+LOCATIONS
+CATERING
+[LOGO CENTER]
+GALLERY
+HOURS
+CONTACT
+ORDER NOW
+
+Behavior:
+- nav items scroll to homepage sections
+- ORDER NOW opens or focuses the live ordering/cart interface
+- nav should be thin uppercase, spaced out, elegant
+- smooth scroll
+- active section states if helpful
+- centered logo should use the provided asset package
+
+Mobile nav:
+- logo
+- Order button
+- Menu button
+- collapsed sheet or overlay nav is fine
+
+==================================================
+2. CINEMATIC HERO
+==================================================
+
+Create a full-screen hero with dark cinematic image overlay.
+
+Hero copy direction:
+FULLY LOADED.
+FAMILY MADE.
+OPEN LATE.
+
+Supporting line:
+Mexican-style burgers, tacos, quesabirrias, tortas, flautas, gorditas, and papas locas — all from one fast, beautiful ordering page.
+
+Hero CTAs:
+- Start Order
+- View Menu
+- Find Us
+- Book Catering / Truck
+
+Behavior:
+- Start Order opens/focuses right-side cart or order drawer
+- View Menu scrolls and activates the menu carousel
+- Find Us expands or scrolls to locations/map panel
+- Book Catering / Truck opens or scrolls to the booking form panel
+- none of these should navigate away from the homepage
+
+Hero goals:
+- communicate the bold food identity immediately
+- explain restaurant + truck model fast
+- create appetite and trust
+- feel premium and cinematic
+
+Hero logo usage:
+- optional subtle use of the provided logo mark as an accent or quiet supporting brand element
+- do not overpower the headline
+
+==================================================
+3. PROLOGUE SECTION
+==================================================
+
+Inspired by hospitality-style introductory storytelling.
+
+Section heading:
+PROLOGUE
+
+Use short brand story copy that introduces La Hamburguesa Loca as:
+- family-owned
+- KC-rooted
+- late-night friendly
+- memorable
+- food truck grown into restaurant + truck
+
+Add a stats row such as:
+- 16 Years Family-Owned
+- 2 Locations
+- Open Late
+- Online Ordering
+- Food Truck Available
+- Catering Ready
+
+This section should feel like an elegant, compact brand thesis.
+
+==================================================
+4. INTERACTIVE MENU CAROUSEL
+==================================================
+
+This is the main conversion engine.
+
+Create a numbered category selector inspired by Mas Girbau’s numbered modules.
+
+Category structure:
+01 / Mexican Burgers
+02 / Tacos
+03 / Tortas
+04 / Quesabirrias
+05 / Flautas
+06 / Gorditas
+07 / Papas Locas
+08 / Drinks / Add-ons
+
+Desktop:
+- left side category list or stacked selector
+- right side active category panel
+
+Mobile:
+- horizontal category pills or snapping carousel
+
+Behavior:
+- clicking a category does not navigate
+- clicking a category updates the active panel in place
+- active panel shows:
+  - category number
+  - title
+  - short craveable description
+  - featured image
+  - item cards
+- animate category changes with Framer Motion
+
+Item cards must support:
+- item image
+- name
+- short description
+- placeholder/demo price or editable price field
+- quantity controls
+- Add button
+- optional Customize action
+
+Add button behavior:
+- adds to live cart drawer/sheet
+- updates cart state immediately
+- gives visible feedback
+
+Important:
+- burgers and Papas Locas must feel like signature differentiators
+- menu should be easy to scan on mobile
+- do not invent fake permanent facts
+- demo menu data is allowed as editable content
+
+==================================================
+5. ESSENCE SECTION
+==================================================
+
+Translate the hospitality “Essence” idea into restaurant brand story cards.
+
+Create 3–6 large interactive cards such as:
+01 / Fire
+02 / Masa
+03 / Meat
+04 / Salsa
+05 / Family
+06 / Late Night
+
+Behavior:
+- one card expands at a time
+- expanded card changes background image and reveals story copy
+- on mobile, cards can swipe/stack
+- smooth animation
+- editorial feel
+
+This section should deepen the brand identity beyond just listing menu items.
+
+==================================================
+6. SERVICES SECTION
+==================================================
+
+Create numbered service rows, simple and elegant.
+
+Suggested rows:
+01 / Pickup Ordering
+02 / Food Truck
+03 / Catering
+04 / Family Combos
+05 / Late-Night Food
+06 / Private Events
+
+Behavior:
+- clicking a row opens an inline detail panel beside or beneath it
+- panel can include copy, CTA buttons, mini forms, or links to relevant page sections
+
+Examples:
+- Food Truck row opens truck location, hours, live status badge, map placeholder
+- Catering row opens short persuasive copy + booking form preview
+- Pickup Ordering row opens/focuses order drawer
+- Private Events row opens booking form section
+
+This section should make the service model feel clear and premium.
+
+==================================================
+7. FIND US / FIND THE TRUCK SECTION
+==================================================
+
+This section replaces a normal locations page.
+
+Include:
+- Restaurant location card
+- Food Truck location card
+
+Restaurant card:
+904 Southwest Blvd, Kansas City, MO 64108
+
+Food truck card:
+3009 Independence Ave, Kansas City, MO 64124
+at Al Halal Grocery Store
+
+Hours:
+- Tue–Fri: 5 PM – 11 PM
+- Sat–Sun: 8 AM – 11 PM
+- Closed Monday
+
+Buttons:
+- Open in Google Maps
+- Open in Apple Maps
+- Call Now placeholder
+- Find the Truck
+
+Find the Truck behavior:
+- expands a live map placeholder panel
+- include placeholder text for Google Maps / Mapbox integration
+- include live truck status badge that can toggle between:
+  - Open
+  - Moving Soon
+  - Closed
+  - Catering Event
+  - Serving Now at [Location]
+  - Catch us at our next stop!
+
+This section must clearly explain:
+- restaurant = dependable home base
+- truck = lively, local, flexible experience
+
+==================================================
+8. POPULAR ORDERS GRID
+==================================================
+
+Create a visual grid of popular items.
+
+Suggested tiles:
+- Loaded Burger
+- Quesabirrias
+- Papas Locas
+- Tacos
+- Torta
+- Flautas
+- Gorditas
+- Family Combo
+- Agua Fresca
+
+Behavior:
+- clicking a tile opens an in-page detail overlay, modal, or expansion
+- show image, description, price, and Add to Order button
+- Add to Order updates live cart immediately
+- grid should feel visual and tempting
+
+==================================================
+9. FAMILY STORY SECTION
+==================================================
+
+This section replaces a normal About page.
+
+Tell the one-page version of the About story:
+- 16-year family-owned legacy
+- growth from food truck roots into restaurant + truck
+- Kansas City/community roots
+- warm, authentic, proud tone
+- clearly not just another taco truck
+
+This section should feel personal and grounded.
+
+==================================================
+10. CATERING / PRIVATE EVENTS SECTION
+==================================================
+
+This section replaces a normal Catering / Truck Booking page.
+
+Must include:
+- persuasive intro copy
+- clear positioning for private events and parties
+- explanation of why La Hamburguesa Loca is a strong fit for:
+  - birthdays
+  - private parties
+  - corporate events
+  - school events
+  - festivals
+  - community gatherings
+- a short persuasive paragraph encouraging users to book the truck
+- inquiry form
+
+Suggested fields:
+- name
+- phone
+- email
+- event date
+- event type
+- guest count
+- event location
+- message/details
+
+Behavior:
+- inline form on homepage
+- optional open/close state via CTA
+- strong CTA buttons:
+  - Book the Truck
+  - Start Your Booking
+  - Ask About Catering
+
+The truck should feel like an experience, not just a meal.
+
+==================================================
+11. ORDERING EXPERIENCE
+==================================================
+
+Ordering must feel like one continuous in-page system.
+
+Build reusable order/cart UI accessible from:
+- hero
+- menu carousel
+- popular orders
+- services
+- final conversion section
+- nav CTA
+
+Core ordering UI:
+- right-side drawer on desktop
+- bottom sheet on mobile
+- item list
+- quantity controls
+- remove item
+- subtotal
+- taxes
+- optional tip
+- delivery fee only when applicable
+- customer info
+- notes
+- fulfillment type
+- Clover payment button/modal
+- confirmation state
+- visible branding using the provided logo package in the header of the order UI
+
+Create OrderContext to manage:
+- fulfillment type: pickup or delivery
+- cart items
+- quantity
+- modifiers
+- notes per item
+- subtotal
+- fees
+- taxes
+- tip
+- total
+- customer info
+- requested time
+- Clover payment token
+- order status
+- confirmation details
+
+==================================================
+12. FULFILLMENT + CUSTOMER FORM
+==================================================
+
+Keep this inside the interactive order flow.
+
+Fields:
+- Pickup / Delivery toggle
+- name
+- phone
+- email optional
+- address fields only when delivery is selected
+- requested time
+- order notes optional
+
+Validation:
+- do not allow Clover payment flow until required info is complete
+
+==================================================
+13. CLOVER INTEGRATION
+==================================================
+
+Do NOT use Stripe.
+Do NOT leave Stripe placeholders.
+
+Implement Clover using a clean isolated integration inspired by Clover iframe/tokenization patterns:
+- dynamically load Clover SDK
+- mount Clover fields in a dedicated modal/sheet
+- tokenize card information
+- store token in order state
+- submit token with order payload
+
+Create:
+- components/clover/CloverPaymentModal.tsx
+- lib/clover/loadClover.ts
+- lib/clover/types.ts
+
+Use env vars:
+- NEXT_PUBLIC_CLOVER_PUBLIC_TOKEN_SANDBOX
+- NEXT_PUBLIC_CLOVER_MERCHANT_ID_SANDBOX
+- NEXT_PUBLIC_CLOVER_ENV
+
+Keep Clover integration isolated for easy sandbox/production switching later.
+
+==================================================
+14. MOCK ORDER API
+==================================================
+
+Create:
+app/api/orders/route.ts
+
+Behavior:
+- accept order payload + Clover token
+- validate payload shape
+- return mock success response with generated order id
+- do not add heavy backend infrastructure
+- structure code so a real backend can replace the mock later
+
+==================================================
+15. FINAL CONVERSION SECTION
+==================================================
+
+Create a strong final CTA section near the end of the homepage.
+
+Suggested heading:
+READY TO EAT?
+
+Buttons:
+- Pickup Order
+- Catering Request
+- Book the Truck
+
+Behavior:
+- Pickup Order opens/focuses order drawer
+- Catering Request opens booking section/form
+- Book the Truck opens booking form
+- user stays on homepage
+
+==================================================
+16. SEO REQUIREMENTS
+==================================================
+
+Naturally integrate these phrases where appropriate:
+- Best Mexican Burger Kansas City
+- KC Food Truck
+- Authentic Mexican Restaurant Southwest Blvd
+
+Do not keyword-stuff.
+
+Account for:
+- title tag strategy
+- meta description strategy
+- local SEO-friendly headings
+- location relevance
+- image alt text strategy
+- local business schema suggestions
+- mobile-first search behavior
+
+Generate:
+- homepage SEO title suggestion
+- homepage meta description suggestion
+- local business schema guidance
+- strong alt text patterns
+
+==================================================
+17. CONTENT RULES
+==================================================
+
+Generate strong homepage copy for:
+- hero
+- prologue
+- category intros
+- essence cards
+- service rows
+- locations section
+- family story
+- catering section
+- CTA buttons
+- footer
+- truck status copy
+- UI microcopy
+
+Do not invent:
+- fake testimonials
+- fake awards
+- fake extra locations
+- fake phone numbers
+- unsupported services
+- fake reviews
+
+==================================================
+18. DEV SETUP + README
+==================================================
+
+Because the repo is empty, create immediately:
+- .gitignore
+- .env.example
+- README.md
+- working app structure
+- clean package.json
+- polished globals.css design system
+- reusable UI primitives
+
+README must include:
+- project purpose
+- local setup steps
+- required env vars
+- Clover sandbox setup notes
+- Vercel deployment notes for the foodtruck project
+- how to replace the mock order API later
+- how editable content/menu/truck status data is organized
+- where the logo/icon files live in /Users/kyle/Desktop/foodtruck/la_hamburguesa_loca_web_assets
+- how favicon/manifest assets are wired
+- what lives in /Users/kyle/Desktop/foodtruck/prompt
+
+==================================================
+19. CODE QUALITY
+==================================================
+
+- TypeScript throughout where practical
+- accessible markup and interactions
+- keyboard escape support for drawers/modals
+- no dead code
+- no broken imports
+- no dead buttons
+- every CTA should do something visible
+- no unnecessary TODO clutter
+- clean component composition
+- avoid giant monolithic files
+- smooth Framer Motion transitions
+- strong mobile responsiveness
+
+==================================================
+20. DELIVERABLE
+==================================================
+
+Build a COMPLETE one-page implementation with:
+- sticky editorial nav
+- cinematic hero
+- prologue
+- interactive menu carousel
+- essence section
+- services section
+- find us / find the truck section
+- popular orders grid
+- family story section
+- catering / private events section
+- live order drawer/sheet
+- Clover payment modal
+- mock order API
+- responsive UI
+- editable demo data
+- provided logo package integrated into design + metadata
+- favicon + manifest wired
+- prompt guide folder at /Users/kyle/Desktop/foodtruck/prompt
+- README
+- env example
+
+At the end, provide:
+- concise summary of what was built
+- key files created/changed
+- required env vars
+- exact commands to run locally from /Users/kyle/Desktop/foodtruck
+- follow-up steps before connecting/deploying to the foodtruck Vercel project
+
+Build it now.

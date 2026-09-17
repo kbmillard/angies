@@ -1,0 +1,267 @@
+Angie's Admin Simplification Direction
+
+Repo review note:
+I reviewed the uploaded CURRENT-ADMIN-PORTAL and FUTURE-ADMIN-PLAN docs, then inspected the repo archive enough to verify the core file paths and assumptions.
+
+Verified repo findings:
+- app/admin/page.tsx currently renders PhotosAdminClient and passes initialTab from ?tab=.
+- components/home/HomeView.tsx is already a one-page public homepage with sections in this order:
+  Hero, Prologue, StorySection, InteractiveMenu, LocationsSection, SocialPromoSection, CateringSection, FinalConversion, SiteFooter.
+- components/admin/PhotosAdminClient.tsx is the current tabbed admin shell.
+- components/admin/SiteSettingsTab.tsx already edits homepage content through site settings.
+- components/admin/MenuCatalogTab.tsx already has menu form concepts, but relational menu editing is blocked.
+- app/api/admin/menu/[id]/route.ts returns 409 when the relational catalog is active.
+- app/api/admin/site-settings/route.ts exists for homepage content saves.
+- app/api/admin/photos/route.ts exists for image uploads.
+- CateringSection.tsx and SocialPromoSection.tsx still contain hardcoded public copy and need to read from site_settings.
+
+Main realization:
+The admin does not need to become a separate CMS or a complicated new product.
+
+The admin should simply clone the public homepage structure into /admin, make each visible section editable, and save the edited values through APIs back to the same data sources the homepage already reads.
+
+In other words:
+
+Public homepage section
+    -> Admin editable section
+    -> Save API
+    -> Database / Blob
+    -> Homepage reads updated content
+
+Recommended direction:
+Replace the tabbed admin with a single scrollable /admin page that mirrors the public homepage order.
+
+Admin page structure:
+
+1. Hero editor
+2. Prologue editor
+3. Story editor
+4. Menu editor
+5. Modifiers editor
+6. Locations editor
+7. Schedule editor
+8. Social editor
+9. Catering editor
+10. Photos library / advanced tools
+
+This should match the public HomeView order as closely as possible.
+
+What to build:
+
+1. Replace the tab shell
+
+Create:
+
+components/admin/SiteAdminClient.tsx
+
+This should replace the current tab-first PhotosAdminClient shell as the main /admin UI.
+
+app/admin/page.tsx should render SiteAdminClient instead of PhotosAdminClient.
+
+The new admin should have:
+- Login gate
+- Environment/status banner
+- Sticky anchor navigation
+- One scrollable editor page
+- Sections ordered like the public homepage
+
+Legacy tab URLs can redirect or map to anchors:
+
+/admin?tab=site      -> /admin#hero
+/admin?tab=menu      -> /admin#menu
+/admin?tab=locations -> /admin#locations
+/admin?tab=schedule  -> /admin#schedule
+/admin?tab=photos    -> /admin#photos
+
+2. Make one ImageAttachField and use it everywhere
+
+Create:
+
+components/admin/ImageAttachField.tsx
+
+Behavior:
+- Show current thumbnail
+- Upload new image through POST /api/admin/photos
+- Pick existing image through GET /api/admin/photos
+- Return the public URL through onChange(url)
+
+Use it for:
+- Hero slides
+- Story slides
+- Menu item photos
+- Any future social/catering imagery
+
+This removes manual image path typing.
+
+Suggested component API:
+
+type ImageAttachFieldProps = {
+  label?: string;
+  value: string;
+  alt?: string;
+  onChange: (url: string) => void;
+  onAltChange?: (alt: string) => void;
+};
+
+3. Keep site content in site_settings
+
+Hero, Prologue, and Story already belong in site_settings.
+
+Extend site_settings for Social and Catering so those sections are no longer hardcoded.
+
+Add to lib/site-settings/types.ts:
+
+catering: {
+  kicker: string;
+  title: string;
+  subtitle: string;
+  body?: string;
+};
+
+social: {
+  kicker: string;
+  title: string;
+  subtitle: string;
+  body?: string;
+  instagramHandle?: string;
+  facebookHandle?: string;
+};
+
+Also update:
+- lib/site-settings/coalesce.ts
+- site settings defaults
+- components/catering/CateringSection.tsx
+- components/social/SocialPromoSection.tsx
+
+CateringSection and SocialPromoSection should read from useSiteSettings(), with the current hardcoded text as fallback defaults.
+
+4. Enable relational menu editing
+
+Do not make the owner import JSON for normal price/name/photo edits.
+
+The repo currently blocks legacy menu PATCH when relational catalog is active. That is correct for the old endpoint, but the new admin needs relational PATCH endpoints.
+
+Add new API routes:
+
+PATCH /api/admin/catalog-menu/items/[slug]
+PATCH /api/admin/catalog-menu/modifiers/[id]
+PUT   /api/admin/catalog-menu/items/[slug]/meat-prices
+
+Add DB helpers in:
+
+lib/catalog-db/menu-relational-db.ts
+
+Suggested helpers:
+- dbUpdateCatalogMenuItem(slug, patch)
+- dbUpdateCatalogModifier(id, patch)
+- dbUpsertItemMeatPrice(itemSlug, meatModifierId, price)
+- dbDeleteItemMeatPrice(itemSlug, meatModifierId)
+
+Menu item editable fields:
+- name
+- description
+- basePrice
+- imageUrl
+- imageAlt
+- requiresMeatSelection
+- active
+- featured
+- sortOrder
+
+Modifier editable fields:
+- name
+- amount
+- active
+- sortOrder
+
+Meat override fields:
+- itemSlug
+- meatModifierId or meatSlug
+- override price
+
+5. Reuse existing working forms
+
+Do not rebuild everything from scratch.
+
+Lift or refactor:
+- SiteSettingsTab.tsx into HeroSectionEditor, PrologueSectionEditor, StorySectionEditor
+- MenuCatalogTab.tsx into MenuSectionEditor, but remove JSON textarea as the main workflow
+- LocationsCatalogTab.tsx into the Locations section
+- ScheduleCatalogTab.tsx into the Schedule section
+- Photos logic from PhotosAdminClient.tsx into ImageAttachField and PhotosLibrarySection
+
+6. Hide JSON import under Advanced
+
+JSON import should remain available, but it should not be the primary menu editing workflow.
+
+In the Menu section:
+
+Menu editor
+Modifiers editor
+Advanced: Import menu JSON
+
+The owner should normally edit forms, not JSON.
+
+7. Save back to the homepage data sources
+
+All saves should update the same sources the public site reads:
+
+Hero / Prologue / Story / Social / Catering:
+PUT /api/admin/site-settings
+GET /api/site-settings
+
+Menu:
+PATCH /api/admin/catalog-menu/items/[slug]
+PATCH /api/admin/catalog-menu/modifiers/[id]
+PUT /api/admin/catalog-menu/items/[slug]/meat-prices
+GET /api/menu
+
+Locations:
+Existing /api/admin/locations
+GET /api/locations
+
+Schedule:
+Existing /api/admin/schedule
+GET /api/schedule
+
+Photos:
+Existing /api/admin/photos
+Vercel Blob / photo metadata
+
+After saves:
+Call revalidatePublicCatalog() or revalidatePath("/", "layout") as appropriate so the public homepage updates.
+
+What not to do:
+- Do not keep tabs as the main admin UX.
+- Do not build a separate CMS.
+- Do not require JSON editing for everyday menu updates.
+- Do not require owners to paste image URLs manually.
+- Do not create a live WYSIWYG iframe in v1.
+- Do not delete all existing admin code; reuse the working forms and APIs.
+- Do not make admin data separate from public homepage data.
+
+MVP checklist:
+
+1. Add SiteAdminClient.
+2. Point app/admin/page.tsx to SiteAdminClient.
+3. Render sections in HomeView order.
+4. Add sticky anchor nav.
+5. Add ImageAttachField.
+6. Refactor existing homepage settings fields into section editors.
+7. Extend site_settings with social and catering.
+8. Wire SocialPromoSection and CateringSection to site_settings.
+9. Add relational menu PATCH APIs.
+10. Add MenuSectionEditor using normal form fields.
+11. Add ModifiersSectionEditor.
+12. Move JSON import to Advanced.
+13. Embed existing Locations and Schedule editors.
+14. Keep Photos library at bottom.
+15. Verify public APIs update after admin saves.
+
+Core message to the agent:
+All you have to do is clone the public page into admin, make the content editable, and API it back to the homepage data sources.
+
+The homepage already exists.
+The database already exists.
+Most admin APIs already exist.
+The work is to align the admin UI with the homepage and fill the few API gaps, especially relational menu editing and site_settings for social/catering.

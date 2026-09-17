@@ -1,0 +1,48 @@
+---
+description: Non-negotiable — owner-editable content must flow through admin + Postgres/Blob, not hardcoded TSX
+alwaysApply: true
+---
+
+# Admin DB content (non-negotiable)
+
+## Rule
+
+Any **interchangeable** site content — copy, images, prices, hours, menu items, modifiers, locations, schedule — must be **saved and read through the admin data layer**, not edited only in React/TSX or committed static strings.
+
+Do **not** ship new homepage/marketing copy or image URLs as hardcoded component props when that content is meant to change without a deploy.
+
+## Where content lives
+
+| Content | Admin UI | Storage | Public read |
+|--------|----------|---------|-------------|
+| Hero, prologue, story, social, catering | `/admin` → Site settings sections | `site_settings` (JSON) | `GET /api/site-settings` → `useSiteSettings()` |
+| Menu items, meat prices | `/admin` → Menu | `catalog_menu_items`, `catalog_menu_item_meat_prices` | `GET /api/menu` |
+| Meats, sides, toppings | `/admin` → Modifiers | `catalog_menu_modifiers` | Built into menu option groups |
+| Photos (hero, menu, gallery) | `/admin` → Photos / Image attach | Vercel Blob + `photos` | URLs in settings or menu rows |
+| Truck locations | `/admin` → Locations | `locations` | `GET /api/locations` |
+| Schedule | `/admin` → Schedule | `schedule` | `GET /api/schedule` |
+
+`public/menu/menu.json` is an **import seed** only (`import:menu:final` / Advanced import). It is not the live CMS.
+
+## When adding or changing public sections
+
+1. **Extend the schema first** if needed (`lib/site-settings/types.ts`, relational catalog types, or location/schedule models).
+2. **Add or update the admin section** in `SiteAdminClient` (same order as `HomeView`).
+3. **Wire the public component** to the same API the site already uses (`useSiteSettings()`, menu catalog context, locations hooks).
+4. Keep **code defaults** in `lib/site-settings/defaults.ts` (or catalog fallbacks) only as offline/first-run fallbacks — not as the owner’s edit surface.
+
+## Exceptions (OK to keep in code)
+
+- Layout, animation, accessibility, and styling
+- Legal/fixed system strings that never change per owner request
+- Dev-only fallbacks when `DATABASE_URL` is unset (must match production shape)
+
+## Planned gaps (do not “fix” with hardcoding)
+
+- **`FinalConversion`** — copy and CTA labels are still in `components/cta/FinalConversion.tsx`; v2 admin block should use `site_settings` (e.g. `finalConversion` on `SiteSettingsResolved`) before more copy changes land in TSX.
+
+## Before merging
+
+- Run `npm run build`
+- If you touched menu import paths, keep `public/menu/menu.json` aligned with `menu-import-final`
+- Do not commit `.env*` or secrets
