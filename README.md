@@ -66,3 +66,7 @@ See `prompt/owner-info-needed.md`.
 ## Hours TODO
 
 Demo hours in fallback data: **Wed–Sat 10:00 AM – 5:00 PM**, Sun–Tue closed, **`America/Chicago`**. **TODO:** confirm final public hours with the owner (see prompt).
+
+## Lab archive
+
+Non-deploy notes/assets live on branch `archive/lab-2026-09` (tag `archive/pre-slim-20260917`).
