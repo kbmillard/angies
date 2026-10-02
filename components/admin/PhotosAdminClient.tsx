@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -9,6 +10,7 @@ import { ScheduleCatalogTab } from "@/components/admin/ScheduleCatalogTab";
 import { SiteSettingsTab } from "@/components/admin/SiteSettingsTab";
 import { MENU_CATEGORY_ORDER } from "@/lib/menu/schema";
 import type { PhotosAdminStatus } from "@/lib/photos/admin-status";
+import { normalizePublicImageSrc } from "@/lib/photos/public-image";
 import type { PhotoRecord } from "@/lib/photos/types";
 
 function absolutePublicUrl(url: string): string {
@@ -348,7 +350,7 @@ export function PhotosAdminClient({ initialAuthed, status, initialTab }: Props) 
             <span className="text-cream/80">Image file</span>
             <input
               type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif"
+              accept="image/*"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
               className="mt-2 block w-full text-sm text-cream/80 file:mr-4 file:rounded-full file:border-0 file:bg-angie-orange file:px-4 file:py-2 file:text-xs file:font-semibold file:uppercase file:text-cream"
             />
@@ -426,11 +428,12 @@ function PhotoAdminRow({
   return (
     <article className="overflow-hidden rounded-2xl border border-white/10 bg-black/30">
       <div className="relative aspect-[4/3] bg-black/50">
-        {/* eslint-disable-next-line @next/next/no-img-element -- admin preview; URLs may be blob or local */}
-        <img
-          src={photo.url}
+        <Image
+          src={normalizePublicImageSrc(photo.url)}
           alt={alt || photo.filename}
-          className="absolute inset-0 h-full w-full object-cover"
+          fill
+          className="object-cover"
+          sizes="(min-width: 1024px) 360px, (min-width: 640px) 45vw, 100vw"
         />
       </div>
       <div className="space-y-3 p-4">

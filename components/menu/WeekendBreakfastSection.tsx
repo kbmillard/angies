@@ -15,6 +15,7 @@ import {
 import { MeatChoiceModal } from "@/components/menu/MeatChoiceModal";
 import { MenuOptionGroupsModal } from "@/components/menu/MenuOptionGroupsModal";
 import { cn } from "@/lib/utils/cn";
+import { normalizePublicImageSrc } from "@/lib/photos/public-image";
 import {
   categoryActiveRing,
   categoryHeroGradient,
@@ -280,7 +281,7 @@ export function WeekendBreakfastSection() {
                               <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-black/40 md:rounded-xl">
                                 {item.imageUrl ? (
                                   <Image
-                                    src={item.imageUrl}
+                                    src={normalizePublicImageSrc(item.imageUrl)}
                                     alt={item.imageAlt ?? item.name}
                                     fill
                                     className="object-cover"
