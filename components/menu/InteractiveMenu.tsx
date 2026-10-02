@@ -24,6 +24,7 @@ import {
   menuPanelBorderClass,
 } from "@/lib/menu/category-styles";
 import { navPrimaryLinkClass } from "@/lib/ui/nav-typography";
+import { normalizePublicImageSrc } from "@/lib/photos/public-image";
 
 function MenuSkeleton() {
   return (
@@ -47,7 +48,10 @@ function PriceRow({ name, price }: { name: string; price: number | null }) {
 function itemHeroImage(item: MenuItem): { src: string; alt: string } | null {
   const src = item.imageUrl?.trim();
   if (!src) return null;
-  return { src, alt: (item.imageAlt?.trim() || item.name).trim() };
+  return {
+    src: normalizePublicImageSrc(src),
+    alt: (item.imageAlt?.trim() || item.name).trim(),
+  };
 }
 
 function defaultCategoryHero(items: MenuItem[]): { src: string; alt: string } | null {

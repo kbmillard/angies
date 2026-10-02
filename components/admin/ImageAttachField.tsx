@@ -3,14 +3,8 @@
 import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import type { PhotoRecord } from "@/lib/photos/types";
+import { normalizePublicImageSrc } from "@/lib/photos/public-image";
 import { adminInputClass, adminLabelClass } from "@/components/admin/admin-form-styles";
-
-function absolutePublicUrl(url: string): string {
-  if (typeof window === "undefined") return url;
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  const path = url.startsWith("/") ? url : `/${url}`;
-  return `${window.location.origin}${path}`;
-}
 
 export type ImageAttachFieldProps = {
   label?: string;
@@ -90,14 +84,14 @@ export function ImageAttachField({
     }
   }
 
-  const previewSrc = value?.trim() ? absolutePublicUrl(value.trim()) : null;
+  const previewSrc = value?.trim() ? normalizePublicImageSrc(value.trim()) : null;
 
   return (
     <div className="space-y-3">
       <p className="text-xs font-semibold uppercase tracking-editorial text-cream/65">{label}</p>
       {previewSrc ? (
         <div className="relative aspect-[4/3] max-w-xs overflow-hidden rounded-xl border border-white/10 bg-black/30">
-          <Image src={previewSrc} alt={alt || label} fill className="object-cover" sizes="320px" unoptimized />
+          <Image src={previewSrc} alt={alt || label} fill className="object-cover" sizes="320px" />
         </div>
       ) : (
         <div className="flex aspect-[4/3] max-w-xs items-center justify-center rounded-xl border border-dashed border-white/15 bg-black/20 text-xs text-cream/45">
@@ -109,7 +103,7 @@ export function ImageAttachField({
           Choose file
           <input
             type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
+            accept="image/*"
             className="sr-only"
             onChange={(e) => {
               setFile(e.target.files?.[0] ?? null);
@@ -173,12 +167,11 @@ export function ImageAttachField({
                     }}
                   >
                     <Image
-                      src={absolutePublicUrl(p.url)}
+                      src={normalizePublicImageSrc(p.url)}
                       alt={p.alt_text || "Photo"}
                       fill
                       className="object-cover"
                       sizes="80px"
-                      unoptimized
                     />
                   </button>
                 </li>

@@ -8,7 +8,7 @@
     "square:production": "bash scripts/use-square-production.sh",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "test": "tsx --test lib/photos/*.test.ts",
     "import:menu": "tsx scripts/import-menu.ts",
     "import:menu:final": "tsx scripts/import-menu.ts public/menu/menu.json",
     "validate:sheets": "node scripts/run-sheet-validation.mjs",

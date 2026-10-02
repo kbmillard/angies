@@ -4,6 +4,7 @@ import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
+import { normalizePublicImageSrc } from "@/lib/photos/public-image";
 
 const SLIDE_MS = 5500;
 /** Crossfade — keep well under SLIDE_MS so the next slide reads as a new beat, not “same photo twice.” */
@@ -53,7 +54,7 @@ export function Hero() {
             style={{ zIndex: idx === i ? 1 : 0 }}
           >
             <Image
-              src={slideItem.src}
+              src={normalizePublicImageSrc(slideItem.src)}
               alt={slideItem.alt}
               fill
               className="object-cover object-center"

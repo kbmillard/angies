@@ -6,6 +6,7 @@ import Image from "next/image";
 import { BodyText } from "@/components/ui/BodyText";
 import { SectionHeading } from "@/components/ui/SectionHeading";
 import { useSiteSettings } from "@/context/SiteSettingsContext";
+import { normalizePublicImageSrc } from "@/lib/photos/public-image";
 
 const AUTO_ADVANCE_MS = 5000;
 const SLIDE_ZOOM_OUT_S = 5.25;
@@ -127,7 +128,7 @@ export function StorySection() {
                     }}
                   >
                     <Image
-                      src={s.src}
+                      src={normalizePublicImageSrc(s.src)}
                       alt={s.alt}
                       fill
                       className="object-cover"
@@ -137,7 +138,7 @@ export function StorySection() {
                   </motion.div>
                 ) : (
                   <Image
-                    src={s.src}
+                    src={normalizePublicImageSrc(s.src)}
                     alt={s.alt}
                     fill
                     className="object-cover"

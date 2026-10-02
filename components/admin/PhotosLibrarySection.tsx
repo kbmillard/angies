@@ -1,9 +1,11 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
-import { MENU_CATEGORY_ORDER } from "@/lib/menu/schema";
-import type { PhotoRecord } from "@/lib/photos/types";
 import { adminInputClass, adminLabelClass } from "@/components/admin/admin-form-styles";
+import { MENU_CATEGORY_ORDER } from "@/lib/menu/schema";
+import { normalizePublicImageSrc } from "@/lib/photos/public-image";
+import type { PhotoRecord } from "@/lib/photos/types";
 
 function absolutePublicUrl(url: string): string {
   if (typeof window === "undefined") return url;
@@ -99,7 +101,7 @@ export function PhotosLibrarySection() {
           Image file
           <input
             type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif"
+            accept="image/*"
             onChange={(e) => setFile(e.target.files?.[0] ?? null)}
             className="mt-2 block w-full text-sm file:rounded-full file:border-0 file:bg-angie-orange file:px-4 file:py-2 file:text-xs file:font-semibold file:text-cream"
           />
@@ -154,8 +156,13 @@ function PhotoRow({
   return (
     <article className="overflow-hidden rounded-2xl border border-white/10 bg-black/30">
       <div className="relative aspect-[4/3] bg-black/50">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={photo.url} alt={alt} className="absolute inset-0 h-full w-full object-cover" />
+        <Image
+          src={normalizePublicImageSrc(photo.url)}
+          alt={alt}
+          fill
+          className="object-cover"
+          sizes="(min-width: 640px) 45vw, 100vw"
+        />
       </div>
       <div className="space-y-2 p-3">
         <input
